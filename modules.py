@@ -107,7 +107,7 @@ def create_dpd_df():
 	
 	global dpd_df
 	
-	dpd_df = pd.read_csv("/home/bhikkhu/Bodhirasa/Dropbox/dpd/csvs/dpd-full.csv", sep="\t", dtype=str)
+	dpd_df = pd.read_csv("/home/deva/Documents/pali/vicara-vocab.csv", sep="\t", dtype=str)
 	dpd_df.fillna("", inplace=True)
 
 	global dpd_df_length
@@ -308,7 +308,7 @@ def generate_changed_inflected_forms():
 		pos = dpd_df.loc[row, "POS"]
 		metadata = dpd_df.loc[row, "Metadata"]
 		meaning = dpd_df.loc[row, "Meaning IN CONTEXT"]
-		variant = dpd_df.loc[row, "Variant – same constr or diff reading"]
+		variant = dpd_df.loc[row, "Variant"]
 
 		inflections_string= ""
 
@@ -449,17 +449,17 @@ def transcribe_new_inflections():
 
 		new_inflections_translit = open("output/new inflections translit.csv", "w")
 
-		print("converting inflections to sinhala")
-		sinhala = transliterate.process("IAST","Sinhala", new_inflections_read, post_options =['SinhalaPali', 'SinhalaConjuncts'])
+		print("converting synonyms to RussianCyrillic")
+		cyrillic = transliterate.process("IAST","RussianCyrillic", new_inflections_read, post_options =['CyrillicPali'])
 
 		print("converting inflections to devanagari")
 		devanagari = transliterate.process("IAST","Devanagari",new_inflections_read, post_options = ['DevanagariAnusvara'])
 
 		roman = new_inflections_read.split("\n")[:-1]
-		sinhala = sinhala.split("\n")
+		cyrillic = cyrillic.split("\n")
 		devanagari = devanagari.split("\n")
 
-		for i in zip(roman, sinhala, devanagari):	
+		for i in zip(roman, cyrillic, devanagari):	
 			new_inflections_translit.write(i[0]+i[1].split("\t")[1]+i[2].split("\t")[1]+"\n")
 
 		new_inflections_translit.close()
@@ -744,7 +744,7 @@ def read_and_clean_sutta_text():
 	print("~" * 40)
 	
 	global input_path
-	input_path = "/home/bhikkhu/git/pure-machine-readable-corpus/cscd/"
+	input_path = "/home/deva/Documents/programs/pure-machine-readable-corpus/cscd/"
 
 	global output_path
 	output_path = "output/html suttas/"
