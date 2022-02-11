@@ -107,7 +107,7 @@ def create_dpd_df():
 	
 	global dpd_df
 	
-	dpd_df = pd.read_csv("/home/deva/Documents/pali/vicara-vocab.csv", sep="\t", dtype=str)
+	dpd_df = pd.read_csv("/home/deva/Documents/dps/pali/vicara-full.csv", sep="\t", dtype=str)
 	dpd_df.fillna("", inplace=True)
 
 	global dpd_df_length
