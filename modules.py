@@ -4,6 +4,7 @@ import pickle
 from pandas_ods_reader import read_ods
 import os
 from aksharamukha import transliterate
+import webbrowser
 
 
 def create_inflection_table_index():
@@ -694,8 +695,10 @@ def make_list_of_all_inflections_no_eg1():
 
 	global no_eg1_list
 
-	test = dpd_df["Sutta1"] == ""
-	no_eg1_df = dpd_df[test]
+	test1 = dpd_df["Sutta1"] == ""
+	test2 = dpd_df["Chapter"] != ""
+	filter = test1 & test2
+	no_eg1_df = dpd_df[filter]
 
 	no_eg1_headword_list = no_eg1_df["Pāli1"].tolist()
 
@@ -724,7 +727,7 @@ def make_list_of_all_inflections_no_eg2():
 
 	global no_eg2_list
 
-	test = dpd_df["Sutta2"] == ""
+	test = dpd_df["Fin"].str.contains("n")
 	no_eg2_df = dpd_df[test]
 
 	no_eg2_headword_list = no_eg2_df["Pāli1"].tolist()
@@ -756,7 +759,6 @@ def clean_machine(text):
 	text = re.sub("!", "", text)
 	text = re.sub("\?", "", text)
 	text = re.sub("\+", "", text)
-	text = re.sub("=", "", text)
 	text = re.sub("﻿", "", text)
 	text = re.sub("§", " ", text)
 	text = re.sub("\(", "", text)
@@ -766,7 +768,7 @@ def clean_machine(text):
 	text = re.sub("\t", " ", text)
 	text = re.sub("…", " ", text)
 	text = re.sub("–", "", text)
-	text = re.sub("\n", " \n ", text)
+	text = re.sub("\n", " <br> ", text)
 	text = re.sub("  ", " ", text)
 	text = re.sub("^ ", "", text)
 	text = re.sub("^ ", "", text)
@@ -882,10 +884,6 @@ def html_find_and_replace():
 	global sutta_text
 	global commentary_text
 
-	no_meaning_string = ""
-	no_eg1_string = ""
-	no_eg2_string = ""
-
 	with open(f"{output_path}{sutta_file}", 'r') as input_file:
 		sutta_text = input_file.read()
 	
@@ -907,56 +905,42 @@ def html_find_and_replace():
 		if meaning_exists == "False":
 
 			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "highlight">\\2</span>\\3""", sutta_text)
-			no_meaning_string += pali_word + " "
 
 		elif eg1_exists == "False":
 
 			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "orange">\\2</span>\\3""", sutta_text)
-			no_eg1_string += pali_word + " "
 
 		elif eg2_exists == "False":
 
 			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "red">\\2</span>\\3""", sutta_text)
-			no_eg2_string += pali_word + " "
-		
-	sutta_text = re.sub("\n", "<br><br>", sutta_text)
-	sutta_text += "<br><br>" + 'no meanings: <span class = "highlight">' + no_meaning_string + "</span>"
-	sutta_text += "<br><br>" + 'no eg1: <span class = "orange">' + no_eg1_string + "</span>"
-	sutta_text += "<br><br>" + 'no eg2: <span class = "red">' + no_eg2_string + "</span>"
 
-	print("~" * 40)
-	print("finding and replacing commentary html")
-	print("~" * 40)
+	# print("~" * 40)
+	# print("finding and replacing commentary html")
+	# print("~" * 40)
 
-	no_meaning_string = ""
-
-	with open(f"{output_path}{commentary_file}", 'r') as input_file:
-		commentary_text = input_file.read()
+	# with open(f"{output_path}{commentary_file}", 'r') as input_file:
+	# 	commentary_text = input_file.read()
 	
-	max_row = commentary_words_df.shape[0]
-	row=0
+	# max_row = commentary_words_df.shape[0]
+	# row=0
 
-	for word in range(row, max_row):
-		pali_word = str(commentary_words_df.iloc[row, 0])
-		inflection_exists = str(commentary_words_df.iloc[row, 1])
-		meaning_exists = str(commentary_words_df.iloc[row, 2])
+	# for word in range(row, max_row):
+	# 	pali_word = str(commentary_words_df.iloc[row, 0])
+	# 	inflection_exists = str(commentary_words_df.iloc[row, 1])
+	# 	meaning_exists = str(commentary_words_df.iloc[row, 2])
 
-		if row % 250 == 0:
-			print(f"{row}/{max_row}\t{pali_word}")
+	# 	if row % 250 == 0:
+	# 		print(f"{row}/{max_row}\t{pali_word}")
 
-		row +=1
+	# 	row +=1
 
-		if inflection_exists == "False":
+	# 	if inflection_exists == "False":
 
-			commentary_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "highlight">\\2</span>\\3""", commentary_text)
+	# 		commentary_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "highlight">\\2</span>\\3""", commentary_text)
 
-		elif meaning_exists == "False":
+	# 	elif meaning_exists == "False":
 
-			commentary_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "orange">\\2</span>\\3""", commentary_text)
-			no_meaning_string += pali_word + " "
-
-	commentary_text = re.sub("\n", "<br><br>", commentary_text)
-	commentary_text += "<br><br>" + 'no meanings: <span class = "highlight">' + no_meaning_string + "</span>"
+	# 		commentary_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "orange">\\2</span>\\3""", commentary_text)
 
 
 def write_html():
@@ -968,7 +952,6 @@ def write_html():
 <style>
 #content, html, body { 
 	height: 98%;
-	font-size: 1.2em;
 	}
 
 #left {
@@ -985,9 +968,9 @@ def write_html():
 	}
 
 body {
-	color: #3b2e18;
-	background-color: #221a0e;
-	}
+	color: #a1998a;
+	background-color: #0d0c0b;
+	font-size: 15px;}
 
 ::-webkit-scrollbar {
     width: 10px;
@@ -1000,7 +983,7 @@ body {
 	}
 
 ::-webkit-scrollbar-thumb {
-    background: #46351d;
+    background: #5d6726;
     border: 2px solid transparent;
     border-radius: 10px;
 	}
@@ -1018,13 +1001,13 @@ body {
 	}
 
 ::-webkit-scrollbar-track:active {
-    background: #332715;
+    background: #433730;
 	}
 
 ::-webkit-scrollbar-track {
     background: transparent;
     border: 0px none transparent;
-    border-radius: 10px;
+    border-radius: 0px;
 	}
 
 ::-webkit-scrollbar-corner {
@@ -1033,26 +1016,25 @@ body {
 	}
 
 .highlight {
-	color:#feffaa;
+	color:#f7be6f;
 	}
 
 .red{
     border-radius: 5px;
-    color: #c22b45;
+    color: #5c4f3e;
 	}
 
 .orange{
     border-radius: 5px;
-    color: #d7551b;
+    color: #9e7a49;
 	}
 
 </style>
 </head>
 <body>
-<div id="content">
-<div id="left">"""
+<div id="content">"""
 
-	html2 = """</div><div id="right">"""
+	# html2 = """</div><div id="right">"""
 
 	html3 = """</div></div>"""
 
@@ -1060,7 +1042,11 @@ body {
 	html_file = open(f"{output_path}{sutta_file}.html", "a")
 	html_file.write(html1)
 	html_file.write(sutta_text)
-	html_file.write(html2)
-	html_file.write(commentary_text)
+	# html_file.write(html2)
+	# html_file.write(commentary_text)
 	html_file.write(html3)
 	html_file.close
+
+def open_in_browser():
+	os.popen('cd "output/html suttas"')
+	os.popen(f"{sutta_file}.html")
