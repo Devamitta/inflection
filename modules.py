@@ -953,82 +953,66 @@ def write_html():
 #content, html, body { 
 	height: 98%;
 	}
-
 #left {
     float: left;
     width: 50%;
     height: 100%;
     overflow: scroll;}
-
 #right {
     float: left;
     width: 50%;
     height: 100%;
 	overflow: scroll;
 	}
-
 body {
 	color: #a1998a;
 	background-color: #0d0c0b;
 	font-size: 15px;}
-
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 	}
-
 ::-webkit-scrollbar-button {
     width: 0px;
     height: 0px;
 	}
-
 ::-webkit-scrollbar-thumb {
     background: #5d6726;
     border: 2px solid transparent;
     border-radius: 10px;
 	}
-
 ::-webkit-scrollbar-thumb:hover {
     background: #9b794b;
 	}
-
 ::-webkit-scrollbar-track:hover {
     background: transparent;
 	}
-
 ::-webkit-scrollbar-thumb:active {
     background: #9b794b;
 	}
-
 ::-webkit-scrollbar-track:active {
     background: #433730;
 	}
-
 ::-webkit-scrollbar-track {
     background: transparent;
     border: 0px none transparent;
     border-radius: 0px;
 	}
-
 ::-webkit-scrollbar-corner {
     background: transparent;
 	border-radius: 10px;
 	}
-
 .highlight {
 	color:#f7be6f;
 	}
-
 .red{
     border-radius: 5px;
     color: #5c4f3e;
 	}
-
 .orange{
     border-radius: 5px;
     color: #9e7a49;
 	}
-
 </style>
 </head>
 <body>
