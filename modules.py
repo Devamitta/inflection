@@ -4,6 +4,7 @@ import pickle
 from pandas_ods_reader import read_ods
 import os
 from aksharamukha import transliterate
+import webbrowser
 
 
 def create_inflection_table_index():
@@ -302,6 +303,8 @@ def generate_changed_inflected_forms():
 		headword = dpd_df.loc[row, "Pāli1"]
 		headword_clean = re.sub(" \d*$", "", headword)
 		stem = dpd_df.loc[row, "Stem"]
+		if re.match("!.+", stem) != None: #stem contains "!.+" - must get inflection table but no synonsyms
+			stem = "!"
 		if stem == "*":
 			stem = ""
 		pattern = dpd_df.loc[row, "Pattern"]
@@ -367,6 +370,8 @@ def generate_html_inflection_table():
 		headword = dpd_df.loc[row, "Pāli1"]
 		headword_clean = re.sub(" \d*$", "", headword)
 		stem = dpd_df.loc[row, "Stem"]
+		if re.match("!.+", stem) != None: #stem contains "!.+" - must get inflection table but no synonsyms
+			stem = re.sub("!", "", stem)
 		if stem == "*":
 			stem = ""
 		pattern = dpd_df.loc[row, "Pattern"]
@@ -377,31 +382,29 @@ def generate_html_inflection_table():
 		if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
 			print(f"{row}\t{headword}")
 
-			with open(f"output/html tables/{headword}.html", "w") as html_table:
-				
-				if stem == "-":
-					html_table.write(f"<p><b>{headword_clean}</b> is indeclinable")
+			try:
+				with open(f"output/html tables/{headword}.html", "w") as html_table:
+					
+					if stem == "-":
+						html_table.write(f"<p><b>{headword_clean}</b> is indeclinable")
 
-				elif stem == "!":
-					html_table.write(f"<p>click on <b>{pattern}</b> for inflection table")
+					elif stem == "!":
+						html_table.write(f"<p>click on <b>{pattern}</b> for inflection table")
 
-				else:
-					df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
-					df.fillna("", inplace=True, axis=0)
-				
-					df_rows = df.shape[0]
-					df_columns = df.shape[1]
+					else:
+						df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
+						df.fillna("", inplace=True, axis=0)
+						df.rename_axis(None, inplace=True) #delete pattern name
 
-					for rows in range(0, df_rows): 
-						for columns in range(0, df_columns, 2): #1 to 0
-						
-							html_cell = df.iloc[rows, columns]
-							syn_cell = df.iloc[rows, columns]	
+						df_rows = df.shape[0]
+						df_columns = df.shape[1]
 
-							if html_cell == "sg" or html_cell == "pl":
-								pass
+						for rows in range(0, df_rows): 
+							for columns in range(0, df_columns, 2): #1 to 0
+							
+								html_cell = df.iloc[rows, columns]
+								syn_cell = df.iloc[rows, columns]
 
-							else:
 								html_cell = re.sub(r"(.+)", f"<b>\\1</b>", html_cell) # add bold
 								html_cell = re.sub(r"(.+)", f"{stem}\\1", html_cell) # add stem
 								html_cell = re.sub(r"\n", "<br>", html_cell) # add line breaks
@@ -411,32 +414,36 @@ def generate_html_inflection_table():
 								search_string = re.compile("\n", re.M)
 								replace_string = " "
 								matches = re.sub(search_string, replace_string, syn_cell)
-				
-					column_list = []
-					for i in range(1, df_columns, 2):
-						column_list.append(i)
+					
+						column_list = []
+						for i in range(1, df_columns, 2):
+							column_list.append(i)
 
-					df.drop(df.columns[column_list], axis=1, inplace=True)
-					table = df.to_html(escape=False)
-					table = re.sub("Unnamed.+", "", table)
-					table = re.sub("NaN", "", table)
+						df.drop(df.columns[column_list], axis=1, inplace=True)
+						table = df.to_html(escape=False)
+						table = re.sub("Unnamed.+", "", table)
+						table = re.sub("NaN", "", table)
 
-					# write header info
+						# write header info
 
-					if inflection_table_index_dict[pattern] != "":
-						if pos in declensions:
-							heading = (f"""<p><b>{headword_clean}</b> is <b>{pattern}</b> declension like <b>{inflection_table_index_dict[pattern]}</b></p>""")
-						if pos in conjugations:
-							heading = (f"""<p><b>{headword_clean}</b> is <b>{pattern}</b> conjugation like <b>{inflection_table_index_dict[pattern]}</b></p>""")
+						if inflection_table_index_dict[pattern] != "":
+							if pos in declensions:
+								heading = (f"""<p class ="heading"><b>{headword_clean}</b> is <b>{pattern}</b> declension like <b>{inflection_table_index_dict[pattern]}</b></p>""")
+							if pos in conjugations:
+								heading = (f"""<p class ="heading"><b>{headword_clean}</b> is <b>{pattern}</b> conjugation like <b>{inflection_table_index_dict[pattern]}</b></p>""")
 
-					if inflection_table_index_dict[pattern] == "":
-						if pos in declensions:
-							heading = (f"""<p><b>{headword_clean}</b> is <b>{pattern}</b> irregular declension</p>""")
-						if pos in conjugations:
-							heading = (f"""<p><b>{headword_clean}</b> is <b>{pattern}</b> irregular conjugation</p>""")
-				
-					html = heading + table 
-					html_table.write(html)
+						if inflection_table_index_dict[pattern] == "":
+							if pos in declensions:
+								heading = (f"""<p class ="heading"><b>{headword_clean}</b> is <b>{pattern}</b> irregular declension</p>""")
+							if pos in conjugations:
+								heading = (f"""<p class ="heading"><b>{headword_clean}</b> is <b>{pattern}</b> irregular conjugation</p>""")
+					
+						html = heading + table 
+						html_table.write(html)
+			
+			except:
+				print (f"error! pattern {pattern} does not exist - fix it!")
+				continue
 
 
 def transcribe_new_inflections():
@@ -497,14 +504,12 @@ def combine_old_and_new_translit_dataframes():
 		filter = test1 & test2
 		diff.loc[filter, "1_x"] = diff.loc[filter, "1_y"]
 
-		# !!! how to delete non existent
+		# fixme !!! how to delete non existent
 
 		# drop columns and write to csv
 
 		diff.drop(columns=["1_y", "exists"], inplace=True)
-
 		diff.to_csv("output/all inflections translit.csv", sep="\t", index=None, header=False)
-
 		print("all inflections translit.csv updated")
 
 	else:
@@ -524,7 +529,7 @@ def export_translit_to_pickle():
 		headword = all_inflections.iloc[row, 0]
 		inflections = all_inflections.iloc[row, 1]
 
-		# !!! how to delete headword when no longer exists	??? 
+		# fixme !!! how to delete headword when no longer exists	??? 
 		
 		if headword in new_inflections_dict.keys():
 			print(headword)
@@ -678,8 +683,40 @@ def make_list_of_all_inflections_no_meaning():
 		if headword in no_meaning_headword_list:
 			no_meaning_string += inflections
 
-	no_meaing_list = no_meaning_string.split()
-	no_meaning_list = list(dict.fromkeys(no_meaing_list))
+	no_meaning_list = no_meaning_string.split()
+	no_meaning_list = list(dict.fromkeys(no_meaning_list))
+
+
+def make_list_of_all_inflections_no_eg1():
+
+	print("~" * 40)
+	print("making list of all inflections with no eg1")
+	print("~" * 40)
+
+	global no_eg1_list
+
+	test1 = dpd_df["Sutta1"] == ""
+	test2 = dpd_df["Chapter"] != ""
+	filter = test1 & test2
+	no_eg1_df = dpd_df[filter]
+
+	no_eg1_headword_list = no_eg1_df["Pāli1"].tolist()
+
+	no_eg1_df = all_inflections_df[all_inflections_df[0].isin(no_eg1_headword_list)]
+
+	no_eg1_string = ""
+	for row in range (all_inflections_df.shape[0]):
+		headword = all_inflections_df.iloc[row, 0]
+		inflections = all_inflections_df.iloc[row, 1]
+
+		if row %5000 == 0:
+			print(f"{row} {headword}")
+
+		if headword in no_eg1_headword_list:
+			no_eg1_string += inflections
+
+	no_eg1_list = no_eg1_string.split()
+	no_eg1_list = list(dict.fromkeys(no_eg1_list))
 
 
 def make_list_of_all_inflections_no_eg2():
@@ -690,7 +727,7 @@ def make_list_of_all_inflections_no_eg2():
 
 	global no_eg2_list
 
-	test = dpd_df["Sutta2"] == ""
+	test = dpd_df["Fin"].str.contains("n")
 	no_eg2_df = dpd_df[test]
 
 	no_eg2_headword_list = no_eg2_df["Pāli1"].tolist()
@@ -723,6 +760,7 @@ def clean_machine(text):
 	text = re.sub("\?", "", text)
 	text = re.sub("\+", "", text)
 	text = re.sub("﻿", "", text)
+	text = re.sub("§", " ", text)
 	text = re.sub("\(", "", text)
 	text = re.sub("\)", "", text)
 	text = re.sub("-", "", text)
@@ -742,6 +780,10 @@ def read_and_clean_sutta_text():
 	print("~" * 40)
 	print("reading and cleaning sutta file")
 	print("~" * 40)
+
+	global sutta_file
+	global commentary_file
+	global sub_commentary_file
 	
 	global input_path
 	input_path = "/home/deva/Documents/programs/pure-machine-readable-corpus/cscd/"
@@ -749,11 +791,18 @@ def read_and_clean_sutta_text():
 	global output_path
 	output_path = "output/html suttas/"
 
-	global sutta_file
-	sutta_file = input("paste sutta file name here: ")
+	sutta_dict = pd.read_csv('sutta corespondence tables/sutta correspondence tables.csv', sep="\t", index_col=0, squeeze=True).to_dict(orient='index',)
 
-	global commentary_file
-	commentary_file = input("paste commnetary file name here: ")
+	while True:
+		sutta_number = input ("enter sutta number: ")
+		if sutta_number in sutta_dict.keys():
+			sutta_file = sutta_dict.get(sutta_number).get("mūla")
+			commentary_file = sutta_dict.get(sutta_number).get("aṭṭhakathā")
+			sub_commentary_file = sutta_dict.get(sutta_number).get("ṭīkā")
+			break
+		elif sutta_number not in sutta_dict.keys():
+			print("sutta number not recognised, please try again")
+			continue
 
 	with open(f"{input_path}{sutta_file}", 'r') as input_file :
 		sutta_text = input_file.read()
@@ -784,8 +833,14 @@ def make_comparison_table():
 	global sutta_words_df
 	sutta_words_df = pd.DataFrame(word_llst)
 
-	inflection_test = sutta_words_df[0].isin(no_meaning_list)
+	inflection_test = sutta_words_df[0].isin(all_inflections_set)
 	sutta_words_df["Inflection"] = inflection_test
+
+	no_meaning_test = sutta_words_df[0].isin(no_meaning_list)
+	sutta_words_df["Meaning"] = no_meaning_test
+
+	eg1_test = sutta_words_df[0].isin(no_eg1_list)
+	sutta_words_df["Eg1"] = ~eg1_test
 	
 	eg2_test = sutta_words_df[0].isin(no_eg2_list)
 	sutta_words_df["Eg2"] = ~eg2_test
@@ -808,9 +863,10 @@ def make_comparison_table():
 
 	inflection_test = commentary_words_df[0].isin(all_inflections_set)
 	commentary_words_df["Inflection"] = inflection_test
+
+	no_meaning_test = commentary_words_df[0].isin(no_meaning_list)
+	commentary_words_df["Meaning"] = no_meaning_test
 	
-
-
 	commentary_words_df.rename(columns={0 :"Pali"}, inplace=True)
 
 	commentary_words_df.drop_duplicates(subset=["Pali"], keep="first", inplace=True)
@@ -837,43 +893,55 @@ def html_find_and_replace():
 	for word in range(row, max_row):
 		pali_word = str(sutta_words_df.iloc[row, 0])
 		inflection_exists = str(sutta_words_df.iloc[row, 1])
-		eg2_exists = str(sutta_words_df.iloc[row, 2])
+		meaning_exists = str(sutta_words_df.iloc[row, 2])
+		eg1_exists = str(sutta_words_df.iloc[row, 3])
+		eg2_exists = str(sutta_words_df.iloc[row, 4])
 
 		if row % 250 == 0:
 			print(f"{row}/{max_row}\t{pali_word}")
 
 		row +=1
 
-		if inflection_exists == "False":
+		if meaning_exists == "False":
 
-			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "inflection">\\2</span>\\3""", sutta_text)
+			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "highlight">\\2</span>\\3""", sutta_text)
 
-		if eg2_exists == "False":
+		elif eg1_exists == "False":
 
-			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "noeg2">\\2</span>\\3""", sutta_text)
+			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "orange">\\2</span>\\3""", sutta_text)
 
-	print("~" * 40)
-	print("finding and replacing commentary html")
-	print("~" * 40)
+		elif eg2_exists == "False":
 
-	with open(f"{output_path}{commentary_file}", 'r') as input_file:
-		commentary_text = input_file.read()
+			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "red">\\2</span>\\3""", sutta_text)
+
+	# print("~" * 40)
+	# print("finding and replacing commentary html")
+	# print("~" * 40)
+
+	# with open(f"{output_path}{commentary_file}", 'r') as input_file:
+	# 	commentary_text = input_file.read()
 	
-	max_row = commentary_words_df.shape[0]
-	row=0
+	# max_row = commentary_words_df.shape[0]
+	# row=0
 
-	for word in range(row, max_row):
-		pali_word = str(commentary_words_df.iloc[row, 0])
-		inflection_exists = str(commentary_words_df.iloc[row, 1])
+	# for word in range(row, max_row):
+	# 	pali_word = str(commentary_words_df.iloc[row, 0])
+	# 	inflection_exists = str(commentary_words_df.iloc[row, 1])
+	# 	meaning_exists = str(commentary_words_df.iloc[row, 2])
 
-		if row % 250 == 0:
-			print(f"{row}/{max_row}\t{pali_word}")
+	# 	if row % 250 == 0:
+	# 		print(f"{row}/{max_row}\t{pali_word}")
 
-		row +=1
+	# 	row +=1
 
-		if inflection_exists == "False":
+	# 	if inflection_exists == "False":
 
-			commentary_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "inflection">\\2</span>\\3""", commentary_text)
+	# 		commentary_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "highlight">\\2</span>\\3""", commentary_text)
+
+	# 	elif meaning_exists == "False":
+
+	# 		commentary_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "orange">\\2</span>\\3""", commentary_text)
+
 
 def write_html():
 	
@@ -885,85 +953,72 @@ def write_html():
 #content, html, body { 
 	height: 98%;
 	}
-
 #left {
     float: left;
     width: 50%;
     height: 100%;
     overflow: scroll;}
-
 #right {
     float: left;
     width: 50%;
     height: 100%;
 	overflow: scroll;
 	}
-
 body {
-	color: #270202;
-	background-color: #e9e9b5;
+	color: #a1998a;
+	background-color: #0d0c0b;
 	font-size: 15px;}
-
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 	}
-
 ::-webkit-scrollbar-button {
     width: 0px;
     height: 0px;
 	}
-
 ::-webkit-scrollbar-thumb {
-    background: #f0e6cc;
-    border: 2px solid #transparent;
+    background: #5d6726;
+    border: 2px solid transparent;
     border-radius: 10px;
 	}
-
 ::-webkit-scrollbar-thumb:hover {
-    background: #a59366;
+    background: #9b794b;
 	}
-
 ::-webkit-scrollbar-track:hover {
     background: transparent;
 	}
-
 ::-webkit-scrollbar-thumb:active {
-    background: #a59366;
+    background: #9b794b;
 	}
-
 ::-webkit-scrollbar-track:active {
-    background: #c9b993;
+    background: #433730;
 	}
-
 ::-webkit-scrollbar-track {
     background: transparent;
     border: 0px none transparent;
     border-radius: 0px;
 	}
-
 ::-webkit-scrollbar-corner {
     background: transparent;
 	border-radius: 10px;
 	}
-
-.inflection {
-	color:#7e2801;
-    background-color: #feffaa ;
+.highlight {
+	color:#f7be6f;
 	}
-
-.noeg2{
+.red{
     border-radius: 5px;
-    color: #cf4e12;
+    color: #5c4f3e;
 	}
-
+.orange{
+    border-radius: 5px;
+    color: #9e7a49;
+	}
 </style>
 </head>
 <body>
-<div id="content">
-<div id="left">"""
+<div id="content">"""
 
-	html2 = """</div><div id="right">"""
+	# html2 = """</div><div id="right">"""
 
 	html3 = """</div></div>"""
 
@@ -971,7 +1026,11 @@ body {
 	html_file = open(f"{output_path}{sutta_file}.html", "a")
 	html_file.write(html1)
 	html_file.write(sutta_text)
-	html_file.write(html2)
-	html_file.write(commentary_text)
+	# html_file.write(html2)
+	# html_file.write(commentary_text)
 	html_file.write(html3)
 	html_file.close
+
+def open_in_browser():
+	os.popen('cd "output/html suttas"')
+	os.popen(f"{sutta_file}.html")
