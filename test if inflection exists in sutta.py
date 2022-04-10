@@ -7,7 +7,7 @@ def inflection_exists_in_sutta():
 	create_inflection_table_index()
 	create_inflection_table_df()
 	test_inflection_pattern_changed()
-	create_dpd_df()
+	create_dps_df()
 	test_for_missing_stem_and_pattern()
 	test_for_wrong_patterns()
 	test_for_differences_in_stem_and_pattern()

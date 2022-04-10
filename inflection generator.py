@@ -3,15 +3,15 @@
 
 from modules import *
 
-def inflection_generator_for_dpd():
+def inflection_generator_for_dps():
 	create_inflection_table_index()
 	create_inflection_table_df()
 	test_inflection_pattern_changed()
-	create_dpd_df()
+	create_dps_df()
 	test_for_missing_stem_and_pattern()
 	test_for_wrong_patterns()
 	test_for_differences_in_stem_and_pattern()
-	test_if_inflections_exist_dpd()
+	test_if_inflections_exist_dps()
 	generate_changed_inflected_forms()
 	generate_html_inflection_table()
 	transcribe_new_inflections()
@@ -19,4 +19,4 @@ def inflection_generator_for_dpd():
 	export_translit_to_pickle()
 
 if __name__ == "__main__":
-   inflection_generator_for_dpd()
+   inflection_generator_for_dps()

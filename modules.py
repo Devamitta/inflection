@@ -102,18 +102,18 @@ def test_inflection_pattern_changed():
 		print(f"the following patterns have changes and will be generated\n{pattern_changed}")
 
 
-def create_dpd_df():
+def create_dps_df():
 	print("~" * 40)
-	print("create dpd_df")
+	print("create dps_df")
 	
-	global dpd_df
+	global dps_df
 	
-	dpd_df = pd.read_csv("/home/deva/Documents/dps/spreadsheets/dps-full.csv", sep="\t", dtype=str)
-	dpd_df.fillna("", inplace=True)
+	dps_df = pd.read_csv("/home/deva/Documents/dps/spreadsheets/dps-full.csv", sep="\t", dtype=str)
+	dps_df.fillna("", inplace=True)
 
-	global dpd_df_length
+	global dps_df_length
 
-	dpd_df_length = dpd_df.shape[0]
+	dps_df_length = dps_df.shape[0]
 
 
 def test_for_missing_stem_and_pattern():
@@ -125,10 +125,10 @@ def test_for_missing_stem_and_pattern():
 	missing_pattern_string = ""
 
 
-	for row in range(dpd_df_length):
-		headword = dpd_df.loc[row, "Pāli1"]
-		stem = dpd_df.loc[row, "Stem"]
-		pattern = dpd_df.loc[row, "Pattern"]
+	for row in range(dps_df_length):
+		headword = dps_df.loc[row, "Pāli1"]
+		stem = dps_df.loc[row, "Stem"]
+		pattern = dps_df.loc[row, "Pattern"]
 		
 		if stem == "":
 			missing_stem_string += headword + "|"
@@ -158,10 +158,10 @@ def test_for_wrong_patterns():
 
 	wrong_patten_string = ""
 
-	for row in range(dpd_df_length):
-		headword =  dpd_df.loc[row, "Pāli1"]
-		stem = dpd_df.loc[row, "Stem"]
-		pattern = dpd_df.loc[row, "Pattern"]
+	for row in range(dps_df_length):
+		headword =  dps_df.loc[row, "Pāli1"]
+		stem = dps_df.loc[row, "Stem"]
+		pattern = dps_df.loc[row, "Pattern"]
 
 		if stem == "-":
 			pass
@@ -192,10 +192,10 @@ def test_for_differences_in_stem_and_pattern():
 	added_string = ""
 	changed_string = ""
 
-	for row in range(dpd_df_length): #dpd_df_length
-		headword = dpd_df.loc[row, "Pāli1"]
-		stem = dpd_df.loc[row, "Stem"]
-		pattern = dpd_df.loc[row, "Pattern"]
+	for row in range(dps_df_length): #dps_df_length
+		headword = dps_df.loc[row, "Pāli1"]
+		stem = dps_df.loc[row, "Stem"]
+		pattern = dps_df.loc[row, "Pattern"]
 		new = f"{headword} {stem} {pattern}"
 
 		try:
@@ -242,8 +242,8 @@ def test_if_inflections_exist_suttas():
 	print("~"*40)
 	print("test if inflections exists")
 
-	for row in range(dpd_df_length): #dpd_df_length
-		headword = dpd_df.loc[row, "Pāli1"]
+	for row in range(dps_df_length): #dps_df_length
+		headword = dps_df.loc[row, "Pāli1"]
 		
 		try:
 			with open(f"output/inflections/{headword}", "rb") as syn_file:
@@ -264,7 +264,7 @@ def test_if_inflections_exist_suttas():
 		print("no missing inflection files")
 
 
-def test_if_inflections_exist_dpd():
+def test_if_inflections_exist_dps():
 
 	global inflections_not_exist
 	inflections_not_exist = []
@@ -273,8 +273,8 @@ def test_if_inflections_exist_dpd():
 	print("~"*40)
 	print("test if inflections exists")
 
-	for row in range(dpd_df_length): #dpd_df_length
-		headword = dpd_df.loc[row, "Pāli1"]
+	for row in range(dps_df_length): #dps_df_length
+		headword = dps_df.loc[row, "Pāli1"]
 		
 		try:
 			with open(f"output/inflections translit/{headword}", "rb") as syn_file:
@@ -299,19 +299,19 @@ def generate_changed_inflected_forms():
 	global new_inflections_dict
 	new_inflections_dict = {}
 
-	for row in range(dpd_df_length): #dpd_df_length
-		headword = dpd_df.loc[row, "Pāli1"]
+	for row in range(dps_df_length): #dps_df_length
+		headword = dps_df.loc[row, "Pāli1"]
 		headword_clean = re.sub(" \d*$", "", headword)
-		stem = dpd_df.loc[row, "Stem"]
+		stem = dps_df.loc[row, "Stem"]
 		if re.match("!.+", stem) != None: #stem contains "!.+" - must get inflection table but no synonsyms
 			stem = "!"
 		if stem == "*":
 			stem = ""
-		pattern = dpd_df.loc[row, "Pattern"]
-		pos = dpd_df.loc[row, "POS"]
-		metadata = dpd_df.loc[row, "Metadata"]
-		meaning = dpd_df.loc[row, "Meaning IN CONTEXT"]
-		variant = dpd_df.loc[row, "Variant"]
+		pattern = dps_df.loc[row, "Pattern"]
+		pos = dps_df.loc[row, "POS"]
+		metadata = dps_df.loc[row, "Metadata"]
+		meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
+		variant = dps_df.loc[row, "Variant"]
 
 		inflections_string= ""
 
@@ -366,18 +366,18 @@ def generate_html_inflection_table():
 	conjugations = ["aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"]
 	declensions = ["adj", "card", "cs", "fem", "letter", "masc", "nt", "ordin", "pp", "pron", "prp", "ptp", "root", "suffix", "ve"]
 
-	for row in range(dpd_df_length): #dpd_df_length
-		headword = dpd_df.loc[row, "Pāli1"]
+	for row in range(dps_df_length): #dps_df_length
+		headword = dps_df.loc[row, "Pāli1"]
 		headword_clean = re.sub(" \d*$", "", headword)
-		stem = dpd_df.loc[row, "Stem"]
+		stem = dps_df.loc[row, "Stem"]
 		if re.match("!.+", stem) != None: #stem contains "!.+" - must get inflection table but no synonsyms
 			stem = re.sub("!", "", stem)
 		if stem == "*":
 			stem = ""
-		pattern = dpd_df.loc[row, "Pattern"]
-		pos = dpd_df.loc[row, "POS"]
-		metadata = dpd_df.loc[row, "Metadata"]
-		meaning = dpd_df.loc[row, "Meaning IN CONTEXT"]
+		pattern = dps_df.loc[row, "Pattern"]
+		pos = dps_df.loc[row, "POS"]
+		metadata = dps_df.loc[row, "Metadata"]
+		meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
 
 		if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
 			print(f"{row}\t{headword}")
@@ -657,16 +657,16 @@ def make_list_of_all_inflections_no_meaning():
 
 	global no_meaning_list
 
-	test1 = dpd_df["Meaning IN CONTEXT"] != ""
-	test2 = dpd_df["POS"] != "prefix"
-	test3 = dpd_df["POS"] != "suffix"
-	test4 = dpd_df["POS"] != "cs"
-	test5 = dpd_df["POS"] != "ve"
-	test6 = dpd_df["POS"] != "idiom"
-	test7 = dpd_df["Metadata"] != "yes"
+	test1 = dps_df["Meaning IN CONTEXT"] != ""
+	test2 = dps_df["POS"] != "prefix"
+	test3 = dps_df["POS"] != "suffix"
+	test4 = dps_df["POS"] != "cs"
+	test5 = dps_df["POS"] != "ve"
+	test6 = dps_df["POS"] != "idiom"
+	test7 = dps_df["Metadata"] != "yes"
 	filter = test1 & test2 & test3 & test4 & test5 & test6 & test7
 
-	no_meaning_df = dpd_df[filter]
+	no_meaning_df = dps_df[filter]
 
 	no_meaning_headword_list = no_meaning_df["Pāli1"].tolist()
 
@@ -695,11 +695,11 @@ def make_list_of_all_inflections_no_eg1():
 
 	global no_eg1_list
 
-	test1 = dpd_df["Sutta1"] == ""
-	test2 = dpd_df["SBS Chapter"] != ""
-	test3 = dpd_df["Sutta2"] == ""
+	test1 = dps_df["Sutta1"] == ""
+	test2 = dps_df["SBS Chapter"] != ""
+	test3 = dps_df["Sutta2"] == ""
 	filter = test1 & test2 & test3
-	no_eg1_df = dpd_df[filter]
+	no_eg1_df = dps_df[filter]
 
 	no_eg1_headword_list = no_eg1_df["Pāli1"].tolist()
 
@@ -728,8 +728,8 @@ def make_list_of_all_inflections_no_eg2():
 
 	global no_eg2_list
 
-	test = dpd_df["Fin"].str.contains("n")
-	no_eg2_df = dpd_df[test]
+	test = dps_df["Fin"].str.contains("n")
+	no_eg2_df = dps_df[test]
 
 	no_eg2_headword_list = no_eg2_df["Pāli1"].tolist()
 
