@@ -696,7 +696,7 @@ def make_list_of_all_inflections_no_eg1():
 	global no_eg1_list
 
 	test1 = dps_df["Sutta1"] == ""
-	test2 = dps_df["SBS Chapter"] != ""
+	test2 = dps_df["Chapter 2"] != ""
 	test3 = dps_df["Sutta2"] == ""
 	filter = test1 & test2 & test3
 	no_eg1_df = dps_df[filter]
