@@ -309,7 +309,7 @@ def generate_changed_inflected_forms():
 			stem = ""
 		pattern = dps_df.loc[row, "Pattern"]
 		pos = dps_df.loc[row, "POS"]
-		metadata = dps_df.loc[row, "Metadata"]
+		# metadata = dps_df.loc[row, "Metadata"]
 		meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
 		variant = dps_df.loc[row, "Variant"]
 
@@ -376,7 +376,7 @@ def generate_html_inflection_table():
 			stem = ""
 		pattern = dps_df.loc[row, "Pattern"]
 		pos = dps_df.loc[row, "POS"]
-		metadata = dps_df.loc[row, "Metadata"]
+		# metadata = dps_df.loc[row, "Metadata"]
 		meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
 
 		if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
@@ -663,8 +663,8 @@ def make_list_of_all_inflections_no_meaning():
 	test4 = dps_df["POS"] != "cs"
 	test5 = dps_df["POS"] != "ve"
 	test6 = dps_df["POS"] != "idiom"
-	test7 = dps_df["Metadata"] != "yes"
-	filter = test1 & test2 & test3 & test4 & test5 & test6 & test7
+	# test7 = dps_df["Metadata"] != "yes"
+	filter = test1 & test2 & test3 & test4 & test5 & test6
 
 	no_meaning_df = dps_df[filter]
 
