@@ -876,6 +876,10 @@ def clean_machine(text):
 	text = re.sub("^ ", "", text)
 	text = re.sub("^ ", "", text)
 	text = re.sub("^ ", "", text)
+	text = re.sub("\[", "", text)
+	text = re.sub("\]", "", text)
+	text = re.sub("ṁ", "ṃ", text)
+
 	return text
 
 def read_and_clean_sutta_text():
@@ -1086,7 +1090,7 @@ def write_html():
 body {
 	color: #a1998a;
 	background-color: #0d0c0b;
-	font-size: 20px;}
+	font-size: 16px;}
 
 ::-webkit-scrollbar {
     width: 10px;
@@ -1132,17 +1136,17 @@ body {
 	}
 
 .highlight {
-	color:#f7be6f;
+	color:#f4ae4d;
 	}
 
 .red{
     border-radius: 5px;
-    color: #5c4f3e;
+    color: #509050;
 	}
 
 .orange{
     border-radius: 5px;
-    color: #9e7a49;
+    color: #704304;
 	}
 
 </style>

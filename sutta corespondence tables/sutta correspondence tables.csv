@@ -37,4 +37,13 @@ sn22	s0303m.mul0.xml.original.txt	s0303a.att0.xml.original.txt	s0303t.tik0.xml.o
 ud1	s0503m.mul0.xml.original.txt	s0503a.att1.xml.original.txt	s0503a.att1.xml.original.txt
 snp39	s0505m.mul3.xml.original.txt	s0505a.att3.xml.original.txt	s0505a.att3.xml.original.txt
 sn42	s0304m.mul7.xml.original.txt	s0304a.att7.xml.original.txt	s0304t.tik7.xml.original.txt
-sbs	SBS.txt	SBS.txt	SBS.txt
+sbs0	SBS.txt	SBS.txt	SBS.txt
+sbs1	SBS_morning.txt	SBS_morning.txt	SBS_morning.txt
+sbs2	SBS_Verses.txt	SBS_Verses.txt	SBS_Verses.txt
+sbs3	SBS_Teachings.txt	SBS_Teachings.txt	SBS_Teachings.txt
+sbs4	SBS_Reflect.txt	SBS_Reflect.txt	SBS_Reflect.txt
+sbs5	SBS_Card.txt	SBS_Card.txt	SBS_Card.txt
+sbs6	SBS_Anum.txt	SBS_Anum.txt	SBS_Anum.txt
+sbs7	SBS_Parit.txt	SBS_Parit.txt	SBS_Parit.txt
+sbs8	SBS_Fun.txt	SBS_Fun.txt	SBS_Fun.txt
+sbs9	SBS_Sharing.txt	SBS_Sharing.txt	SBS_Sharing.txt
