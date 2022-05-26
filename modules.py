@@ -855,6 +855,8 @@ def clean_machine(text):
 	text = text.lower()
 	text = re.sub("\d", "", text)
 	text = re.sub("\.", "", text)
+	text = re.sub("\:", "", text)
+	text = re.sub("\;", "", text)
 	text = re.sub(",", " ", text)
 	text = re.sub("‘", "", text)
 	text = re.sub(";", "", text)
