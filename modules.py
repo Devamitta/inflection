@@ -850,6 +850,7 @@ def make_list_of_all_inflections_no_eg2():
 
 	no_eg2_list = no_eg2_string.split()
 	no_eg2_list = list(dict.fromkeys(no_eg2_list))
+	d
 
 def clean_machine(text):
 	text = text.lower()
