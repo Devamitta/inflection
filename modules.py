@@ -911,7 +911,7 @@ def read_and_clean_sutta_text():
 	global sub_commentary_file
 	
 	global input_path
-	input_path = "/home/deva/Documents/programs/pitaka/cscd/"
+	input_path = "/home/deva/Documents/dpd/pure-machine-readable-corpus/cscd/"
 
 	global output_path
 	output_path = "output/html suttas/"
