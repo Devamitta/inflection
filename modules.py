@@ -157,6 +157,23 @@ def create_dps_df():
 	headwords_list = dps_df["Pāli1"].tolist()
 
 
+def create_sbs_df():
+	print("~" * 40)
+	print("create sbs_df")
+	
+	global dps_df
+	
+	dps_df = pd.read_csv("/home/deva/Documents/dps/spreadsheets/nid-most-common.csv", sep="\t", dtype=str)
+	dps_df.fillna("", inplace=True)
+
+	global dps_df_length
+
+	dps_df_length = dps_df.shape[0]
+
+	global headwords_list
+	headwords_list = dps_df["Pāli1"].tolist()
+
+
 def test_for_missing_stem_and_pattern():
 	print("~" * 40)
 	print(f"test for missing stems and patterns:")
@@ -911,7 +928,7 @@ def read_and_clean_sutta_text():
 	global sub_commentary_file
 	
 	global input_path
-	input_path = "/home/deva/Documents/dpd/pure-machine-readable-corpus/cscd/"
+	input_path = "/home/deva/Documents/dpd-br/pure-machine-readable-corpus/cscd/"
 
 	global output_path
 	output_path = "output/html suttas/"
