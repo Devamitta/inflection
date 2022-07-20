@@ -909,7 +909,7 @@ def clean_machine(text):
 	text = re.sub("〉", "", text)
 	text = re.sub("\*", "", text)
 	text = re.sub("☸", "", text)
-	text = re.sub("\n", "  ", text)
+	# text = re.sub("\n", "  ", text)
 	text = re.sub("suttaṃ", "suttaṃ\n", text)
 	text = re.sub("next", "next\n", text)
 	

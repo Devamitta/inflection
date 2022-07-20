@@ -47,3 +47,12 @@ sbs6	SBS_Anum.txt	SBS_Anum.txt	SBS_Anum.txt
 sbs7	SBS_Parit.txt	SBS_Parit.txt	SBS_Parit.txt
 sbs8	SBS_Fun.txt	SBS_Fun.txt	SBS_Fun.txt
 sbs9	SBS_Sharing.txt	SBS_Sharing.txt	SBS_Sharing.txt
+2gr	bigrams.txt	bigrams.txt	bigrams.txt
+3gr	trigrams.txt	trigrams.txt	trigrams.txt
+4gr	fourgrams.txt	fourgrams.txt	fourgrams.txt
+5gr	fivegrams.txt	fivegrams.txt	fivegrams.txt
+6gr	sixgrams.txt	sixgrams.txt	sixgrams.txt
+7gr	sevengrams.txt	sevengrams.txt	sevengrams.txt
+8gr	eightgrams.txt	eightgrams.txt	eightgrams.txt
+9gr	ninegrams.txt	ninegrams.txt	ninegrams.txt
+10gr	tengrams.txt	tengrams.txt	tengrams.txt
