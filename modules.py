@@ -1060,41 +1060,13 @@ def html_find_and_replace():
 
 		elif eg2_exists == "False":
 
-			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "red">\\2</span>\\3""", sutta_text)
+			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "green">\\2</span>\\3""", sutta_text)
 			no_eg2_string += pali_word + " "
 
 	sutta_text = re.sub("\n", "<br><br>", sutta_text)
 	sutta_text += "<br><br>" + 'no meanings: <span class = "highlight">' + no_meaning_string + "</span>"
 	sutta_text += "<br><br>" + 'no eg1: <span class = "orange">' + no_eg1_string + "</span>"
-	sutta_text += "<br><br>" + 'no eg2: <span class = "red">' + no_eg2_string + "</span>"
-
-	# print("~" * 40)
-	# print("finding and replacing commentary html")
-	# print("~" * 40)
-
-	# with open(f"{output_path}{commentary_file}", 'r') as input_file:
-	# 	commentary_text = input_file.read()
-	
-	# max_row = commentary_words_df.shape[0]
-	# row=0
-
-	# for word in range(row, max_row):
-	# 	pali_word = str(commentary_words_df.iloc[row, 0])
-	# 	inflection_exists = str(commentary_words_df.iloc[row, 1])
-	# 	meaning_exists = str(commentary_words_df.iloc[row, 2])
-
-	# 	if row % 250 == 0:
-	# 		print(f"{row}/{max_row}\t{pali_word}")
-
-	# 	row +=1
-
-	# 	if inflection_exists == "False":
-
-	# 		commentary_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "highlight">\\2</span>\\3""", commentary_text)
-
-	# 	elif meaning_exists == "False":
-
-	# 		commentary_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "orange">\\2</span>\\3""", commentary_text)
+	sutta_text += "<br><br>" + 'no eg2: <span class = "green">' + no_eg2_string + "</span>"
 
 
 def write_html():
@@ -1174,7 +1146,7 @@ body {
 	color:#f4ae4d;
 	}
 
-.red{
+.green{
     border-radius: 5px;
     color: #509050;
 	}
