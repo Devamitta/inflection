@@ -146,7 +146,7 @@ def create_dps_df():
 	
 	global dps_df
 	
-	dps_df = pd.read_csv("/home/deva/Documents/dps/spreadsheets/dps-full.csv", sep="\t", dtype=str)
+	dps_df = pd.read_csv("../spreadsheets/dps-full.csv", sep="\t", dtype=str)
 	dps_df.fillna("", inplace=True)
 
 	global dps_df_length
@@ -163,7 +163,7 @@ def create_sbs_df():
 	
 	global dps_df
 	
-	dps_df = pd.read_csv("/home/deva/Documents/dps/spreadsheets/nid-most-common.csv", sep="\t", dtype=str)
+	dps_df = pd.read_csv("../spreadsheets/nid-most-common.csv", sep="\t", dtype=str)
 	dps_df.fillna("", inplace=True)
 
 	global dps_df_length
