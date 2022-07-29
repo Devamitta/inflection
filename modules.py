@@ -163,7 +163,7 @@ def create_sbs_df():
 	
 	global dps_df
 	
-	dps_df = pd.read_csv("../spreadsheets/nid-most-common.csv", sep="\t", dtype=str)
+	dps_df = pd.read_csv("../word-frequency/csv-for-examples/2-class.csv", sep="\t", dtype=str)
 	dps_df.fillna("", inplace=True)
 
 	global dps_df_length
@@ -803,6 +803,46 @@ def make_list_of_all_inflections_no_meaning():
 	no_meaning_list = list(dict.fromkeys(no_meaning_list))
 
 
+def make_list_of_all_inflections_have_meaning():
+
+	print("~" * 40)
+	print("making list of all inflections with no meaning")
+	print("~" * 40)
+
+	global no_meaning_list
+
+	test1 = dps_df["Meaning IN CONTEXT"] != ""
+	test2 = dps_df["POS"] != "prefix"
+	test3 = dps_df["POS"] != "suffix"
+	test4 = dps_df["POS"] != "cs"
+	test5 = dps_df["POS"] != "ve"
+	test6 = dps_df["POS"] != "idiom"
+	# test7 = dps_df["Metadata"] != "yes"
+	filter = test1 & test2 & test3 & test4 & test5 & test6
+
+	no_meaning_df = dps_df[filter]
+
+	no_meaning_headword_list = no_meaning_df["Pāli1"].tolist()
+
+	no_meaning_df = all_inflections_df[all_inflections_df[0].isin(no_meaning_headword_list)]
+
+	no_meaning_string = ""
+	all_inflections_length = all_inflections_df.shape[0]
+	for row in range (all_inflections_length):		
+		headword = all_inflections_df.iloc[row, 0]
+		inflections = all_inflections_df.iloc[row, 1]
+
+
+		if row %5000 == 0:
+			print(f"{row} {headword}")
+
+		if headword in no_meaning_headword_list:
+			no_meaning_string += inflections
+
+	no_meaning_list = no_meaning_string.split()
+	no_meaning_list = list(dict.fromkeys(no_meaning_list))
+
+
 def make_list_of_all_inflections_no_eg1():
 
 	print("~" * 40)
@@ -816,6 +856,41 @@ def make_list_of_all_inflections_no_eg1():
 	test3 = dps_df["Sutta2"] == ""
 	test4 = dps_df["POS"] != "prefix"
 	filter = test1 & test2 & test3 & test4
+	no_eg1_df = dps_df[filter]
+
+	no_eg1_headword_list = no_eg1_df["Pāli1"].tolist()
+
+	no_eg1_df = all_inflections_df[all_inflections_df[0].isin(no_eg1_headword_list)]
+
+	no_eg1_string = ""
+	all_inflections_length = all_inflections_df.shape[0]
+	for row in range (all_inflections_length):
+		headword = all_inflections_df.iloc[row, 0]
+		inflections = all_inflections_df.iloc[row, 1]
+
+		if row %5000 == 0:
+			print(f"{row} {headword}")
+
+		if headword in no_eg1_headword_list:
+			no_eg1_string += inflections
+
+	no_eg1_list = no_eg1_string.split()
+	no_eg1_list = list(dict.fromkeys(no_eg1_list))
+
+
+def make_list_of_all_inflections_no_sbs():
+
+	print("~" * 40)
+	print("making list of all inflections with sbs")
+	print("~" * 40)
+
+	global no_eg1_list
+
+	test1 = dps_df["Meaning IN CONTEXT"] != ""
+	test2 = dps_df["Meaning in native language"] != ""
+	# test3 = dps_df["Sutta2"] == ""
+	# test4 = dps_df["POS"] != "prefix"
+	filter = test2
 	no_eg1_df = dps_df[filter]
 
 	no_eg1_headword_list = no_eg1_df["Pāli1"].tolist()
@@ -867,6 +942,40 @@ def make_list_of_all_inflections_no_eg2():
 
 	no_eg2_list = no_eg2_string.split()
 	no_eg2_list = list(dict.fromkeys(no_eg2_list))
+
+
+def make_list_of_all_inflections_sbs():
+
+	print("~" * 40)
+	print("making list of all inflections with sbs")
+	print("~" * 40)
+
+	global no_eg2_list
+
+	test1 = dps_df["Meaning IN CONTEXT"] != ""
+	# test2 = dps_df["Chapter 2"] != ""
+	filter = test1
+	no_eg2_df = dps_df[filter]
+
+	no_eg2_headword_list = no_eg2_df["Pāli1"].tolist()
+
+	no_eg2_df = all_inflections_df[all_inflections_df[0].isin(no_eg2_headword_list)]
+
+	no_eg2_string = ""
+	all_inflections_length = all_inflections_df.shape[0]
+	for row in range (all_inflections_length):
+		headword = all_inflections_df.iloc[row, 0]
+		inflections = all_inflections_df.iloc[row, 1]
+
+		if row %5000 == 0:
+			print(f"{row} {headword}")
+
+		if headword in no_eg2_headword_list:
+			no_eg2_string += inflections
+
+	no_eg2_list = no_eg2_string.split()
+	no_eg2_list = list(dict.fromkeys(no_eg2_list))
+
 
 def clean_machine(text):
 	text = text.lower()
