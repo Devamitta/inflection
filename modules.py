@@ -1,11 +1,13 @@
 import pandas as pd
 import re
+import sys
 import pickle
 from pandas_ods_reader import read_ods
 import os
 from aksharamukha import transliterate
 import webbrowser
 from datetime import datetime
+from sorter import sort_key
 
 def timeis():
 	global blue
@@ -149,6 +151,8 @@ def create_dps_df():
 	dps_df = pd.read_csv("../spreadsheets/dps-full.csv", sep="\t", dtype=str)
 	dps_df.fillna("", inplace=True)
 
+	# dps_df.sort_values(by = ['Pāli1'], ignore_index=True, inplace=True, key=lambda x: x.map(sort_key))
+
 	global dps_df_length
 
 	dps_df_length = dps_df.shape[0]
@@ -163,7 +167,10 @@ def create_sbs_df():
 	
 	global dps_df
 	
-	dps_df = pd.read_csv("../word-frequency/csv-for-examples/2-class.csv", sep="\t", dtype=str)
+	class_file_name = sys.argv[1]
+
+
+	dps_df = pd.read_csv(f"../word-frequency/csv-for-examples/{class_file_name}-class.csv", sep="\t", dtype=str)
 	dps_df.fillna("", inplace=True)
 
 	global dps_df_length
@@ -803,46 +810,6 @@ def make_list_of_all_inflections_no_meaning():
 	no_meaning_list = list(dict.fromkeys(no_meaning_list))
 
 
-def make_list_of_all_inflections_have_meaning():
-
-	print("~" * 40)
-	print("making list of all inflections with no meaning")
-	print("~" * 40)
-
-	global no_meaning_list
-
-	test1 = dps_df["Meaning IN CONTEXT"] != ""
-	test2 = dps_df["POS"] != "prefix"
-	test3 = dps_df["POS"] != "suffix"
-	test4 = dps_df["POS"] != "cs"
-	test5 = dps_df["POS"] != "ve"
-	test6 = dps_df["POS"] != "idiom"
-	# test7 = dps_df["Metadata"] != "yes"
-	filter = test1 & test2 & test3 & test4 & test5 & test6
-
-	no_meaning_df = dps_df[filter]
-
-	no_meaning_headword_list = no_meaning_df["Pāli1"].tolist()
-
-	no_meaning_df = all_inflections_df[all_inflections_df[0].isin(no_meaning_headword_list)]
-
-	no_meaning_string = ""
-	all_inflections_length = all_inflections_df.shape[0]
-	for row in range (all_inflections_length):		
-		headword = all_inflections_df.iloc[row, 0]
-		inflections = all_inflections_df.iloc[row, 1]
-
-
-		if row %5000 == 0:
-			print(f"{row} {headword}")
-
-		if headword in no_meaning_headword_list:
-			no_meaning_string += inflections
-
-	no_meaning_list = no_meaning_string.split()
-	no_meaning_list = list(dict.fromkeys(no_meaning_list))
-
-
 def make_list_of_all_inflections_no_eg1():
 
 	print("~" * 40)
@@ -878,7 +845,7 @@ def make_list_of_all_inflections_no_eg1():
 	no_eg1_list = list(dict.fromkeys(no_eg1_list))
 
 
-def make_list_of_all_inflections_no_sbs():
+def make_list_of_all_inflections_ex_0():
 
 	print("~" * 40)
 	print("making list of all inflections with sbs")
@@ -886,11 +853,11 @@ def make_list_of_all_inflections_no_sbs():
 
 	global no_eg1_list
 
-	test1 = dps_df["Meaning IN CONTEXT"] != ""
-	test2 = dps_df["Meaning in native language"] != ""
+	test1 = dps_df["ex"] == "0"
+	# test2 = dps_df["Meaning in native language"] != ""
 	# test3 = dps_df["Sutta2"] == ""
 	# test4 = dps_df["POS"] != "prefix"
-	filter = test2
+	filter = test1
 	no_eg1_df = dps_df[filter]
 
 	no_eg1_headword_list = no_eg1_df["Pāli1"].tolist()
@@ -911,6 +878,42 @@ def make_list_of_all_inflections_no_sbs():
 
 	no_eg1_list = no_eg1_string.split()
 	no_eg1_list = list(dict.fromkeys(no_eg1_list))
+
+
+def make_list_of_all_inflections_ex():
+
+	print("~" * 40)
+	print("making list of all inflections with sbs")
+	print("~" * 40)
+
+	global no_eg2_list
+
+	test1 = dps_df["ex"] != "0"
+	test2 = dps_df["ex"] != ""
+	# test2 = dps_df["Meaning in native language"] != ""
+	# test3 = dps_df["Sutta2"] == ""
+	# test4 = dps_df["POS"] != "prefix"
+	filter = test1 & test2
+	no_eg2_df = dps_df[filter]
+
+	no_eg2_headword_list = no_eg2_df["Pāli1"].tolist()
+
+	no_eg2_df = all_inflections_df[all_inflections_df[0].isin(no_eg2_headword_list)]
+
+	no_eg2_string = ""
+	all_inflections_length = all_inflections_df.shape[0]
+	for row in range (all_inflections_length):
+		headword = all_inflections_df.iloc[row, 0]
+		inflections = all_inflections_df.iloc[row, 1]
+
+		if row %5000 == 0:
+			print(f"{row} {headword}")
+
+		if headword in no_eg2_headword_list:
+			no_eg2_string += inflections
+
+	no_eg2_list = no_eg2_string.split()
+	no_eg2_list = list(dict.fromkeys(no_eg2_list))
 
 
 def make_list_of_all_inflections_no_eg2():
@@ -950,18 +953,18 @@ def make_list_of_all_inflections_sbs():
 	print("making list of all inflections with sbs")
 	print("~" * 40)
 
-	global no_eg2_list
+	global no_eg3_list
 
 	test1 = dps_df["Meaning IN CONTEXT"] != ""
 	# test2 = dps_df["Chapter 2"] != ""
 	filter = test1
-	no_eg2_df = dps_df[filter]
+	no_eg3_df = dps_df[filter]
 
-	no_eg2_headword_list = no_eg2_df["Pāli1"].tolist()
+	no_eg3_headword_list = no_eg3_df["Pāli1"].tolist()
 
-	no_eg2_df = all_inflections_df[all_inflections_df[0].isin(no_eg2_headword_list)]
+	no_eg3_df = all_inflections_df[all_inflections_df[0].isin(no_eg3_headword_list)]
 
-	no_eg2_string = ""
+	no_eg3_string = ""
 	all_inflections_length = all_inflections_df.shape[0]
 	for row in range (all_inflections_length):
 		headword = all_inflections_df.iloc[row, 0]
@@ -970,11 +973,11 @@ def make_list_of_all_inflections_sbs():
 		if row %5000 == 0:
 			print(f"{row} {headword}")
 
-		if headword in no_eg2_headword_list:
-			no_eg2_string += inflections
+		if headword in no_eg3_headword_list:
+			no_eg3_string += inflections
 
-	no_eg2_list = no_eg2_string.split()
-	no_eg2_list = list(dict.fromkeys(no_eg2_list))
+	no_eg3_list = no_eg3_string.split()
+	no_eg3_list = list(dict.fromkeys(no_eg3_list))
 
 
 def clean_machine(text):
@@ -1096,6 +1099,9 @@ def make_comparison_table():
 	eg2_test = sutta_words_df[0].isin(no_eg2_list)
 	sutta_words_df["Eg2"] = ~eg2_test
 
+	eg3_test = sutta_words_df[0].isin(no_eg3_list)
+	sutta_words_df["Eg3"] = ~eg3_test
+
 	sutta_words_df.rename(columns={0 :"Pali"}, inplace=True)
 
 	sutta_words_df.drop_duplicates(subset=["Pali"], keep="first", inplace=True)
@@ -1138,6 +1144,7 @@ def html_find_and_replace():
 	no_meaning_string = ""
 	no_eg1_string = ""
 	no_eg2_string = ""
+	no_eg3_string = ""
 
 	with open(f"{output_path}{sutta_file}", 'r') as input_file:
 		sutta_text = input_file.read()
@@ -1151,6 +1158,7 @@ def html_find_and_replace():
 		meaning_exists = str(sutta_words_df.iloc[row, 2])
 		eg1_exists = str(sutta_words_df.iloc[row, 3])
 		eg2_exists = str(sutta_words_df.iloc[row, 4])
+		eg3_exists = str(sutta_words_df.iloc[row, 5])
 
 		if row % 250 == 0:
 			print(f"{row}/{max_row}\t{pali_word}")
@@ -1164,7 +1172,7 @@ def html_find_and_replace():
 
 		elif eg1_exists == "False":
 
-			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "orange">\\2</span>\\3""", sutta_text)
+			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "red">\\2</span>\\3""", sutta_text)
 			no_eg1_string += pali_word + " "
 
 		elif eg2_exists == "False":
@@ -1172,10 +1180,16 @@ def html_find_and_replace():
 			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "green">\\2</span>\\3""", sutta_text)
 			no_eg2_string += pali_word + " "
 
+		elif eg3_exists == "False":
+
+			sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "blue">\\2</span>\\3""", sutta_text)
+			no_eg3_string += pali_word + " "
+
 	sutta_text = re.sub("\n", "<br><br>", sutta_text)
 	sutta_text += "<br><br>" + 'no meanings: <span class = "highlight">' + no_meaning_string + "</span>"
-	sutta_text += "<br><br>" + 'no eg1: <span class = "orange">' + no_eg1_string + "</span>"
+	sutta_text += "<br><br>" + 'no eg1: <span class = "red">' + no_eg1_string + "</span>"
 	sutta_text += "<br><br>" + 'no eg2: <span class = "green">' + no_eg2_string + "</span>"
+	sutta_text += "<br><br>" + 'no eg3: <span class = "blue">' + no_eg3_string + "</span>"
 
 
 def write_html():
@@ -1255,14 +1269,19 @@ body {
 	color:#f4ae4d;
 	}
 
-.green{
+.red{
     border-radius: 5px;
-    color: #509050;
+    color: #de6767;
 	}
 
-.orange{
+.green{
     border-radius: 5px;
-    color: #704304;
+    color: #83e783;
+	}
+	
+.blue{
+    border-radius: 5px;
+    color: #8983fe;
 	}
 
 </style>

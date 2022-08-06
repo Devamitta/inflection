@@ -4,6 +4,8 @@ import os
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+# class_file_name = sys.argv[1]
+
 def inflection_exists_in_sutta():
 	# convert_dpd_ods_to_csv()
 	create_inflection_table_index()
@@ -18,8 +20,9 @@ def inflection_exists_in_sutta():
 	combine_old_and_new_dataframes()
 	export_inflections_to_pickle()
 	make_list_of_all_inflections()
-	make_list_of_all_inflections_have_meaning()
-	make_list_of_all_inflections_no_sbs()
+	make_list_of_all_inflections_no_meaning()
+	make_list_of_all_inflections_ex_0()
+	make_list_of_all_inflections_ex()
 	make_list_of_all_inflections_sbs()
 	read_and_clean_sutta_text()
 	make_comparison_table()
