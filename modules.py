@@ -772,6 +772,8 @@ def make_list_of_all_inflections():
 
 def make_list_of_all_inflections_no_meaning():
 
+	# higlight
+
 	print("~" * 40)
 	print("making list of all inflections with no meaning")
 	print("~" * 40)
@@ -812,6 +814,8 @@ def make_list_of_all_inflections_no_meaning():
 
 def make_list_of_all_inflections_no_eg1():
 
+	# red
+
 	print("~" * 40)
 	print("making list of all inflections with no eg1")
 	print("~" * 40)
@@ -845,7 +849,9 @@ def make_list_of_all_inflections_no_eg1():
 	no_eg1_list = list(dict.fromkeys(no_eg1_list))
 
 
-def make_list_of_all_inflections_ex_0():
+def make_list_of_all_inflections_only_in_class():
+
+	# red
 
 	print("~" * 40)
 	print("making list of all inflections with sbs")
@@ -853,7 +859,7 @@ def make_list_of_all_inflections_ex_0():
 
 	global no_eg1_list
 
-	test1 = dps_df["ex"] == "0"
+	test1 = dps_df["ex"] == "-"
 	# test2 = dps_df["Meaning in native language"] != ""
 	# test3 = dps_df["Sutta2"] == ""
 	# test4 = dps_df["POS"] != "prefix"
@@ -880,7 +886,9 @@ def make_list_of_all_inflections_ex_0():
 	no_eg1_list = list(dict.fromkeys(no_eg1_list))
 
 
-def make_list_of_all_inflections_ex():
+def make_list_of_all_inflections_already_in():
+
+	# green
 
 	print("~" * 40)
 	print("making list of all inflections with sbs")
@@ -888,7 +896,18 @@ def make_list_of_all_inflections_ex():
 
 	global no_eg2_list
 
-	test1 = dps_df["ex"] != "0"
+	# class_file_name = sys.argv[1]
+
+	# if class_file_name == '2':
+	# 	cl_active = "1|2"
+
+	# if class_file_name == '3':
+	# 	cl_active = "1|2|3"
+
+	# if class_file_name == '4':
+	# 	cl_active = "1|2|3|4"
+
+	test1 = dps_df["ex"] != "-"
 	test2 = dps_df["ex"] != ""
 	# test2 = dps_df["Meaning in native language"] != ""
 	# test3 = dps_df["Sutta2"] == ""
@@ -917,6 +936,8 @@ def make_list_of_all_inflections_ex():
 
 
 def make_list_of_all_inflections_no_eg2():
+
+	# green
 
 	print("~" * 40)
 	print("making list of all inflections with no eg2")
@@ -947,7 +968,9 @@ def make_list_of_all_inflections_no_eg2():
 	no_eg2_list = list(dict.fromkeys(no_eg2_list))
 
 
-def make_list_of_all_inflections_sbs():
+def make_list_of_all_inflections_potential():
+
+	# blue
 
 	print("~" * 40)
 	print("making list of all inflections with sbs")
@@ -1000,6 +1023,7 @@ def clean_machine(text):
 	text = re.sub("\+", "", text)
 	text = re.sub("=", "", text)
 	text = re.sub("﻿", "", text)
+	text = re.sub("⇒", "", text)
 	text = re.sub("§", " ", text)
 	text = re.sub("\(", "", text)
 	text = re.sub("\)", "", text)

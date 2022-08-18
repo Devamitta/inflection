@@ -21,9 +21,13 @@ def inflection_exists_in_sutta():
 	export_inflections_to_pickle()
 	make_list_of_all_inflections()
 	make_list_of_all_inflections_no_meaning()
-	make_list_of_all_inflections_ex_0()
-	make_list_of_all_inflections_ex()
-	make_list_of_all_inflections_sbs()
+	# higlight
+	make_list_of_all_inflections_only_in_class()
+	# red
+	make_list_of_all_inflections_already_in()
+	# green
+	make_list_of_all_inflections_potential()
+	# blue
 	read_and_clean_sutta_text()
 	make_comparison_table()
 	html_find_and_replace()
