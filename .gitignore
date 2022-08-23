@@ -8,5 +8,6 @@ test if inflection exists in sutta.sh
 sutta text/
 sandhi splitting strategies.ipynb
 inflection generator errorlog.txt
-
+__pycache__/
 .~lock*#
+sorter.cpython-310.pyc
