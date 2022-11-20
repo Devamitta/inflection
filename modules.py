@@ -978,9 +978,13 @@ def make_list_of_all_inflections_potential():
 
 	global no_eg3_list
 
+	class_file_name = sys.argv[1]
+
 	test1 = dps_df["Meaning IN CONTEXT"] != ""
+	test2 = dps_df["ex"] == ""
+	test3 = dps_df["class"] == f"{class_file_name}"
 	# test2 = dps_df["Chapter 2"] != ""
-	filter = test1
+	filter = test1 & test2 & test3
 	no_eg3_df = dps_df[filter]
 
 	no_eg3_headword_list = no_eg3_df["Pāli1"].tolist()
