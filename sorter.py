@@ -5,9 +5,9 @@ def sort_key(word):
         "c", "ch", "j", "jh", "ñ", "ṭ", "ṭh", "ḍ", "ḍḥ", "ṇ", "t", "th", "d",
         "dh", "n", "p", "ph", "b", "bh", "m", "y", "r", "l", "s", "v", "h",
         "ḷ", "ṃ", " ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"
-	]
+    ]
 
-    #comp iteration condition
+    # comp iteration condition
     dl = [i for i in pāli_alphabet if len(i) > 1]
 
     for i in dl:
