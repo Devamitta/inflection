@@ -1,13 +1,29 @@
-import pandas as pd
+from datetime import datetime
+
+import os
+import pickle
 import re
 import sys
-import pickle
-from pandas_ods_reader import read_ods
-import os
+
+import pandas as pd
+
 from aksharamukha import transliterate
-import webbrowser
-from datetime import datetime
+from pandas_ods_reader import read_ods
 from sorter import sort_key
+
+
+def create_directories() -> None:
+    dirs = [
+        'output/',
+        'output/patterns/',
+        #'output/picle test',
+        #'output/inflections',
+        #'output/inflections translit',
+    ]
+
+    for d in dirs:
+        os.makedirs(d, exist_ok=True)
+
 
 def timeis():
     global blue
@@ -24,6 +40,7 @@ def timeis():
     now = datetime.now()
     current_time = now.strftime("%Y-%m-%d %H:%M:%S")
     return (f"{blue}{current_time}{white}")
+
 
 def convert_dpd_ods_to_csv():
     print(f"{timeis()} {yellow}converting dpd.ods to csv")
@@ -48,7 +65,7 @@ def convert_dpd_ods_to_csv():
 
 def create_inflection_table_index():
     print(f"{timeis()} {yellow}inflection generator")
-    print(f"{timeis()} ----------------------------------------") 
+    print(f"{timeis()} ----------------------------------------")
     print(f"{timeis()} {green}creating inflection table index")
 
     global inflection_table_index_df
@@ -79,6 +96,7 @@ def create_inflection_table_df():
 def test_inflection_pattern_changed():
     print(f"{timeis()} {green}test if inflection patterns have changed")
 
+    create_directories()
     global pattern_changed
     pattern_changed = []
 
@@ -145,9 +163,9 @@ def test_inflection_pattern_changed():
 def create_dps_df():
     print("~" * 40)
     print("create dps_df")
-    
+
     global dps_df
-    
+
     dps_df = pd.read_csv("../spreadsheets/dps-full.csv", sep="\t", dtype=str)
     dps_df.fillna("", inplace=True)
 
@@ -164,9 +182,9 @@ def create_dps_df():
 def create_sbs_df():
     print("~" * 40)
     print("create sbs_df")
-    
+
     global dps_df
-    
+
     class_file_name = sys.argv[1]
 
 
@@ -194,7 +212,7 @@ def test_for_missing_stem_and_pattern():
         headword = dps_df.loc[row, "Pāli1"]
         stem = dps_df.loc[row, "Stem"]
         pattern = dps_df.loc[row, "Pattern"]
-        
+
         if stem == "":
             missing_stem_string += headword + "|"
             error = True
@@ -309,13 +327,13 @@ def test_if_inflections_exist_suttas():
 
     for row in range(dps_df_length): #dps_df_length
         headword = dps_df.loc[row, "Pāli1"]
-        
+
         try:
             with open(f"output/inflections/{headword}", "rb") as syn_file:
                 pass
             with open(f"output/inflections/{headword}", "rb") as syn_file:
                 pass
-        
+
         except:
             inflections_not_exists_string += headword + "|"
             inflections_not_exist.append(headword)
@@ -340,11 +358,11 @@ def test_if_inflections_exist_dps():
 
     for row in range(dps_df_length): #dps_df_length
         headword = dps_df.loc[row, "Pāli1"]
-        
+
         try:
             with open(f"output/inflections translit/{headword}", "rb") as syn_file:
                 pass
-        
+
         except:
             inflections_not_exists_string += headword + "|"
             inflections_not_exist.append(headword)
@@ -381,7 +399,7 @@ def generate_changed_inflected_forms():
         inflections_string= ""
 
         if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
-            
+
             if stem == "-":
                 inflections_string += headword_clean + " "
 
@@ -423,6 +441,8 @@ def generate_changed_inflected_forms():
 
 
 def generate_html_inflection_table():
+    create_directories()
+
     print("~" * 40)
     print("generating html inflection tables")
     print("~" * 40)
@@ -449,7 +469,7 @@ def generate_html_inflection_table():
 
             try:
                 with open(f"output/html tables/{headword}.html", "w") as html_table:
-                    
+
                     if stem == "-":
                         html_table.write(f"<p><b>{headword_clean}</b> is indeclinable")
 
@@ -464,9 +484,9 @@ def generate_html_inflection_table():
                         df_rows = df.shape[0]
                         df_columns = df.shape[1]
 
-                        for rows in range(0, df_rows): 
+                        for rows in range(0, df_rows):
                             for columns in range(0, df_columns, 2): #1 to 0
-                            
+
                                 html_cell = df.iloc[rows, columns]
                                 syn_cell = df.iloc[rows, columns]
 
@@ -474,12 +494,12 @@ def generate_html_inflection_table():
                                 html_cell = re.sub(r"(.+)", f"{stem}\\1", html_cell) # add stem
                                 html_cell = re.sub(r"\n", "<br>", html_cell) # add line breaks
                                 df.iloc[rows, columns] = html_cell
-                            
+
                                 syn_cell = re.sub(r"(.+)", f"{stem}\\1", syn_cell)
                                 search_string = re.compile("\n", re.M)
                                 replace_string = " "
                                 matches = re.sub(search_string, replace_string, syn_cell)
-                    
+
                         column_list = []
                         for i in range(1, df_columns, 2):
                             column_list.append(i)
@@ -502,15 +522,17 @@ def generate_html_inflection_table():
                                 heading = (f"""<p class ="heading"><b>{headword_clean}</b> is <b>{pattern}</b> irregular declension</p>""")
                             if pos in conjugations:
                                 heading = (f"""<p class ="heading"><b>{headword_clean}</b> is <b>{pattern}</b> irregular conjugation</p>""")
-                    
-                        html = heading + table 
+
+                        html = heading + table
                         html_table.write(html)
-            
+
             except:
                 print (f"error! pattern {pattern} does not exist - fix it!")
                 continue
 
+
 def generate_inflections_in_table_list():
+    create_directories()
     print(f"{timeis()} {green}generating inflection lists")
 
     indeclinables = ["abbrev", "abs", "ger", "ind", "inf", "prefix", "suffix", "cs", "letter"]
@@ -532,7 +554,7 @@ def generate_inflections_in_table_list():
             if pos not in indeclinables and pos != "idiom" and pos != "sandhi":
                 if row %1000 == 0:
                     print(f"{timeis()} {row}/{dps_df_length}\t{headword}")
-                
+
                 try:
                     df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
                     df.fillna("", inplace=True, axis=0)
@@ -542,7 +564,7 @@ def generate_inflections_in_table_list():
 
                 except:
                     print(f"{timeis()} {red}pattern '{pattern}' not found for headword '{headword}'")
-                    continue            
+                    continue
 
                 for rows in range(0, df_rows):
                     for columns in range(0, df_columns, 2): #1 to 0
@@ -567,6 +589,7 @@ def generate_inflections_in_table_list():
 
 
 def transcribe_new_inflections():
+    create_directories()
     if new_inflections_dict != {}:
         print("~" * 40)
 
@@ -586,11 +609,11 @@ def transcribe_new_inflections():
         cyrillic = cyrillic.split("\n")
         devanagari = devanagari.split("\n")
 
-        for i in zip(roman, cyrillic, devanagari):  
+        for i in zip(roman, cyrillic, devanagari):
             new_inflections_translit.write(i[0]+i[1].split("\t")[1]+i[2].split("\t")[1]+"\n")
 
         new_inflections_translit.close()
-    
+
     else:
         print("no new inflections to transcribe")
 
@@ -649,8 +672,8 @@ def export_translit_to_pickle():
         headword = all_inflections.iloc[row, 0]
         inflections = all_inflections.iloc[row, 1]
 
-        # fixme !!! how to delete headword when no longer exists    ??? 
-        
+        # fixme !!! how to delete headword when no longer exists    ???
+
         if headword in new_inflections_dict.keys():
             print(headword)
 
@@ -660,7 +683,7 @@ def export_translit_to_pickle():
 
             for word in inflections_list:
                 if 'ṃ' in word:
-                    wordṁ = re.sub("ṃ", "ṁ", word) 
+                    wordṁ = re.sub("ṃ", "ṁ", word)
                     inflections_list.append(wordṁ)
 
             inflections_list = list(dict.fromkeys(inflections_list))
@@ -726,8 +749,8 @@ def export_inflections_to_pickle():
         headword = all_inflections.iloc[row, 0]
         inflections = all_inflections.iloc[row, 1]
 
-        # !!! how to delete headword when no longer exists  ??? 
-        
+        # !!! how to delete headword when no longer exists  ???
+
         if headword in new_inflections_dict.keys():
             print(headword)
 
@@ -759,7 +782,7 @@ def make_list_of_all_inflections():
         headword = all_inflections_df.iloc[row, 0]
         inflections = all_inflections_df.iloc[row, 1]
         all_inflections_string += inflections
-        
+
         if row %5000 == 0:
             print(f"{row} {headword}")
 
@@ -797,7 +820,7 @@ def make_list_of_all_inflections_no_meaning():
 
     no_meaning_string = ""
     all_inflections_length = all_inflections_df.shape[0]
-    for row in range (all_inflections_length):      
+    for row in range (all_inflections_length):
         headword = all_inflections_df.iloc[row, 0]
         inflections = all_inflections_df.iloc[row, 1]
 
@@ -850,9 +873,7 @@ def make_list_of_all_inflections_no_eg1():
 
 
 def make_list_of_all_inflections_only_in_class():
-
     # red
-
     print("~" * 40)
     print("making list of all inflections with sbs")
     print("~" * 40)
@@ -887,9 +908,7 @@ def make_list_of_all_inflections_only_in_class():
 
 
 def make_list_of_all_inflections_already_in():
-
     # green
-
     print("~" * 40)
     print("making list of all inflections with sbs")
     print("~" * 40)
@@ -936,9 +955,7 @@ def make_list_of_all_inflections_already_in():
 
 
 def make_list_of_all_inflections_no_eg2():
-
     # green
-
     print("~" * 40)
     print("making list of all inflections with no eg2")
     print("~" * 40)
@@ -1032,8 +1049,8 @@ def clean_machine(text):
     text = re.sub("\(", "", text)
     text = re.sub("\)", "", text)
     text = re.sub("-", "", text)
-    text = re.sub("–", "", text)    
-    text = re.sub("\—", " ", text)  
+    text = re.sub("–", "", text)
+    text = re.sub("\—", " ", text)
     text = re.sub("\t", " ", text)
     text = re.sub("…", " ", text)
     text = re.sub("–", "", text)
@@ -1052,12 +1069,12 @@ def clean_machine(text):
     # text = re.sub("\n", "  ", text)
     text = re.sub("suttaṃ", "suttaṃ\n", text)
     text = re.sub("next", "next\n", text)
-    
-    
 
     return text
 
+
 def read_and_clean_sutta_text():
+    create_directories()
 
     print("~" * 40)
     print("reading and cleaning sutta file")
@@ -1066,7 +1083,7 @@ def read_and_clean_sutta_text():
     global sutta_file
     global commentary_file
     global sub_commentary_file
-    
+
     global input_path
     input_path = "/home/deva/Documents/dpd-br/pure-machine-readable-corpus/cscd/"
 
@@ -1104,8 +1121,8 @@ def read_and_clean_sutta_text():
     with open(f"{output_path}{commentary_file}", "w") as output_file:
         output_file.write(commentary_text)
 
-def make_comparison_table():
 
+def make_comparison_table():
     print("~" * 40)
     print("making sutta comparison table")
 
@@ -1123,7 +1140,7 @@ def make_comparison_table():
 
     eg1_test = sutta_words_df[0].isin(no_eg1_list)
     sutta_words_df["Eg1"] = ~eg1_test
-    
+
     eg2_test = sutta_words_df[0].isin(no_eg2_list)
     sutta_words_df["Eg2"] = ~eg2_test
 
@@ -1151,7 +1168,7 @@ def make_comparison_table():
 
     no_meaning_test = commentary_words_df[0].isin(no_meaning_list)
     commentary_words_df["Meaning"] = no_meaning_test
-    
+
     commentary_words_df.rename(columns={0 :"Pali"}, inplace=True)
 
     commentary_words_df.drop_duplicates(subset=["Pali"], keep="first", inplace=True)
@@ -1161,7 +1178,6 @@ def make_comparison_table():
 
 
 def html_find_and_replace():
-
     print("~" * 40)
     print("finding and replacing sutta html")
     print("~" * 40)
@@ -1176,7 +1192,7 @@ def html_find_and_replace():
 
     with open(f"{output_path}{sutta_file}", 'r') as input_file:
         sutta_text = input_file.read()
-    
+
     max_row = sutta_words_df.shape[0]
     row=0
 
@@ -1221,13 +1237,15 @@ def html_find_and_replace():
 
 
 def write_html():
-    
+    create_directories()
+
+    # TODO To file
     html1 = """
 <!DOCTYPE html>
 <html>
 <head>
 <style>
-#content, html, body { 
+#content, html, body {
     height: 98%;
     font-size: 1.5em;
     }
@@ -1277,7 +1295,7 @@ body {
 ::-webkit-scrollbar-thumb:active {
     background: #9b794b;
     }
-    
+
 ::-webkit-scrollbar-track:active {
     background: #433730;
     }
@@ -1306,7 +1324,7 @@ body {
     border-radius: 5px;
     color: #83e783;
     }
-    
+
 .blue{
     border-radius: 5px;
     color: #8983fe;
@@ -1330,13 +1348,15 @@ body {
     html_file.write(html3)
     html_file.close
 
+
 def open_in_browser():
     os.popen('cd "output/html suttas"')
     os.popen(f"{sutta_file}.html")
 
+
 def delete_old_pickle_files():
     print(f"{timeis()} {green}deleting old pickle files ")
-    
+
     for root, dirs, files in os.walk("output/pickle test", topdown=True):
         for file in files:
             try:
@@ -1345,6 +1365,7 @@ def delete_old_pickle_files():
                     print(f"{timeis()} {file}")
             except:
                 print(f"{timeis()} {red}{file} not found")
+
 
 def delete_unused_inflection_patterns():
     print(f"{timeis()} {green}deleting unused inflection patterns")
@@ -1360,9 +1381,10 @@ def delete_unused_inflection_patterns():
         except:
             print(f"{timeis()} {red}{file} not found")
 
+
 def delete_unused_html_tables():
     print(f"{timeis()} {green}deleting unused html files ")
-    
+
     for root, dirs, files in os.walk("output/html tables", topdown=True):
         for file in files:
             try:
@@ -1373,9 +1395,10 @@ def delete_unused_html_tables():
             except:
                 print(f"{timeis()} {red}{file} not found")
 
+
 def delete_unused_inflections():
     print(f"{timeis()} {green}deleting unused inflections")
-    
+
     for root, dirs, files in os.walk("output/inflections", topdown=True):
         for file in files:
             try:
@@ -1385,9 +1408,10 @@ def delete_unused_inflections():
             except:
                 print(f"{timeis()} {red}{file} not found")
 
+
 def delete_unused_inflections_translit():
     print(f"{timeis()} {green}deleting unused inflections translit")
-    
+
     for root, dirs, files in os.walk("output/inflections translit", topdown=True):
         for file in files:
             try:
