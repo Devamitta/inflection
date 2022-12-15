@@ -9,10 +9,12 @@ import sys
 import pandas as pd
 
 from aksharamukha import transliterate
+from pandas.errors import EmptyDataError
 from pandas_ods_reader import read_ods
 from sorter import sort_key
 
-DPS_DIR = Path(os.getenv('DPS_DIR', '../spreadsheets/'))
+DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
+ALL_INFLECTIONS = Path("output/all inflections.csv")
 
 def create_directories() -> None:
     dirs = [
@@ -701,11 +703,17 @@ def combine_old_and_new_dataframes():
     print("~" * 40)
     print("combinging old and new dataframes:")
 
+    create_directories()
+
     global diff
     diff = pd.DataFrame()
 
     if new_inflections_dict != {}:
-        all_inflections_df = pd.read_csv("output/all inflections.csv", header=None, sep="\t")
+        try:
+            all_inflections_df = pd.read_csv(ALL_INFLECTIONS, header=None, sep="\t")
+        except (FileNotFoundError, EmptyDataError):
+            all_inflections_df = pd.DataFrame(data={0: [], 1: []})
+
 
         new_inflections_df = pd.read_csv("output/new inflections.csv", header=None, sep="\t")
 
@@ -732,7 +740,7 @@ def combine_old_and_new_dataframes():
 
         diff.drop(columns=["1_y", "exists"], inplace=True)
 
-        diff.to_csv("output/all inflections.csv", sep="\t", index=None, header=False)
+        diff.to_csv(ALL_INFLECTIONS, sep="\t", index=None, header=False)
 
         print("all inflections.csv updated")
 
@@ -774,7 +782,7 @@ def make_list_of_all_inflections():
     print("creating all inflections df")
 
     global all_inflections_df
-    all_inflections_df = pd.read_csv("output/all inflections.csv", header=None, sep="\t")
+    all_inflections_df = pd.read_csv(ALL_INFLECTIONS, header=None, sep="\t")
 
     print("~" * 40)
     print("making master list of all inflections")
