@@ -21,11 +21,18 @@ Install dependencies:
 pip3 install -r requirements.txt
 ```
 
+Directory with CSV files of dictionary may be set with `DPS_DIR` environment
+variable:
+
+```shell
+export DPS_DIR='/PATH/TO/FILES/'
+```
+
 ## TODO
 
 - ~~Untabify~~
 - Remove timeis.py
 - Remove spaces in names of modules
 - Make variables' names ASCII-only
-- Mirge generator modules
+- Merge generator modules
 - Create necessary dirs

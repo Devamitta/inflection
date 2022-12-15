@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 import os
 import pickle
@@ -11,6 +12,7 @@ from aksharamukha import transliterate
 from pandas_ods_reader import read_ods
 from sorter import sort_key
 
+DPS_DIR = Path(os.getenv('DPS_DIR', '../spreadsheets/'))
 
 def create_directories() -> None:
     dirs = [
@@ -166,7 +168,7 @@ def create_dps_df():
 
     global dps_df
 
-    dps_df = pd.read_csv("../spreadsheets/dps-full.csv", sep="\t", dtype=str)
+    dps_df = pd.read_csv(DPS_DIR / "dps-full.csv", sep="\t", dtype=str)
     dps_df.fillna("", inplace=True)
 
     # dps_df.sort_values(by = ['Pāli1'], ignore_index=True, inplace=True, key=lambda x: x.map(sort_key))
