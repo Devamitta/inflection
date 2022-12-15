@@ -18,7 +18,7 @@ def create_directories() -> None:
     dirs = [
         'output/',
         'output/patterns/',
-        #'output/picle test',
+        'output/pickle test/',
         #'output/inflections',
         #'output/inflections translit',
     ]
@@ -136,6 +136,8 @@ def test_inflection_pattern_changed():
         inflection_table_df_filtered = inflection_table_df_filtered.rename(columns=lambda x: re.sub('Unnamed.*','',x))
 
         # test
+
+        old = ''
 
         try:
             old = pd.read_csv(f"output/patterns/{inflection_name}.csv", sep="\t", index_col=0, na_filter=False) #, header=0
@@ -272,6 +274,8 @@ def test_for_differences_in_stem_and_pattern():
     print("~" * 40)
     print("testing for changes in stem and pattern:")
 
+    create_directories()
+
     global changed
     changed = []
     added_string = ""
@@ -281,18 +285,17 @@ def test_for_differences_in_stem_and_pattern():
         headword = dps_df.loc[row, "Pāli1"]
         stem = dps_df.loc[row, "Stem"]
         pattern = dps_df.loc[row, "Pattern"]
+        old = ""
         new = f"{headword} {stem} {pattern}"
 
         try:
-            pickle_file = open(f"output/pickle test/{headword}","rb")
-            old = pickle.load(pickle_file)
-            pickle_file.close()
-        except:
+            with open(f"output/pickle test/{headword}","rb") as pickle_file:
+                old = pickle.load(pickle_file)
+        except FileNotFoundError:
             added_string += headword + "|"
             changed.append(headword)
-            pickle_file = open(f"output/pickle test/{headword}","wb")
-            pickle.dump(new,pickle_file)
-            pickle_file.close()
+            with open(f"output/pickle test/{headword}","wb") as pickle_file:
+                pickle.dump(new,pickle_file)
             continue
 
         if old == new:
