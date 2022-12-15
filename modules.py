@@ -18,9 +18,10 @@ ALL_INFLECTIONS = Path("output/all inflections.csv")
 
 def create_directories() -> None:
     dirs = [
-        'output/',
-        'output/patterns/',
-        'output/pickle test/',
+        "output/",
+        "output/patterns/",
+        "output/pickle test/",
+        "output/inflections in table",
         #'output/inflections',
         #'output/inflections translit',
     ]
@@ -539,8 +540,9 @@ def generate_html_inflection_table():
 
 
 def generate_inflections_in_table_list():
-    create_directories()
     print(f"{timeis()} {green}generating inflection lists")
+
+    create_directories()
 
     indeclinables = ["abbrev", "abs", "ger", "ind", "inf", "prefix", "suffix", "cs", "letter"]
     conjugations = ["aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"]
