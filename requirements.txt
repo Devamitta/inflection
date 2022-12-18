@@ -1,0 +1,4 @@
+aksharamukha~=2.0
+openpyxl~=3.0
+pandas-ods-reader~=0.1
+pandas~=1.0
