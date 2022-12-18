@@ -15,6 +15,16 @@ from sorter import sort_key
 
 DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
 ALL_INFLECTIONS = Path("output/all inflections.csv")
+ALL_INFLECTIONS_TRANSLIT = Path("output/all inflections translit.csv")
+
+
+def data_frame_from_inflections_csv(file) -> pd.DataFrame:
+    try:
+        result = pd.read_csv(file, header=None, sep="\t")
+    except (FileNotFoundError, EmptyDataError):
+        result = pd.DataFrame(data={0: [], 1: []})
+    return result
+
 
 def create_directories() -> None:
     dirs = [
@@ -635,7 +645,7 @@ def combine_old_and_new_translit_dataframes():
     diff = pd.DataFrame()
 
     if new_inflections_dict != {}:
-        all_inflections_translit = pd.read_csv("output/all inflections translit.csv", header=None, sep="\t")
+        all_inflections_translit = data_frame_from_inflections_csv(ALL_INFLECTIONS_TRANSLIT)
 
         new_inflections_translit = pd.read_csv("output/new inflections translit.csv", header=None, sep="\t")
 
@@ -661,7 +671,7 @@ def combine_old_and_new_translit_dataframes():
         # drop columns and write to csv
 
         diff.drop(columns=["1_y", "exists"], inplace=True)
-        diff.to_csv("output/all inflections translit.csv", sep="\t", index=None, header=False)
+        diff.to_csv(ALL_INFLECTIONS_TRANSLIT, sep="\t", index=None, header=False)
         print("all inflections translit.csv updated")
 
     else:
@@ -711,11 +721,7 @@ def combine_old_and_new_dataframes():
     diff = pd.DataFrame()
 
     if new_inflections_dict != {}:
-        try:
-            all_inflections_df = pd.read_csv(ALL_INFLECTIONS, header=None, sep="\t")
-        except (FileNotFoundError, EmptyDataError):
-            all_inflections_df = pd.DataFrame(data={0: [], 1: []})
-
+        all_inflections_df = data_frame_from_inflections_csv(ALL_INFLECTIONS)
 
         new_inflections_df = pd.read_csv("output/new inflections.csv", header=None, sep="\t")
 
