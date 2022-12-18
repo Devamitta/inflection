@@ -18,26 +18,26 @@ ALL_INFLECTIONS = Path("output/all inflections.csv")
 ALL_INFLECTIONS_TRANSLIT = Path("output/all inflections translit.csv")
 
 
-def data_frame_from_inflections_csv(file) -> pd.DataFrame:
-    try:
-        result = pd.read_csv(file, header=None, sep="\t")
-    except (FileNotFoundError, EmptyDataError):
-        result = pd.DataFrame(data={0: [], 1: []})
-    return result
-
-
 def create_directories() -> None:
     dirs = [
         "output/",
         "output/patterns/",
         "output/pickle test/",
         "output/inflections in table",
-        #'output/inflections',
-        #'output/inflections translit',
+        "output/inflections",
+        "output/inflections translit",
     ]
 
     for d in dirs:
         os.makedirs(d, exist_ok=True)
+
+
+def data_frame_from_inflections_csv(file) -> pd.DataFrame:
+    try:
+        result = pd.read_csv(file, header=None, sep="\t")
+    except (FileNotFoundError, EmptyDataError):
+        result = pd.DataFrame(data={0: [], 1: []})
+    return result
 
 
 def timeis():
@@ -681,6 +681,8 @@ def combine_old_and_new_translit_dataframes():
 def export_translit_to_pickle():
     print("~" * 40)
     print("exporting inflections translit to pickle")
+
+    create_directories()
 
     all_inflections = diff
 
