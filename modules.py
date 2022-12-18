@@ -153,10 +153,10 @@ def test_inflection_pattern_changed():
         old = ''
 
         try:
-            old = pd.read_csv(f"output/patterns/{inflection_name}.csv", sep="\t", index_col=0, na_filter=False) #, header=0
+            old = pd.read_csv(f"output/patterns/{inflection_name}.csv", sep="\t", index_col=0, na_filter=False)
             old.fillna("", inplace=True)
             old = old.rename(columns=lambda x: re.sub('Unnamed.*','',x))
-        except:
+        except FileNotFoundError:
             print(f"{timeis()} {red}{inflection_name} - doesn't exist - added")
             pattern_changed.append(inflection_name)
             inflection_table_df_filtered.to_csv(f"output/patterns/{inflection_name}.csv", sep="\t")
@@ -351,8 +351,7 @@ def test_if_inflections_exist_suttas():
                 pass
             with open(f"output/inflections/{headword}", "rb") as syn_file:
                 pass
-
-        except:
+        except FileNotFoundError:
             inflections_not_exists_string += headword + "|"
             inflections_not_exist.append(headword)
 
@@ -366,7 +365,6 @@ def test_if_inflections_exist_suttas():
 
 
 def test_if_inflections_exist_dps():
-
     global inflections_not_exist
     inflections_not_exist = []
     inflections_not_exists_string = ""
@@ -377,11 +375,7 @@ def test_if_inflections_exist_dps():
     for row in range(dps_df_length): #dps_df_length
         headword = dps_df.loc[row, "Pāli1"]
 
-        try:
-            with open(f"output/inflections translit/{headword}", "rb") as syn_file:
-                pass
-
-        except:
+        if not Path(f"output/inflections translit/{headword}").is_file():
             inflections_not_exists_string += headword + "|"
             inflections_not_exist.append(headword)
 
@@ -544,7 +538,7 @@ def generate_html_inflection_table():
                         html = heading + table
                         html_table.write(html)
 
-            except:
+            except FileNotFoundError:
                 print (f"error! pattern {pattern} does not exist - fix it!")
                 continue
 
@@ -1386,7 +1380,7 @@ def delete_old_pickle_files():
                 if file not in headwords_list:
                     os.remove(f"output/pickle test/{file}")
                     print(f"{timeis()} {file}")
-            except:
+            except FileNotFoundError:
                 print(f"{timeis()} {red}{file} not found")
 
 
@@ -1395,14 +1389,15 @@ def delete_unused_inflection_patterns():
 
     inflection_patterns_list = inflection_table_index_df["inflection name"].tolist()
     for root, dirs, files in os.walk("output/patterns", topdown=True):
-        try:
-            for file in files:
-                file_clean = re.sub(".csv", "", file)
-                if file_clean not in inflection_patterns_list:
+        for file in files:
+            file_clean = re.sub(".csv", "", file)
+            if file_clean not in inflection_patterns_list:
+                try:
                     os.remove(f"output/patterns/{file}")
+                except FileNotFoundError:
+                    print(f"{timeis()} {red}{file} not found")
+                else:
                     print(f"{timeis()} {file}")
-        except:
-            print(f"{timeis()} {red}{file} not found")
 
 
 def delete_unused_html_tables():
@@ -1413,10 +1408,12 @@ def delete_unused_html_tables():
             try:
                 file_clean = re.sub(".html", "", file)
                 if file_clean not in headwords_list:
-                    os.remove(f"output/html tables/{file}")
-                    print(f"{timeis()} {file}")
-            except:
-                print(f"{timeis()} {red}{file} not found")
+                    try
+                        os.remove(f"output/html tables/{file}")
+                    except FileNotFoundError:
+                        print(f"{timeis()} {red}{file} not found")
+                    else:
+                        print(f"{timeis()} {file}")
 
 
 def delete_unused_inflections():
@@ -1424,12 +1421,13 @@ def delete_unused_inflections():
 
     for root, dirs, files in os.walk("output/inflections", topdown=True):
         for file in files:
-            try:
-                if file not in headwords_list:
+            if file not in headwords_list:
+                try:
                     os.remove(f"output/inflections/{file}")
+                except FileNotFoundError:
+                    print(f"{timeis()} {red}{file} not found")
+                else:
                     print(f"{timeis()} {file}")
-            except:
-                print(f"{timeis()} {red}{file} not found")
 
 
 def delete_unused_inflections_translit():
@@ -1437,12 +1435,13 @@ def delete_unused_inflections_translit():
 
     for root, dirs, files in os.walk("output/inflections translit", topdown=True):
         for file in files:
-            try:
-                if file not in headwords_list:
+            if file not in headwords_list:
+                try:
                     os.remove(f"output/inflections translit/{file}")
+                except FileNotFoundError:
+                    print(f"{timeis()} {red}{file} not found")
+                else:
                     print(f"{timeis()} {file}")
-            except:
-                print(f"{timeis()} {red}{file} not found")
 
 
 print(f"{timeis()} ----------------------------------------")
