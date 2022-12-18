@@ -1405,15 +1405,14 @@ def delete_unused_html_tables():
 
     for root, dirs, files in os.walk("output/html tables", topdown=True):
         for file in files:
-            try:
-                file_clean = re.sub(".html", "", file)
-                if file_clean not in headwords_list:
-                    try
-                        os.remove(f"output/html tables/{file}")
-                    except FileNotFoundError:
-                        print(f"{timeis()} {red}{file} not found")
-                    else:
-                        print(f"{timeis()} {file}")
+            file_clean = re.sub(".html", "", file)
+            if file_clean not in headwords_list:
+                try:
+                    os.remove(f"output/html tables/{file}")
+                except FileNotFoundError:
+                    print(f"{timeis()} {red}{file} not found")
+                else:
+                    print(f"{timeis()} {file}")
 
 
 def delete_unused_inflections():
