@@ -28,6 +28,15 @@ variable:
 export DPS_DIR='/PATH/TO/FILES/'
 ```
 
+Run generator with command:
+
+```shell
+python 'inflection generator.py'
+```
+
+At first time utility should be ran mulitple times until output will not
+changes.
+
 ## TODO
 
 - ~~Untabify~~
@@ -35,4 +44,4 @@ export DPS_DIR='/PATH/TO/FILES/'
 - Remove spaces in names of modules
 - Make variables' names ASCII-only
 - Merge generator modules
-- Create necessary dirs
+- ~~Create necessary dirs~~
