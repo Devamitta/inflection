@@ -17,6 +17,14 @@ DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
 ALL_INFLECTIONS = Path("output/all inflections.csv")
 ALL_INFLECTIONS_TRANSLIT = Path("output/all inflections translit.csv")
 
+# FIXME Ugly globals
+blue = "\033[38;5;33m"
+green = "\033[38;5;34m"
+red = "\033[38;5;160m"
+yellow = "\033[38;5;220m"
+white = "\033[38;5;251m"
+current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 
 def create_directories() -> None:
     dirs = [
@@ -41,19 +49,6 @@ def data_frame_from_inflections_csv(file) -> pd.DataFrame:
 
 
 def timeis():
-    global blue
-    global yellow
-    global green
-    global red
-    global white
-
-    blue = "\033[38;5;33m" #blue
-    green = "\033[38;5;34m" #green
-    red= "\033[38;5;160m" #red
-    yellow = "\033[38;5;220m" #yellow
-    white = "\033[38;5;251m" #white
-    now = datetime.now()
-    current_time = now.strftime("%Y-%m-%d %H:%M:%S")
     return (f"{blue}{current_time}{white}")
 
 
@@ -62,20 +57,19 @@ def convert_dpd_ods_to_csv():
     print(f"{timeis()} ----------------------------------------")
 
     ods_file = "../dpd.ods"
-    csv_file = ""
     sheet_index = 1
-    df = read_ods (ods_file, sheet_index, headers = False)
+    df = read_ods(ods_file, sheet_index, headers = False)
 
     df.fillna("", inplace=True)
-    df = df.astype(str)     # make everting string
-    df = df.drop(index=0)   #remove first row of numbers
-    new_header = df.iloc[0]     #grab the first row for the header
-    df = df[1:]     #take the data less the header row
-    df.columns = new_header     #set the header row as the df header
-    df.reset_index(drop = True, inplace=True)   #resets index to 0
-    df = df.replace(to_replace ="\.0", value = "", regex = True) #removes all flaots .0
+    df = df.astype(str)  # make everting string
+    df = df.drop(index=0)  # remove first row of numbers
+    new_header = df.iloc[0]  # grab the first row for the header
+    df = df[1:]  # take the data less the header row
+    df.columns = new_header  # set the header row as the df header
+    df.reset_index(drop=True, inplace=True)  # resets index to 0
+    df = df.replace(to_replace=r"\.0", value="", regex=True)  # removes all flaots .0
 
-    df.to_csv("../csvs/dpd.csv", index = False, sep = "\t", encoding="utf-8")
+    df.to_csv("../csvs/dpd.csv", index=False, sep="\t", encoding="utf-8")
 
 
 def create_inflection_table_index():
