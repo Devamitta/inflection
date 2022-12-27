@@ -31,12 +31,13 @@ export DPS_DIR='/PATH/TO/FILES/'
 Run generator with command:
 
 ```shell
+python inflection_generator.py --kind DPS
+```
+
+Or in an old style:
+```shell
 python 'inflection generator.py'
 ```
 
 At first time utility should be ran mulitple times until output will not
 changes.
-
-## TODO
-
-- Merge generator modules

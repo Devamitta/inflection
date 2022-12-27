@@ -4,7 +4,6 @@ from pathlib import Path
 import os
 import pickle
 import re
-import sys
 
 import pandas as pd
 
@@ -14,6 +13,8 @@ from pandas_ods_reader import read_ods
 from rich import print
 
 from sorter import sort_key
+
+# TODO Try to avoid global keyword in the module
 
 DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
 ALL_INFLECTIONS = Path("output/all inflections.csv")
@@ -185,14 +186,11 @@ def create_dps_df():
     headwords_list = dps_df["Pāli1"].tolist()
 
 
-def create_sbs_df():
+def create_sbs_df(class_file_name: str):
     print("~" * 40)
     print("create sbs_df")
 
     global dps_df
-
-    class_file_name = sys.argv[1]
-
 
     dps_df = pd.read_csv(f"../word-frequency/csv-for-examples/{class_file_name}-class.csv", sep="\t", dtype=str)
     dps_df.fillna("", inplace=True)
@@ -921,8 +919,6 @@ def make_list_of_all_inflections_already_in():
 
     global no_eg2_list
 
-    # class_file_name = sys.argv[1]
-
     # if class_file_name == '2':
     #   cl_active = "1|2"
 
@@ -991,7 +987,7 @@ def make_list_of_all_inflections_no_eg2():
     no_eg2_list = list(dict.fromkeys(no_eg2_list))
 
 
-def make_list_of_all_inflections_potential():
+def make_list_of_all_inflections_potential(class_file_name: str):
 
     # blue
 
@@ -1000,8 +996,6 @@ def make_list_of_all_inflections_potential():
     print("~" * 40)
 
     global no_eg3_list
-
-    class_file_name = sys.argv[1]
 
     test1 = dps_df["Meaning IN CONTEXT"] != ""
     test2 = dps_df["ex"] == ""
