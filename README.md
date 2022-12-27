@@ -39,9 +39,6 @@ changes.
 
 ## TODO
 
-- ~~Untabify~~
 - Remove timeis.py
 - Remove spaces in names of modules
-- Make variables' names ASCII-only
 - Merge generator modules
-- ~~Create necessary dirs~~
