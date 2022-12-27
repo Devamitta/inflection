@@ -39,6 +39,4 @@ changes.
 
 ## TODO
 
-- Remove timeis.py
-- Remove spaces in names of modules
 - Merge generator modules

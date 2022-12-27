@@ -11,19 +11,13 @@ import pandas as pd
 from aksharamukha import transliterate
 from pandas.errors import EmptyDataError
 from pandas_ods_reader import read_ods
+from rich import print
+
 from sorter import sort_key
 
 DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
 ALL_INFLECTIONS = Path("output/all inflections.csv")
 ALL_INFLECTIONS_TRANSLIT = Path("output/all inflections translit.csv")
-
-# FIXME Ugly globals
-blue = "\033[38;5;33m"
-green = "\033[38;5;34m"
-red = "\033[38;5;160m"
-yellow = "\033[38;5;220m"
-white = "\033[38;5;251m"
-current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def create_directories() -> None:
@@ -49,11 +43,12 @@ def data_frame_from_inflections_csv(file) -> pd.DataFrame:
 
 
 def timeis():
-    return (f"{blue}{current_time}{white}")
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return f"[blue]{current_time}[/blue]"
 
 
 def convert_dpd_ods_to_csv():
-    print(f"{timeis()} {yellow}converting dpd.ods to csv")
+    print(f"{timeis()} [yellow]converting dpd.ods to csv")
     print(f"{timeis()} ----------------------------------------")
 
     ods_file = "../dpd.ods"
@@ -73,9 +68,9 @@ def convert_dpd_ods_to_csv():
 
 
 def create_inflection_table_index():
-    print(f"{timeis()} {yellow}inflection generator")
+    print(f"{timeis()} [yellow]inflection generator")
     print(f"{timeis()} ----------------------------------------")
-    print(f"{timeis()} {green}creating inflection table index")
+    print(f"{timeis()} [green]creating inflection table index")
 
     global inflection_table_index_df
     inflection_table_index_df = pd.read_excel("declensions & conjugations.xlsx", sheet_name="index", dtype=str)
@@ -90,7 +85,7 @@ def create_inflection_table_index():
 
 
 def create_inflection_table_df():
-    print(f"{timeis()} {green}creating inflection table dataframe")
+    print(f"{timeis()} [green]creating inflection table dataframe")
 
     global inflection_table_df
     inflection_table_df = pd.read_excel("declensions & conjugations.xlsx", sheet_name="declensions", dtype=str)
@@ -103,7 +98,7 @@ def create_inflection_table_df():
 
 
 def test_inflection_pattern_changed():
-    print(f"{timeis()} {green}test if inflection patterns have changed")
+    print(f"{timeis()} [green]test if inflection patterns have changed")
 
     create_directories()
     global pattern_changed
@@ -151,7 +146,7 @@ def test_inflection_pattern_changed():
             old.fillna("", inplace=True)
             old = old.rename(columns=lambda x: re.sub('Unnamed.*','',x))
         except FileNotFoundError:
-            print(f"{timeis()} {red}{inflection_name} - doesn't exist - added")
+            print(f"{timeis()} [red]{inflection_name} - doesn't exist - added")
             pattern_changed.append(inflection_name)
             inflection_table_df_filtered.to_csv(f"output/patterns/{inflection_name}.csv", sep="\t")
 
@@ -160,7 +155,7 @@ def test_inflection_pattern_changed():
         elif inflection_name in pattern_changed:
             continue
         elif not inflection_table_df_filtered.equals(old):
-            print(f"{timeis()} {red}{inflection_name} - different - updated")
+            print(f"{timeis()} [red]{inflection_name} - different - updated")
             inflection_table_df_filtered.to_csv(f"output/patterns/{inflection_name}.csv", sep="\t")
             pattern_changed.append(inflection_name)
 
@@ -212,7 +207,7 @@ def create_sbs_df():
 
 def test_for_missing_stem_and_pattern():
     print("~" * 40)
-    print(f"test for missing stems and patterns:")
+    print("test for missing stems and patterns:")
 
     error = False
     missing_stem_string = ""
@@ -232,11 +227,11 @@ def test_for_missing_stem_and_pattern():
             error = True
 
     if missing_stem_string != "":
-        print(f"{timeis()} {red}words with missing stems: {missing_stem_string}")
+        print(f"{timeis()} [red]words with missing stems: {missing_stem_string}")
     if missing_pattern_string != "":
-        print(f"{timeis()} {red}words with missing patterns: {missing_pattern_string}")
+        print(f"{timeis()} [red]words with missing patterns: {missing_pattern_string}")
     if error == True:
-        input(f"{timeis()} {red}there are stem & pattern errors, please fix them before continuing")
+        input(f"{timeis()} [red]there are stem & pattern errors, please fix them before continuing")
     else:
         print("no stem & pattern errors found")
 
@@ -270,9 +265,9 @@ def test_for_wrong_patterns():
             pass
 
     if wrong_patten_string != "":
-        print(f"{timeis()} {red}wrong patterns: {wrong_patten_string}")
+        print(f"{timeis()} [red]wrong patterns: {wrong_patten_string}")
     if error == True:
-        input(f"{timeis()} {red}wrong patterns - fix 'em!")
+        input(f"{timeis()} [red]wrong patterns - fix 'em!")
     if error == False:
         print("no wrong patterns found")
 
@@ -317,11 +312,11 @@ def test_for_differences_in_stem_and_pattern():
             pickle_file.close()
 
     if added_string != "":
-        print(f"headword / stem / pattern doesnt exist and will be added:")
+        print("headword / stem / pattern doesnt exist and will be added:")
         print("~" * 40)
         print(added_string)
     if changed_string != "":
-        print(f"headword / stem / pattern has changed and will be updated")
+        print("headword / stem / pattern has changed and will be updated")
         print("~" * 40)
         print(changed_string)
     if changed == []:
@@ -533,12 +528,12 @@ def generate_html_inflection_table():
                         html_table.write(html)
 
             except FileNotFoundError:
-                print (f"error! pattern {pattern} does not exist - fix it!")
+                print (f"[red]error! pattern {pattern} does not exist - fix it!")
                 continue
 
 
 def generate_inflections_in_table_list():
-    print(f"{timeis()} {green}generating inflection lists")
+    print(f"{timeis()} [green]generating inflection lists")
 
     create_directories()
 
@@ -570,7 +565,7 @@ def generate_inflections_in_table_list():
                     df_columns = df.shape[1]
 
                 except:
-                    print(f"{timeis()} {red}pattern '{pattern}' not found for headword '{headword}'")
+                    print(f"{timeis()} [red]pattern '{pattern}' not found for headword '{headword}'")
                     continue
 
                 for rows in range(0, df_rows):
@@ -1366,7 +1361,7 @@ def open_in_browser():
 
 
 def delete_old_pickle_files():
-    print(f"{timeis()} {green}deleting old pickle files ")
+    print(f"{timeis()} [green]deleting old pickle files ")
 
     for root, dirs, files in os.walk("output/pickle test", topdown=True):
         for file in files:
@@ -1375,11 +1370,11 @@ def delete_old_pickle_files():
                     os.remove(f"output/pickle test/{file}")
                     print(f"{timeis()} {file}")
             except FileNotFoundError:
-                print(f"{timeis()} {red}{file} not found")
+                print(f"{timeis()} [red]{file} not found")
 
 
 def delete_unused_inflection_patterns():
-    print(f"{timeis()} {green}deleting unused inflection patterns")
+    print(f"{timeis()} [green]deleting unused inflection patterns")
 
     inflection_patterns_list = inflection_table_index_df["inflection name"].tolist()
     for root, dirs, files in os.walk("output/patterns", topdown=True):
@@ -1389,13 +1384,13 @@ def delete_unused_inflection_patterns():
                 try:
                     os.remove(f"output/patterns/{file}")
                 except FileNotFoundError:
-                    print(f"{timeis()} {red}{file} not found")
+                    print(f"{timeis()} [red]{file} not found")
                 else:
                     print(f"{timeis()} {file}")
 
 
 def delete_unused_html_tables():
-    print(f"{timeis()} {green}deleting unused html files ")
+    print(f"{timeis()} [green]deleting unused html files ")
 
     for root, dirs, files in os.walk("output/html tables", topdown=True):
         for file in files:
@@ -1404,13 +1399,13 @@ def delete_unused_html_tables():
                 try:
                     os.remove(f"output/html tables/{file}")
                 except FileNotFoundError:
-                    print(f"{timeis()} {red}{file} not found")
+                    print(f"{timeis()} [red]{file} not found")
                 else:
                     print(f"{timeis()} {file}")
 
 
 def delete_unused_inflections():
-    print(f"{timeis()} {green}deleting unused inflections")
+    print(f"{timeis()} [green]deleting unused inflections")
 
     for root, dirs, files in os.walk("output/inflections", topdown=True):
         for file in files:
@@ -1418,13 +1413,13 @@ def delete_unused_inflections():
                 try:
                     os.remove(f"output/inflections/{file}")
                 except FileNotFoundError:
-                    print(f"{timeis()} {red}{file} not found")
+                    print(f"{timeis()} [red]{file} not found")
                 else:
                     print(f"{timeis()} {file}")
 
 
 def delete_unused_inflections_translit():
-    print(f"{timeis()} {green}deleting unused inflections translit")
+    print(f"{timeis()} [green]deleting unused inflections translit")
 
     for root, dirs, files in os.walk("output/inflections translit", topdown=True):
         for file in files:
@@ -1432,7 +1427,7 @@ def delete_unused_inflections_translit():
                 try:
                     os.remove(f"output/inflections translit/{file}")
                 except FileNotFoundError:
-                    print(f"{timeis()} {red}{file} not found")
+                    print(f"{timeis()} [red]{file} not found")
                 else:
                     print(f"{timeis()} {file}")
 

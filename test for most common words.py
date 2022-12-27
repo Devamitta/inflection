@@ -1,6 +1,7 @@
-import warnings
-from modules import *
 import os
+import warnings
+
+from modules import *
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 

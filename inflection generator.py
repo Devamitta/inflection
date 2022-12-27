@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+# FIXME It is common to avoid whitespaces in names of modules, better to use underscore
+
 from modules import *
+
+from rich import print
 
 def inflection_generator_for_dps():
     create_inflection_table_index()
