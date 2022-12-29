@@ -5,9 +5,11 @@ import os
 import pickle
 import re
 
+import pandas
 import pandas as pd
 
 from aksharamukha import transliterate
+from pandas import DataFrame
 from pandas.errors import EmptyDataError
 from pandas_ods_reader import read_ods
 from rich import print
@@ -15,10 +17,12 @@ from rich import print
 from sorter import sort_key
 
 # TODO Try to avoid global keyword in the module
+# FIXME Too long, split on modules
 
-DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
 ALL_INFLECTIONS = Path("output/all inflections.csv")
 ALL_INFLECTIONS_TRANSLIT = Path("output/all inflections translit.csv")
+DECLENSIONS_AND_CONJUGATIONS_FILE = Path("declensions & conjugations.xlsx")
+DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
 
 
 def create_directories() -> None:
@@ -68,13 +72,36 @@ def convert_dpd_ods_to_csv():
     df.to_csv("../csvs/dpd.csv", index=False, sep="\t", encoding="utf-8")
 
 
-def create_inflection_table_index():
+class AbbreviationTranslater:
+    def __init__(self, script: str, declensions_file=DECLENSIONS_AND_CONJUGATIONS_FILE):
+        abbrev_frame = pandas.read_excel(
+            declensions_file,
+            sheet_name="abbreviations",
+            dtype=str,
+            keep_default_na=True,)
+
+        if script not in abbrev_frame:
+            raise RuntimeError(f'No script variant {script} for abbreviations in {declensions_file}')
+
+        # Filter rows with empty trasnslate cell
+        abbrev_frame = abbrev_frame[~abbrev_frame['cyrl'].isnull()]
+
+        abbreviations = abbrev_frame['name']
+        translates = abbrev_frame[script]
+
+        self._abbrev_dict = dict(zip(abbreviations, translates))
+        print(self._abbrev_dict)
+
+    def get(self, key: str, default=None) -> str:
+        return self._abbrev_dict.get(key)
+
+
+def create_inflection_table_index() -> DataFrame:
     print(f"{timeis()} [yellow]inflection generator")
     print(f"{timeis()} ----------------------------------------")
     print(f"{timeis()} [green]creating inflection table index")
 
-    global inflection_table_index_df
-    inflection_table_index_df = pd.read_excel("declensions & conjugations.xlsx", sheet_name="index", dtype=str)
+    inflection_table_index_df = pd.read_excel(DECLENSIONS_AND_CONJUGATIONS_FILE, sheet_name="index", dtype=str)
 
     inflection_table_index_df.fillna("", inplace=True)
 
@@ -84,12 +111,14 @@ def create_inflection_table_index():
     global inflection_table_index_dict
     inflection_table_index_dict = dict(zip(inflection_table_index_df.iloc[:, 0], inflection_table_index_df.iloc[:, 2]))
 
+    return inflection_table_index_df
+
 
 def create_inflection_table_df():
     print(f"{timeis()} [green]creating inflection table dataframe")
 
     global inflection_table_df
-    inflection_table_df = pd.read_excel("declensions & conjugations.xlsx", sheet_name="declensions", dtype=str)
+    inflection_table_df = pd.read_excel(DECLENSIONS_AND_CONJUGATIONS_FILE, sheet_name="declensions", dtype=str)
 
     inflection_table_df = inflection_table_df.shift(periods=2)
 
@@ -98,7 +127,7 @@ def create_inflection_table_df():
     inflection_table_df.fillna("", inplace=True)
 
 
-def test_inflection_pattern_changed():
+def test_inflection_pattern_changed(inflection_table_index: DataFrame) -> None:
     print(f"{timeis()} [green]test if inflection patterns have changed")
 
     create_directories()
@@ -106,10 +135,10 @@ def test_inflection_pattern_changed():
     pattern_changed = []
 
     for row in range(inflection_table_index_length):
-        inflection_name = inflection_table_index_df.iloc[row,0]
-        cell_range = inflection_table_index_df.iloc[row,1]
-        like = inflection_table_index_df.iloc[row,2]
-        irreg = inflection_table_index_df.iloc[row,3]
+        inflection_name = inflection_table_index.iloc[row,0]
+        cell_range = inflection_table_index.iloc[row,1]
+        like = inflection_table_index.iloc[row,2]
+        irreg = inflection_table_index.iloc[row,3]
 
         col_range_1 = re.sub("(.+?)\d*\:.+", "\\1", cell_range)
         col_range_2 = re.sub(".+\:(.[A-Z]*)\d*", "\\1", cell_range)
@@ -234,12 +263,12 @@ def test_for_missing_stem_and_pattern():
         print("no stem & pattern errors found")
 
 
-def test_for_wrong_patterns():
+def test_for_wrong_patterns(inflection_table_index):
 
     print("~" * 40)
     print("testing for wrong patterns:")
 
-    index_patterns = inflection_table_index_df["inflection name"].values.tolist()
+    index_patterns = inflection_table_index["inflection name"].values.tolist()
 
     error = False
 
@@ -1367,10 +1396,10 @@ def delete_old_pickle_files():
                 print(f"{timeis()} [red]{file} not found")
 
 
-def delete_unused_inflection_patterns():
+def delete_unused_inflection_patterns(inflection_table_index):
     print(f"{timeis()} [green]deleting unused inflection patterns")
 
-    inflection_patterns_list = inflection_table_index_df["inflection name"].tolist()
+    inflection_patterns_list = inflection_table_index["inflection name"].tolist()
     for root, dirs, files in os.walk("output/patterns", topdown=True):
         for file in files:
             file_clean = re.sub(".csv", "", file)
@@ -1424,6 +1453,3 @@ def delete_unused_inflections_translit():
                     print(f"{timeis()} [red]{file} not found")
                 else:
                     print(f"{timeis()} {file}")
-
-
-print(f"{timeis()} ----------------------------------------")

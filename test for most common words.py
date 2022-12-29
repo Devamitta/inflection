@@ -12,12 +12,12 @@ def inflection_exists_in_sutta():
     class_file_name = sys.argv[1]
 
     # convert_dpd_ods_to_csv()
-    create_inflection_table_index()
+    inflection_table_index = create_inflection_table_index()
     create_inflection_table_df()
-    test_inflection_pattern_changed()
+    test_inflection_pattern_changed(inflection_table_index)
     create_sbs_df(class_file_name)
     test_for_missing_stem_and_pattern()
-    test_for_wrong_patterns()
+    test_for_wrong_patterns(inflection_table_index)
     test_for_differences_in_stem_and_pattern()
     test_if_inflections_exist_suttas()
     generate_changed_inflected_forms()
