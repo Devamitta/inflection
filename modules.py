@@ -14,6 +14,7 @@ from pandas.errors import EmptyDataError
 from pandas_ods_reader import read_ods
 from rich import print
 
+from helpers import excel_index
 from sorter import sort_key
 
 # TODO Try to avoid global keyword in the module
@@ -118,13 +119,16 @@ def create_inflection_table_df():
     print(f"{timeis()} [green]creating inflection table dataframe")
 
     global inflection_table_df
-    inflection_table_df = pd.read_excel(DECLENSIONS_AND_CONJUGATIONS_FILE, sheet_name="declensions", dtype=str)
+    inflection_table_df = pd.read_excel(
+        DECLENSIONS_AND_CONJUGATIONS_FILE,
+        sheet_name="declensions",
+        dtype=str,
+        keep_default_na=False)
 
     inflection_table_df = inflection_table_df.shift(periods=2)
 
-    inflection_table_df.columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ", "BA", "BB", "BC", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BK", "BL", "BM", "BN", "BO", "BP", "BQ", "BR", "BS", "BT", "BU", "BV", "BW", "BX", "BY", "BZ", "CA", "CB", "CC", "CD", "CE", "CF", "CG", "CH", "CI", "CJ", "CK", "CL", "CM", "CN", "CO", "CP", "CQ", "CR", "CS", "CT", "CU", "CV", "CW", "CX", "CY", "CZ", "DA", "DB", "DC", "DD", "DE", "DF", "DG", "DH", "DI", "DJ", "DK"]
-
-    inflection_table_df.fillna("", inplace=True)
+    col_length = len(inflection_table_df.columns)
+    inflection_table_df.columns = [excel_index(i) for i in range(col_length)]
 
 
 def test_inflection_pattern_changed(inflection_table_index: DataFrame) -> None:
