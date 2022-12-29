@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 
 import os
@@ -10,11 +9,10 @@ import pandas as pd
 
 from aksharamukha import transliterate
 from pandas import DataFrame
-from pandas.errors import EmptyDataError
 from pandas_ods_reader import read_ods
 from rich import print
 
-from helpers import excel_index
+from helpers import create_directories, data_frame_from_inflections_csv, excel_index, timeis
 from sorter import sort_key
 
 # TODO Try to avoid global keyword in the module
@@ -24,33 +22,6 @@ ALL_INFLECTIONS = Path("output/all inflections.csv")
 ALL_INFLECTIONS_TRANSLIT = Path("output/all inflections translit.csv")
 DECLENSIONS_AND_CONJUGATIONS_FILE = Path("declensions & conjugations.xlsx")
 DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
-
-
-def create_directories() -> None:
-    dirs = [
-        "output/",
-        "output/patterns/",
-        "output/pickle test/",
-        "output/inflections in table",
-        "output/inflections",
-        "output/inflections translit",
-    ]
-
-    for d in dirs:
-        os.makedirs(d, exist_ok=True)
-
-
-def data_frame_from_inflections_csv(file) -> pd.DataFrame:
-    try:
-        result = pd.read_csv(file, header=None, sep="\t")
-    except (FileNotFoundError, EmptyDataError):
-        result = pd.DataFrame(data={0: [], 1: []})
-    return result
-
-
-def timeis():
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    return f"[blue]{current_time}[/blue]"
 
 
 def convert_dpd_ods_to_csv():

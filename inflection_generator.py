@@ -6,6 +6,8 @@ import modules
 
 from rich import print
 
+from helpers import timeis
+
 
 def _get_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
@@ -15,7 +17,7 @@ def _get_argparser() -> argparse.ArgumentParser:
 
 
 def main(args: argparse.Namespace):
-    print(f"{modules.timeis()} ----------------------------------------")
+    print(f"{timeis()} ----------------------------------------")
 
     inflection_table_index = modules.create_inflection_table_index()
     modules.create_inflection_table_df()
@@ -43,7 +45,7 @@ def main(args: argparse.Namespace):
     modules.delete_unused_inflections()
     modules.delete_unused_inflections_translit()
 
-    print(f"{modules.timeis()} ----------------------------------------")
+    print(f"{timeis()} ----------------------------------------")
 
 
 if __name__ == "__main__":
