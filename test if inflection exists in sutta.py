@@ -21,6 +21,7 @@ def inflection_exists_in_sutta():
     make_list_of_all_inflections_no_meaning()
     make_list_of_all_inflections_no_eg1()
     make_list_of_all_inflections_no_eg2()
+    make_list_of_all_inflections_no_eg3()
     read_and_clean_sutta_text()
     make_comparison_table()
     html_find_and_replace()

@@ -37,7 +37,7 @@ sn22	s0303m.mul0.xml.original.txt	s0303a.att0.xml.original.txt	s0303t.tik0.xml.o
 ud1	s0503m.mul0.xml.original.txt	s0503a.att1.xml.original.txt	s0503a.att1.xml.original.txt
 snp39	s0505m.mul3.xml.original.txt	s0505a.att3.xml.original.txt	s0505a.att3.xml.original.txt
 sn42	s0304m.mul7.xml.original.txt	s0304a.att7.xml.original.txt	s0304t.tik7.xml.original.txt
-sbs-f	pali-only.txt	pali-only.txt	pali-only.txt
+sbs-f	pali-only-without-split.txt	pali-only-without-split.txt	pali-only-without-split.txt
 sbs-s	sandhi-split.txt	sandhi-split.txt	sandhi-split.txt
 sbs	sbs-canonical.txt	sbs-canonical.txt	sbs-canonical.txt
 2gr	bigrams.txt	bigrams.txt	bigrams.txt
