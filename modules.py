@@ -445,11 +445,11 @@ def generate_changed_inflected_forms():
 
 def _create_html_table(row: int):
 
-    indeclinables = ["abbrev", "abs", "ger", "ind", "inf", "prefix"]
-    conjugations = ["aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"]
-    declensions = [
+    indeclinables = {"abbrev", "abs", "ger", "ind", "inf", "prefix"}
+    conjugations = {"aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"}
+    declensions = {
         "adj", "card", "cs", "fem", "letter", "masc", "nt", "ordin",
-        "pp", "pron", "prp", "ptp", "root", "suffix", "ve"]
+        "pp", "pron", "prp", "ptp", "root", "suffix", "ve"}
 
     headword = dps_df.loc[row, "Pāli1"]
     print(f"{row}\t{headword}")
@@ -505,23 +505,21 @@ def _create_html_table(row: int):
             table = re.sub("Unnamed.+", "", table)
             table = re.sub("NaN", "", table)
 
-            # write header info
-
-            if inflection_table_index_dict[pattern] != "":
+            if inflection_table_index_dict[pattern]:
                 if pos in declensions:
                     heading = (
                         '<p class ="heading">'
                         f'<b>{headword_clean}</b> is <b>{pattern}</b> declension'
                         f' like <b>{inflection_table_index_dict[pattern]}</b>'
                         '</p>')
-                if pos in conjugations:
+                elif pos in conjugations:
                     heading = (
                         '<p class ="heading">'
                         f'<b>{headword_clean}</b> is <b>{pattern}</b> conjugation'
                         f' like <b>{inflection_table_index_dict[pattern]}</b>'
                         '</p>')
 
-            if inflection_table_index_dict[pattern] == "":
+            else:
                 if pos in declensions:
                     heading = (
                         '<p class ="heading">'
