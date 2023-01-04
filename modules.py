@@ -467,10 +467,10 @@ def _create_html_table(row: int):
 
     with open(f"output/html tables/{headword}.html", "w") as html_table:
         if stem == "-":
-            html_table.write(f"<p><b>{headword_clean}</b> is indeclinable")
+            html_table.write(f"<p><b>{headword_clean}</b> is indeclinable</p>")
 
         elif stem == "!":
-            html_table.write(f"<p>click on <b>{pattern}</b> for inflection table")
+            html_table.write(f"<p>click on <b>{pattern}</b> for inflection table</p>")
 
         else:
             df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
@@ -531,7 +531,7 @@ def _create_html_table(row: int):
                         f'<b>{headword_clean}</b> is <b>{pattern}</b> irregular conjugation'
                         '</p>')
 
-            html = heading + table
+            html = heading + '\n' + table
             html_table.write(html)
 
 
