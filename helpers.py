@@ -11,11 +11,13 @@ from pandas.errors import EmptyDataError
 def create_directories() -> None:
     dirs = [
         "output/",
+        "output/html tables/",
+        "output/html suttas/",
+        "output/inflections in table/",
+        "output/inflections translit/",
+        "output/inflections/",
         "output/patterns/",
         "output/pickle test/",
-        "output/inflections in table",
-        "output/inflections",
-        "output/inflections translit",
     ]
 
     for d in dirs:

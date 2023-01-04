@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# coding: utf-8 
+# coding: utf-8
 
 # FIXME It is common to avoid whitespaces in names of modules, better to use underscore
 

@@ -41,3 +41,7 @@ python 'inflection generator.py'
 
 At first time utility should be ran mulitple times until output will not
 changes.
+
+## TODO
+
+- Fix func args in `test*.py`

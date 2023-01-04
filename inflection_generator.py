@@ -2,9 +2,9 @@
 
 import argparse
 
-import modules
+from rich import print  # pylint: disable=redefined-builtin
 
-from rich import print
+import modules
 
 from helpers import timeis
 
@@ -20,12 +20,15 @@ def main(args: argparse.Namespace):
     print(f"{timeis()} ----------------------------------------")
 
     inflection_table_index = modules.create_inflection_table_index()
-    modules.create_inflection_table_df()
-    modules.test_inflection_pattern_changed(inflection_table_index)
+    inflection_table = modules.create_inflection_table_df()
+
+    modules.test_inflection_pattern_changed(inflection_table_index, inflection_table)
+
     if args.kind == "DPS":
         modules.create_dps_df()
     elif args.kind == "SBS":
         modules.create_sbs_df(args.class_file_name)
+
     modules.test_for_missing_stem_and_pattern()
     modules.test_for_wrong_patterns(inflection_table_index)
     modules.test_for_differences_in_stem_and_pattern()
@@ -49,7 +52,7 @@ def main(args: argparse.Namespace):
 
 
 if __name__ == "__main__":
-    args = _get_argparser().parse_args()
-    # FIXME
+    ARGS = _get_argparser().parse_args()
+    # FIXME Put in a proper place
     modules.AbbreviationTranslater('cyrl')
-    main(args)
+    main(ARGS)
