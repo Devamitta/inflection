@@ -31,3 +31,7 @@ class AbbreviationTranslator:
             val = self._abbrev_dict[key]
             string = string.replace(key, val)
         return string
+
+
+def translate_table(data: pandas.DataFrame, script='') -> pandas.DataFrame:
+    ...

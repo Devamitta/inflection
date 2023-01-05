@@ -21,12 +21,15 @@ Install dependencies:
 pip3 install -r requirements.txt
 ```
 
-Directory with CSV files of dictionary may be set with `DPS_DIR` environment
+Directory with the dictionary sources may be set with `DPS_DIR` environment
 variable:
 
 ```shell
-export DPS_DIR='/PATH/TO/FILES/'
+export DPS_DIR='/PATH/TO/DIR/'
 ```
+
+`DPS_DIR` directory expected to contain `spreadsheets` subdirectory with CSV
+files.
 
 Run generator with command:
 

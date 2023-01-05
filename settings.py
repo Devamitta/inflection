@@ -4,7 +4,8 @@ from pathlib import Path
 
 # Source paths
 DECLENSIONS_AND_CONJUGATIONS_FILE = Path("declensions & conjugations.xlsx")
-DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
+DPS_DIR = Path(os.getenv("DPS_DIR", "../"))
+
 
 # Output paths
 OUTPUT_DIR = Path("output")

@@ -12,6 +12,7 @@ from pandas import DataFrame
 from pandas_ods_reader import read_ods
 from rich import print
 
+from abbreviation_translator import translate_table
 from helpers import create_directories, data_frame_from_inflections_csv, excel_index, timeis
 from sorter import sort_key
 
@@ -21,12 +22,17 @@ import settings
 # TODO Better to use paths without spaces (see also create_directories())
 # FIXME Too long, split on modules
 
+# Globals
+dps_df = None
+dps_df_length = None
+headwords_list = None
+
 
 def convert_dpd_ods_to_csv():
     print(f"{timeis()} [yellow]converting dpd.ods to csv")
     print(f"{timeis()} ----------------------------------------")
 
-    ods_file = "../dpd.ods"
+    ods_file = settings.DPS_DIR / "dpd.ods"
     sheet_index = 1
     df = read_ods(ods_file, sheet_index, headers=False)
 
@@ -39,7 +45,7 @@ def convert_dpd_ods_to_csv():
     df.reset_index(drop=True, inplace=True)  # resets index to 0
     df = df.replace(to_replace=r"\.0", value="", regex=True)  # removes all flaots .0
 
-    df.to_csv("../csvs/dpd.csv", index=False, sep="\t", encoding="utf-8")
+    df.to_csv(settings.DPS_DIR / "csvs" / "dpd.csv", index=False, sep="\t", encoding="utf-8")
 
 
 def create_inflection_table_index() -> DataFrame:
@@ -150,7 +156,7 @@ def create_dps_df():
 
     global dps_df
 
-    dps_df = pd.read_csv(settings.DPS_DIR / "dps-full.csv", sep="\t", dtype=str)
+    dps_df = pd.read_csv(settings.DPS_DIR / "spreadsheets" / "dps-full.csv", sep="\t", dtype=str)
     dps_df.fillna("", inplace=True)
 
     # dps_df.sort_values(by = ['Pāli1'], ignore_index=True, inplace=True, key=lambda x: x.map(sort_key))
@@ -169,7 +175,8 @@ def create_sbs_df(class_file_name: str):
 
     global dps_df
 
-    dps_df = pd.read_csv(f"../word-frequency/csv-for-examples/{class_file_name}-class.csv", sep="\t", dtype=str)
+    path = settings.DPS_DIR / "word-frequency" / "csv-for-examples" / f"{class_file_name}-class.csv"
+    dps_df = pd.read_csv(path, sep="\t", dtype=str)
     dps_df.fillna("", inplace=True)
 
     global dps_df_length
@@ -472,7 +479,7 @@ def _create_html_table(row: int):
                 column_list.append(i)
 
             df.drop(df.columns[column_list], axis=1, inplace=True)
-            # TODO df.columns = translate_header(df.columns)
+            #df = translate_table(df)
             table = df.to_html(escape=False)
             table = re.sub("Unnamed.+", "", table)
             table = re.sub("NaN", "", table)
