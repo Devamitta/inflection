@@ -479,7 +479,7 @@ def _create_html_table(row: int):
                 column_list.append(i)
 
             df.drop(df.columns[column_list], axis=1, inplace=True)
-            #df = translate_table(df)
+            df = translate_table(df)
             table = df.to_html(escape=False)
             table = re.sub("Unnamed.+", "", table)
             table = re.sub("NaN", "", table)

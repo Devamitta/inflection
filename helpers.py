@@ -1,3 +1,4 @@
+import enum
 import os
 import string
 
@@ -8,6 +9,11 @@ import pandas
 from pandas.errors import EmptyDataError
 
 import settings
+
+
+class Kind(enum.Enum):
+    DPS = enum.auto()
+    SBS = enum.auto()
 
 
 def create_directories() -> None:

@@ -6,12 +6,12 @@ from rich import print  # pylint: disable=redefined-builtin
 
 import modules
 
-from helpers import timeis
+from helpers import Kind, timeis
 
 
 def _get_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--kind", choices=["DPS", "SBS"])
+    parser.add_argument("--kind", choices=[i.name for i in Kind])
     parser.add_argument("--class-file-name", type=str, default='1')
     return parser
 
@@ -24,9 +24,11 @@ def main(args: argparse.Namespace):
 
     modules.test_inflection_pattern_changed(inflection_table_index, inflection_table)
 
-    if args.kind == "DPS":
+    kind = Kind[args.kind]
+
+    if kind == Kind.DPS:
         modules.create_dps_df()
-    elif args.kind == "SBS":
+    elif kind == Kind.SBS:
         modules.create_sbs_df(args.class_file_name)
 
     modules.test_for_missing_stem_and_pattern()
