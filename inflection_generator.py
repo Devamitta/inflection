@@ -27,22 +27,22 @@ def main(args: argparse.Namespace):
     kind = Kind[args.kind]
 
     if kind == Kind.DPS:
-        modules.create_dps_df()
+        data = modules.create_dps_df()
     elif kind == Kind.SBS:
-        modules.create_sbs_df(args.class_file_name)
+        data = modules.create_sbs_df(args.class_file_name)
 
-    modules.test_for_missing_stem_and_pattern()
-    modules.test_for_wrong_patterns(inflection_table_index)
-    modules.test_for_differences_in_stem_and_pattern()
-    modules.test_if_inflections_exist_dps()
-    modules.test_if_inflections_exist_suttas()  # nu
-    modules.generate_changed_inflected_forms()
+    modules.test_for_missing_stem_and_pattern(data)
+    modules.test_for_wrong_patterns(inflection_table_index, data)
+    modules.test_for_differences_in_stem_and_pattern(data)
+    modules.test_if_inflections_exist_dps(data)
+    modules.test_if_inflections_exist_suttas(data)  # nu
+    modules.generate_changed_inflected_forms(data)
     modules.combine_old_and_new_dataframes()
 
-    table_generator = modules.InflectionTableGenerator(kind)
+    table_generator = modules.InflectionTableGenerator(data, kind)
     table_generator.generate_html()
 
-    modules.generate_inflections_in_table_list()
+    modules.generate_inflections_in_table_list(data)
     modules.transcribe_new_inflections()
     modules.combine_old_and_new_translit_dataframes()
     modules.export_translit_to_pickle()

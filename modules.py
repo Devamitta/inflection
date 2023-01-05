@@ -20,8 +20,6 @@ import settings
 # FIXME Too long, split on modules
 
 # Globals
-dps_df = None
-dps_df_length = None
 headwords_list = None
 inflection_table_index_dict = None
 
@@ -148,44 +146,34 @@ def test_inflection_pattern_changed(inflection_table_index: DataFrame, inflectio
         print(f"the following patterns have changes and will be generated\n{pattern_changed}")
 
 
-def create_dps_df():
+def create_dps_df() -> pandas.DataFrame:
     print("~" * 40)
     print("create dps_df")
 
-    global dps_df
-
     dps_df = pd.read_csv(settings.DPS_DIR / "spreadsheets" / "dps-full.csv", sep="\t", dtype=str)
-    dps_df.fillna("", inplace=True)
-
-    # dps_df.sort_values(by = ['Pāli1'], ignore_index=True, inplace=True, key=lambda x: x.map(sort_key))
-
-    global dps_df_length
-
-    dps_df_length = dps_df.shape[0]
+    dps_df.fillna("", inplace=True)  # FIXME Use read_csv option
 
     global headwords_list
     headwords_list = dps_df["Pāli1"].tolist()
 
+    return dps_df
 
-def create_sbs_df(class_file_name: str):
+
+def create_sbs_df(class_file_name: str) -> pandas.DataFrame:
     print("~" * 40)
     print("create sbs_df")
 
-    global dps_df
-
     path = settings.DPS_DIR / "word-frequency" / "csv-for-examples" / f"{class_file_name}-class.csv"
     dps_df = pd.read_csv(path, sep="\t", dtype=str)
-    dps_df.fillna("", inplace=True)
-
-    global dps_df_length
-
-    dps_df_length = dps_df.shape[0]
+    dps_df.fillna("", inplace=True)  # FIXME Use read_csv option
 
     global headwords_list
     headwords_list = dps_df["Pāli1"].tolist()
 
+    return dps_df
 
-def test_for_missing_stem_and_pattern():
+
+def test_for_missing_stem_and_pattern(dps_df: pandas.DataFrame):
     print("~" * 40)
     print("test for missing stems and patterns:")
 
@@ -193,7 +181,7 @@ def test_for_missing_stem_and_pattern():
     missing_stem_string = ""
     missing_pattern_string = ""
 
-    for row in range(dps_df_length):
+    for row in range(dps_df.shape[0]):
         headword = dps_df.loc[row, "Pāli1"]
         stem = dps_df.loc[row, "Stem"]
         pattern = dps_df.loc[row, "Pattern"]
@@ -215,7 +203,7 @@ def test_for_missing_stem_and_pattern():
         print("no stem & pattern errors found")
 
 
-def test_for_wrong_patterns(inflection_table_index):
+def test_for_wrong_patterns(inflection_table_index: pandas.DataFrame, dps_df: pandas.DataFrame) -> None:
 
     print("~" * 40)
     print("testing for wrong patterns:")
@@ -226,7 +214,7 @@ def test_for_wrong_patterns(inflection_table_index):
 
     wrong_patten_string = ""
 
-    for row in range(dps_df_length):
+    for row in range(dps_df.shape[0]):
         headword =  dps_df.loc[row, "Pāli1"]
         stem = dps_df.loc[row, "Stem"]
         pattern = dps_df.loc[row, "Pattern"]
@@ -251,7 +239,7 @@ def test_for_wrong_patterns(inflection_table_index):
         print("no wrong patterns found")
 
 
-def test_for_differences_in_stem_and_pattern():
+def test_for_differences_in_stem_and_pattern(dps_df: pandas.DataFrame) -> None:
     print("~" * 40)
     print("testing for changes in stem and pattern:")
 
@@ -262,7 +250,7 @@ def test_for_differences_in_stem_and_pattern():
     added_string = ""
     changed_string = ""
 
-    for row in range(dps_df_length): #dps_df_length
+    for row in range(dps_df.shape[0]):
         headword = dps_df.loc[row, "Pāli1"]
         stem = dps_df.loc[row, "Stem"]
         pattern = dps_df.loc[row, "Pattern"]
@@ -302,8 +290,7 @@ def test_for_differences_in_stem_and_pattern():
         print("no headwords stems or patterns changed")
 
 
-def test_if_inflections_exist_suttas():
-
+def test_if_inflections_exist_suttas(dps_df: DataFrame) -> None:
     global inflections_not_exist
     inflections_not_exist = []
     inflections_not_exists_string = ""
@@ -311,7 +298,7 @@ def test_if_inflections_exist_suttas():
     print("~"*40)
     print("test if inflections exists")
 
-    for row in range(dps_df_length): #dps_df_length
+    for row in range(dps_df.shape[0]):
         headword = dps_df.loc[row, "Pāli1"]
 
         try:
@@ -332,7 +319,7 @@ def test_if_inflections_exist_suttas():
         print("no missing inflection files")
 
 
-def test_if_inflections_exist_dps():
+def test_if_inflections_exist_dps(dps_df: pandas.DataFrame):
     global inflections_not_exist
     inflections_not_exist = []
     inflections_not_exists_string = ""
@@ -340,7 +327,7 @@ def test_if_inflections_exist_dps():
     print("~"*40)
     print("test if inflections exists")
 
-    for row in range(dps_df_length): #dps_df_length
+    for row in range(dps_df.shape[0]):
         headword = dps_df.loc[row, "Pāli1"]
 
         if not Path(f"output/inflections translit/{headword}").is_file():
@@ -354,15 +341,14 @@ def test_if_inflections_exist_dps():
         print("no missing inflection files")
 
 
-def generate_changed_inflected_forms():
-
+def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
     print("~" * 40)
     print("generating changed inflected forms:")
 
     global new_inflections_dict
     new_inflections_dict = {}
 
-    for row in range(dps_df_length): #dps_df_length
+    for row in range(dps_df.shape[0]):
         headword = dps_df.loc[row, "Pāli1"]
         headword_clean = re.sub(" \d*$", "", headword)
         stem = dps_df.loc[row, "Stem"]
@@ -421,7 +407,8 @@ def generate_changed_inflected_forms():
 
 
 class InflectionTableGenerator:
-    def __init__(self, kind: Kind) -> None:
+    def __init__(self, data: pandas.DataFrame, kind: Kind) -> None:
+        self._data = data
         self._kind = kind
         self._translator = AbbreviationTranslator(script='cyrl')
 
@@ -436,19 +423,19 @@ class InflectionTableGenerator:
             "adj", "card", "cs", "fem", "letter", "masc", "nt", "ordin",
             "pp", "pron", "prp", "ptp", "root", "suffix", "ve"}
 
-        headword = dps_df.loc[row, "Pāli1"]
+        headword = self._data.loc[row, "Pāli1"]
         print(f"{row}\t{headword}")
 
         headword_clean = re.sub(r" \d*$", "", headword)
 
-        stem = dps_df.loc[row, "Stem"]
+        stem = self._data.loc[row, "Stem"]
         if re.match("!.+", stem) is not None:  # stem contains "!.+" - must get inflection table but no synonsyms
             stem = re.sub("!", "", stem)
         if stem == "*":
             stem = ""
 
-        pattern = dps_df.loc[row, "Pattern"]
-        pos = dps_df.loc[row, "POS"]
+        pattern = self._data.loc[row, "Pattern"]
+        pos = self._data.loc[row, "POS"]
 
         with open(settings.HTML_TABLES_DIR / f"{headword}.html", "w") as html_table:
             if stem == "-":
@@ -527,17 +514,15 @@ class InflectionTableGenerator:
         print("generating html inflection tables")
         print("~" * 40)
 
-        for row in range(dps_df_length):
-            headword = dps_df.loc[row, "Pāli1"]
-            pattern = dps_df.loc[row, "Pattern"]
-            # metadata = dps_df.loc[row, "Metadata"]
-            meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
+        for row in range(self._data.shape[0]):
+            headword = self._data.loc[row, "Pāli1"]
+            pattern = self._data.loc[row, "Pattern"]
 
             if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
                 self._create_html_table(row)
 
 
-def generate_inflections_in_table_list():
+def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
     print(f"{timeis()} [green]generating inflection lists")
 
     create_directories()
@@ -545,6 +530,8 @@ def generate_inflections_in_table_list():
     indeclinables = ["abbrev", "abs", "ger", "ind", "inf", "prefix", "suffix", "cs", "letter"]
     conjugations = ["aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"]
     declensions = ["adj", "card", "fem", "letter", "masc", "nt", "ordin", "pp", "pron", "prp", "ptp", "root", "suffix", "ve"]
+
+    dps_df_length = dps_df.shape[0]
 
     for row in range(dps_df_length):
         headword = dps_df.loc[row, "Pāli1"]
@@ -804,9 +791,7 @@ def make_list_of_all_inflections():
     all_inflections_set = set(dict.fromkeys(all_inflections_list))
 
 
-def make_list_of_all_inflections_no_meaning():
-
-    # higlight
+def make_list_of_all_inflections_no_meaning(dps_df: pandas.DataFrame) -> None:
 
     print("~" * 40)
     print("making list of all inflections with no meaning")
@@ -846,10 +831,7 @@ def make_list_of_all_inflections_no_meaning():
     no_meaning_list = list(dict.fromkeys(no_meaning_list))
 
 
-def make_list_of_all_inflections_no_eg1():
-
-    # red
-
+def make_list_of_all_inflections_no_eg1(dps_df: pandas.DataFrame) -> None:
     print("~" * 40)
     print("making list of all inflections with no eg1")
     print("~" * 40)
@@ -883,8 +865,7 @@ def make_list_of_all_inflections_no_eg1():
     no_eg1_list = list(dict.fromkeys(no_eg1_list))
 
 
-def make_list_of_all_inflections_only_in_class():
-    # red
+def make_list_of_all_inflections_only_in_class(dps_df: pandas.DataFrame) -> None:
     print("~" * 40)
     print("making list of all inflections with sbs")
     print("~" * 40)
@@ -918,8 +899,7 @@ def make_list_of_all_inflections_only_in_class():
     no_eg1_list = list(dict.fromkeys(no_eg1_list))
 
 
-def make_list_of_all_inflections_already_in():
-    # green
+def make_list_of_all_inflections_already_in(dps_df: pandas.DataFrame) -> None:
     print("~" * 40)
     print("making list of all inflections with sbs")
     print("~" * 40)
@@ -963,8 +943,7 @@ def make_list_of_all_inflections_already_in():
     no_eg2_list = list(dict.fromkeys(no_eg2_list))
 
 
-def make_list_of_all_inflections_no_eg2():
-    # green
+def make_list_of_all_inflections_no_eg2(dps_df: pandas.DataFrame) -> None:
     print("~" * 40)
     print("making list of all inflections with no eg2")
     print("~" * 40)
@@ -994,10 +973,7 @@ def make_list_of_all_inflections_no_eg2():
     no_eg2_list = list(dict.fromkeys(no_eg2_list))
 
 
-def make_list_of_all_inflections_potential(class_file_name: str):
-
-    # blue
-
+def make_list_of_all_inflections_potential(dps_df: pandas.DataFrame, class_file_name: str) -> None:
     print("~" * 40)
     print("making list of all inflections with sbs")
     print("~" * 40)
@@ -1017,11 +993,11 @@ def make_list_of_all_inflections_potential(class_file_name: str):
 
     no_eg3_string = ""
     all_inflections_length = all_inflections_df.shape[0]
-    for row in range (all_inflections_length):
+    for row in range(all_inflections_length):
         headword = all_inflections_df.iloc[row, 0]
         inflections = all_inflections_df.iloc[row, 1]
 
-        if row %5000 == 0:
+        if row % 5000 == 0:
             print(f"{row} {headword}")
 
         if headword in no_eg3_headword_list:
