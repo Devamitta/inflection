@@ -15,14 +15,11 @@ from rich import print
 from helpers import create_directories, data_frame_from_inflections_csv, excel_index, timeis
 from sorter import sort_key
 
+import settings
+
 # TODO Try to avoid global keyword in the module
 # TODO Better to use paths without spaces (see also create_directories())
 # FIXME Too long, split on modules
-
-ALL_INFLECTIONS = Path("output/all inflections.csv")
-ALL_INFLECTIONS_TRANSLIT = Path("output/all inflections translit.csv")
-DECLENSIONS_AND_CONJUGATIONS_FILE = Path("declensions & conjugations.xlsx")
-DPS_DIR = Path(os.getenv("DPS_DIR", "../spreadsheets/"))
 
 
 def convert_dpd_ods_to_csv():
@@ -47,7 +44,7 @@ def convert_dpd_ods_to_csv():
 
 class AbbreviationTranslater:
     # TODO Move to module
-    def __init__(self, script: str, declensions_file=DECLENSIONS_AND_CONJUGATIONS_FILE):
+    def __init__(self, script: str, declensions_file=settings.DECLENSIONS_AND_CONJUGATIONS_FILE):
         abbrev_frame = pandas.read_excel(
             declensions_file,
             sheet_name="abbreviations",
@@ -75,7 +72,7 @@ def create_inflection_table_index() -> DataFrame:
     print(f"{timeis()} ----------------------------------------")
     print(f"{timeis()} [green]creating inflection table index")
 
-    inflection_table_index_df = pd.read_excel(DECLENSIONS_AND_CONJUGATIONS_FILE, sheet_name="index", dtype=str)
+    inflection_table_index_df = pd.read_excel(settings.DECLENSIONS_AND_CONJUGATIONS_FILE, sheet_name="index", dtype=str)
 
     inflection_table_index_df.fillna("", inplace=True)
 
@@ -92,7 +89,7 @@ def create_inflection_table_df() -> pandas.DataFrame:
     print(f"{timeis()} [green]creating inflection table dataframe")
 
     inflection_table_df = pd.read_excel(
-        DECLENSIONS_AND_CONJUGATIONS_FILE,
+        settings.DECLENSIONS_AND_CONJUGATIONS_FILE,
         sheet_name="declensions",
         dtype=str,
         keep_default_na=False)
@@ -178,7 +175,7 @@ def create_dps_df():
 
     global dps_df
 
-    dps_df = pd.read_csv(DPS_DIR / "dps-full.csv", sep="\t", dtype=str)
+    dps_df = pd.read_csv(settings.DPS_DIR / "dps-full.csv", sep="\t", dtype=str)
     dps_df.fillna("", inplace=True)
 
     # dps_df.sort_values(by = ['Pāli1'], ignore_index=True, inplace=True, key=lambda x: x.map(sort_key))
@@ -465,7 +462,7 @@ def _create_html_table(row: int):
     pattern = dps_df.loc[row, "Pattern"]
     pos = dps_df.loc[row, "POS"]
 
-    with open(f"output/html tables/{headword}.html", "w") as html_table:
+    with open(settings.HTML_TABLES_DIR / f"{headword}.html", "w") as html_table:
         if stem == "-":
             html_table.write(f"<p><b>{headword_clean}</b> is indeclinable</p>")
 
@@ -648,7 +645,7 @@ def combine_old_and_new_translit_dataframes():
     diff = pd.DataFrame()
 
     if new_inflections_dict != {}:
-        all_inflections_translit = data_frame_from_inflections_csv(ALL_INFLECTIONS_TRANSLIT)
+        all_inflections_translit = data_frame_from_inflections_csv(settings.ALL_INFLECTIONS_TRANSLIT_FILE)
 
         new_inflections_translit = pd.read_csv("output/new inflections translit.csv", header=None, sep="\t")
 
@@ -674,11 +671,11 @@ def combine_old_and_new_translit_dataframes():
         # drop columns and write to csv
 
         diff.drop(columns=["1_y", "exists"], inplace=True)
-        diff.to_csv(ALL_INFLECTIONS_TRANSLIT, sep="\t", index=None, header=False)
-        print("all inflections translit.csv updated")
+        diff.to_csv(settings.ALL_INFLECTIONS_TRANSLIT_FILE, sep="\t", index=None, header=False)
+        print(f"{settings.ALL_INFLECTIONS_TRANSLIT_FILE} updated")
 
     else:
-        print("all inflections translit.csv unchanged")
+        print(f"{settings.ALL_INFLECTIONS_TRANSLIT_FILE} unchanged")
 
 
 def export_translit_to_pickle():
@@ -726,7 +723,7 @@ def combine_old_and_new_dataframes():
     diff = pd.DataFrame()
 
     if new_inflections_dict != {}:
-        all_inflections_df = data_frame_from_inflections_csv(ALL_INFLECTIONS)
+        all_inflections_df = data_frame_from_inflections_csv(settings.ALL_INFLECTIONS_FILE)
 
         new_inflections_df = pd.read_csv("output/new inflections.csv", header=None, sep="\t")
 
@@ -753,7 +750,7 @@ def combine_old_and_new_dataframes():
 
         diff.drop(columns=["1_y", "exists"], inplace=True)
 
-        diff.to_csv(ALL_INFLECTIONS, sep="\t", index=None, header=False)
+        diff.to_csv(settings.ALL_INFLECTIONS_FILE, sep="\t", index=None, header=False)
 
         print("all inflections.csv updated")
 
@@ -795,7 +792,7 @@ def make_list_of_all_inflections():
     print("creating all inflections df")
 
     global all_inflections_df
-    all_inflections_df = pd.read_csv(ALL_INFLECTIONS, header=None, sep="\t")
+    all_inflections_df = pd.read_csv(settings.ALL_INFLECTIONS_FILE, header=None, sep="\t")
 
     print("~" * 40)
     print("making master list of all inflections")
@@ -1408,12 +1405,12 @@ def delete_unused_inflection_patterns(inflection_table_index):
 def delete_unused_html_tables():
     print(f"{timeis()} [green]deleting unused html files ")
 
-    for root, dirs, files in os.walk("output/html tables", topdown=True):
+    for root, dirs, files in os.walk(settings.HTML_TABLES_DIR, topdown=True):
         for file in files:
             file_clean = re.sub(".html", "", file)
             if file_clean not in headwords_list:
                 try:
-                    os.remove(f"output/html tables/{file}")
+                    os.remove(settings.HTML_TABLES_DIR / file)
                 except FileNotFoundError:
                     print(f"{timeis()} [red]{file} not found")
                 else:

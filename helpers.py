@@ -7,11 +7,13 @@ import pandas
 
 from pandas.errors import EmptyDataError
 
+import settings
+
 
 def create_directories() -> None:
     dirs = [
-        "output/",
-        "output/html tables/",
+        settings.OUTPUT_DIR,
+        settings.HTML_TABLES_DIR,
         "output/html suttas/",
         "output/inflections in table/",
         "output/inflections translit/",
@@ -21,7 +23,7 @@ def create_directories() -> None:
     ]
 
     for d in dirs:
-        os.makedirs(d, exist_ok=True)
+        os.makedirs(str(d), exist_ok=True)
 
 
 def data_frame_from_inflections_csv(file) -> pandas.DataFrame:
