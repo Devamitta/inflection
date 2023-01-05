@@ -42,31 +42,6 @@ def convert_dpd_ods_to_csv():
     df.to_csv("../csvs/dpd.csv", index=False, sep="\t", encoding="utf-8")
 
 
-class AbbreviationTranslater:
-    # TODO Move to module
-    def __init__(self, script: str, declensions_file=settings.DECLENSIONS_AND_CONJUGATIONS_FILE):
-        abbrev_frame = pandas.read_excel(
-            declensions_file,
-            sheet_name="abbreviations",
-            dtype=str,
-            keep_default_na=True,)
-
-        if script not in abbrev_frame:
-            raise RuntimeError(f'No script variant {script} for abbreviations in {declensions_file}')
-
-        # Filter rows with empty trasnslate cell
-        abbrev_frame = abbrev_frame[~abbrev_frame['cyrl'].isnull()]
-
-        abbreviations = abbrev_frame['name']
-        translates = abbrev_frame[script]
-
-        self._abbrev_dict = dict(zip(abbreviations, translates))
-        print(self._abbrev_dict)
-
-    def get(self, key: str, default=None) -> str:
-        return self._abbrev_dict.get(key, default)
-
-
 def create_inflection_table_index() -> DataFrame:
     print(f"{timeis()} [yellow]inflection generator")
     print(f"{timeis()} ----------------------------------------")
@@ -479,7 +454,6 @@ def _create_html_table(row: int):
 
             for rows in range(0, df_rows):
                 for columns in range(0, df_columns, 2):  # 1 to 0
-
                     html_cell = df.iloc[rows, columns]
                     syn_cell = df.iloc[rows, columns]
 
@@ -498,6 +472,7 @@ def _create_html_table(row: int):
                 column_list.append(i)
 
             df.drop(df.columns[column_list], axis=1, inplace=True)
+            # TODO df.columns = translate_header(df.columns)
             table = df.to_html(escape=False)
             table = re.sub("Unnamed.+", "", table)
             table = re.sub("NaN", "", table)

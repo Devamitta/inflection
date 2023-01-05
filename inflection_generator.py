@@ -53,6 +53,4 @@ def main(args: argparse.Namespace):
 
 if __name__ == "__main__":
     ARGS = _get_argparser().parse_args()
-    # FIXME Put in a proper place
-    modules.AbbreviationTranslater('cyrl')
     main(ARGS)
