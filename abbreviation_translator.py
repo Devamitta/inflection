@@ -17,7 +17,7 @@ class AbbreviationTranslator:
         if script not in abbrev_frame:
             raise RuntimeError(f"No script variant {script} for abbreviations in {declensions_file}")
 
-        # Filter rows with empty trasnslate cell
+        # Filter rows with empty translation cell
         abbrev_frame = abbrev_frame[~abbrev_frame[script].isnull()]
 
         abbreviations = abbrev_frame["name"]
@@ -34,9 +34,3 @@ class AbbreviationTranslator:
             val = self._abbrev_dict[key]
             string = string.replace(key, val)
         return string
-
-
-def translate_table(data: pandas.DataFrame, kind: Kind):
-    if kind is Kind.DPS:
-        translator = AbbreviationTranslator(script='cyrl')
-        data.columns = [translator.translate_string(col) for col in data.columns]

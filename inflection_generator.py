@@ -38,7 +38,10 @@ def main(args: argparse.Namespace):
     modules.test_if_inflections_exist_suttas()  # nu
     modules.generate_changed_inflected_forms()
     modules.combine_old_and_new_dataframes()
-    modules.generate_html_inflection_table(kind)
+
+    table_generator = modules.InflectionTableGenerator(kind)
+    table_generator.generate_html()
+
     modules.generate_inflections_in_table_list()
     modules.transcribe_new_inflections()
     modules.combine_old_and_new_translit_dataframes()

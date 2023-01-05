@@ -10,7 +10,7 @@ from rich import print
 import pandas
 import pandas as pd
 
-from abbreviation_translator import translate_table
+from abbreviation_translator import AbbreviationTranslator
 from helpers import Kind, create_directories, data_frame_from_inflections_csv, excel_index, timeis
 from sorter import sort_key
 import settings
@@ -23,6 +23,7 @@ import settings
 dps_df = None
 dps_df_length = None
 headwords_list = None
+inflection_table_index_dict = None
 
 
 def convert_dpd_ods_to_csv():
@@ -419,113 +420,121 @@ def generate_changed_inflected_forms():
         print("no new inflections")
 
 
-def _create_html_table(row: int, kind: Kind):
+class InflectionTableGenerator:
+    def __init__(self, kind: Kind) -> None:
+        self._kind = kind
+        self._translator = AbbreviationTranslator(script='cyrl')
 
-    indeclinables = {"abbrev", "abs", "ger", "ind", "inf", "prefix"}
-    conjugations = {"aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"}
-    declensions = {
-        "adj", "card", "cs", "fem", "letter", "masc", "nt", "ordin",
-        "pp", "pron", "prp", "ptp", "root", "suffix", "ve"}
+    def translate_table(self, data: pandas.DataFrame) -> None:
+        if self._kind is Kind.DPS:
+            data.columns = [self._translator.translate_string(col) for col in data.columns]
 
-    headword = dps_df.loc[row, "Pāli1"]
-    print(f"{row}\t{headword}")
+    def _create_html_table(self, row: int):
+        indeclinables = {"abbrev", "abs", "ger", "ind", "inf", "prefix"}
+        conjugations = {"aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"}
+        declensions = {
+            "adj", "card", "cs", "fem", "letter", "masc", "nt", "ordin",
+            "pp", "pron", "prp", "ptp", "root", "suffix", "ve"}
 
-    headword_clean = re.sub(r" \d*$", "", headword)
+        headword = dps_df.loc[row, "Pāli1"]
+        print(f"{row}\t{headword}")
 
-    stem = dps_df.loc[row, "Stem"]
-    if re.match("!.+", stem) is not None:  # stem contains "!.+" - must get inflection table but no synonsyms
-        stem = re.sub("!", "", stem)
-    if stem == "*":
-        stem = ""
+        headword_clean = re.sub(r" \d*$", "", headword)
 
-    pattern = dps_df.loc[row, "Pattern"]
-    pos = dps_df.loc[row, "POS"]
+        stem = dps_df.loc[row, "Stem"]
+        if re.match("!.+", stem) is not None:  # stem contains "!.+" - must get inflection table but no synonsyms
+            stem = re.sub("!", "", stem)
+        if stem == "*":
+            stem = ""
 
-    with open(settings.HTML_TABLES_DIR / f"{headword}.html", "w") as html_table:
-        if stem == "-":
-            html_table.write(f"<p><b>{headword_clean}</b> is indeclinable</p>")
+        pattern = dps_df.loc[row, "Pattern"]
+        pos = dps_df.loc[row, "POS"]
 
-        elif stem == "!":
-            html_table.write(f"<p>click on <b>{pattern}</b> for inflection table</p>")
+        with open(settings.HTML_TABLES_DIR / f"{headword}.html", "w") as html_table:
+            if stem == "-":
+                html_table.write(f"<p><b>{headword_clean}</b> is indeclinable</p>")
 
-        else:
-            df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
-            df.fillna("", inplace=True, axis=0)
-            df.rename_axis(None, inplace=True)  # delete pattern name
-
-            df_rows = df.shape[0]
-            df_columns = df.shape[1]
-
-            for rows in range(0, df_rows):
-                for columns in range(0, df_columns, 2):  # 1 to 0
-                    html_cell = df.iloc[rows, columns]
-                    syn_cell = df.iloc[rows, columns]
-
-                    html_cell = re.sub(r"(.+)", "<b>\\1</b>", html_cell)  # add bold
-                    html_cell = re.sub(r"(.+)", f"{stem}\\1", html_cell)  # add stem
-                    html_cell = re.sub(r"\n", "<br>", html_cell)  # add line breaks
-                    df.iloc[rows, columns] = html_cell
-
-                    syn_cell = re.sub(r"(.+)", f"{stem}\\1", syn_cell)
-                    search_string = re.compile("\n", re.M)
-                    replace_string = " "
-                    matches = re.sub(search_string, replace_string, syn_cell)
-
-            column_list = []
-            for i in range(1, df_columns, 2):
-                column_list.append(i)
-
-            df.drop(df.columns[column_list], axis=1, inplace=True)
-            translate_table(df, kind)
-            table = df.to_html(escape=False)
-            table = re.sub("Unnamed.+", "", table)
-            table = re.sub("NaN", "", table)
-
-            if inflection_table_index_dict[pattern]:
-                if pos in declensions:
-                    heading = (
-                        '<p class ="heading">'
-                        f'<b>{headword_clean}</b> is <b>{pattern}</b> declension'
-                        f' like <b>{inflection_table_index_dict[pattern]}</b>'
-                        '</p>')
-                elif pos in conjugations:
-                    heading = (
-                        '<p class ="heading">'
-                        f'<b>{headword_clean}</b> is <b>{pattern}</b> conjugation'
-                        f' like <b>{inflection_table_index_dict[pattern]}</b>'
-                        '</p>')
+            elif stem == "!":
+                html_table.write(f"<p>click on <b>{pattern}</b> for inflection table</p>")
 
             else:
-                if pos in declensions:
-                    heading = (
-                        '<p class ="heading">'
-                        f'<b>{headword_clean}</b> is <b>{pattern}</b> irregular declension'
-                        '</p>')
-                if pos in conjugations:
-                    heading = (
-                        '<p class ="heading">'
-                        f'<b>{headword_clean}</b> is <b>{pattern}</b> irregular conjugation'
-                        '</p>')
+                df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
+                df.fillna("", inplace=True, axis=0)
+                df.rename_axis(None, inplace=True)  # delete pattern name
 
-            html = heading + '\n' + table
-            html_table.write(html)
+                df_rows = df.shape[0]
+                df_columns = df.shape[1]
 
+                for rows in range(0, df_rows):
+                    for columns in range(0, df_columns, 2):  # 1 to 0
+                        html_cell = df.iloc[rows, columns]
+                        syn_cell = df.iloc[rows, columns]
 
-def generate_html_inflection_table(kind: Kind) -> None:
-    create_directories()
+                        html_cell = re.sub(r"(.+)", "<b>\\1</b>", html_cell)  # add bold
+                        html_cell = re.sub(r"(.+)", f"{stem}\\1", html_cell)  # add stem
+                        html_cell = re.sub(r"\n", "<br>", html_cell)  # add line breaks
+                        df.iloc[rows, columns] = html_cell
 
-    print("~" * 40)
-    print("generating html inflection tables")
-    print("~" * 40)
+                        syn_cell = re.sub(r"(.+)", f"{stem}\\1", syn_cell)
+                        # FIXME following seems unused
+                        #search_string = re.compile("\n", re.M)
+                        #replace_string = " "
+                        #matches = re.sub(search_string, replace_string, syn_cell)
 
-    for row in range(dps_df_length):
-        headword = dps_df.loc[row, "Pāli1"]
-        pattern = dps_df.loc[row, "Pattern"]
-        # metadata = dps_df.loc[row, "Metadata"]
-        meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
+                column_list = []
+                for i in range(1, df_columns, 2):
+                    column_list.append(i)
 
-        if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
-            _create_html_table(row, kind)
+                df.drop(df.columns[column_list], axis=1, inplace=True)
+                self.translate_table(df)
+                table = df.to_html(escape=False)
+                table = re.sub("Unnamed.+", "", table)
+                table = re.sub("NaN", "", table)
+
+                if inflection_table_index_dict[pattern]:
+                    if pos in declensions:
+                        heading = (
+                            '<p class ="heading">'
+                            f'<b>{headword_clean}</b> is <b>{pattern}</b> declension'
+                            f' like <b>{inflection_table_index_dict[pattern]}</b>'
+                            '</p>')
+                    elif pos in conjugations:
+                        heading = (
+                            '<p class ="heading">'
+                            f'<b>{headword_clean}</b> is <b>{pattern}</b> conjugation'
+                            f' like <b>{inflection_table_index_dict[pattern]}</b>'
+                            '</p>')
+
+                else:
+                    if pos in declensions:
+                        heading = (
+                            '<p class ="heading">'
+                            f'<b>{headword_clean}</b> is <b>{pattern}</b> irregular declension'
+                            '</p>')
+                    if pos in conjugations:
+                        heading = (
+                            '<p class ="heading">'
+                            f'<b>{headword_clean}</b> is <b>{pattern}</b> irregular conjugation'
+                            '</p>')
+
+                html = heading + '\n' + table
+                html_table.write(html)
+
+    def generate_html(self) -> None:
+        create_directories()
+
+        print("~" * 40)
+        print("generating html inflection tables")
+        print("~" * 40)
+
+        for row in range(dps_df_length):
+            headword = dps_df.loc[row, "Pāli1"]
+            pattern = dps_df.loc[row, "Pattern"]
+            # metadata = dps_df.loc[row, "Metadata"]
+            meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
+
+            if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
+                self._create_html_table(row)
 
 
 def generate_inflections_in_table_list():
