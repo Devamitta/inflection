@@ -1,6 +1,9 @@
 import pandas
 
+from helpers import Kind
 import settings
+
+# FIXME File must not be read for every word
 
 
 class AbbreviationTranslator:
@@ -33,5 +36,7 @@ class AbbreviationTranslator:
         return string
 
 
-def translate_table(data: pandas.DataFrame, script="") -> pandas.DataFrame:
-    return data
+def translate_table(data: pandas.DataFrame, kind: Kind):
+    if kind is Kind.DPS:
+        translator = AbbreviationTranslator(script='cyrl')
+        data.columns = [translator.translate_string(col) for col in data.columns]

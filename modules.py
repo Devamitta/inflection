@@ -1,21 +1,18 @@
 from pathlib import Path
-
 import os
 import pickle
 import re
-
-import pandas
-import pandas as pd
 
 from aksharamukha import transliterate
 from pandas import DataFrame
 from pandas_ods_reader import read_ods
 from rich import print
+import pandas
+import pandas as pd
 
 from abbreviation_translator import translate_table
-from helpers import create_directories, data_frame_from_inflections_csv, excel_index, timeis
+from helpers import Kind, create_directories, data_frame_from_inflections_csv, excel_index, timeis
 from sorter import sort_key
-
 import settings
 
 # TODO Try to avoid global keyword in the module
@@ -422,7 +419,7 @@ def generate_changed_inflected_forms():
         print("no new inflections")
 
 
-def _create_html_table(row: int):
+def _create_html_table(row: int, kind: Kind):
 
     indeclinables = {"abbrev", "abs", "ger", "ind", "inf", "prefix"}
     conjugations = {"aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"}
@@ -479,7 +476,7 @@ def _create_html_table(row: int):
                 column_list.append(i)
 
             df.drop(df.columns[column_list], axis=1, inplace=True)
-            df = translate_table(df)
+            translate_table(df, kind)
             table = df.to_html(escape=False)
             table = re.sub("Unnamed.+", "", table)
             table = re.sub("NaN", "", table)
@@ -514,7 +511,7 @@ def _create_html_table(row: int):
             html_table.write(html)
 
 
-def generate_html_inflection_table():
+def generate_html_inflection_table(kind: Kind) -> None:
     create_directories()
 
     print("~" * 40)
@@ -528,7 +525,7 @@ def generate_html_inflection_table():
         meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
 
         if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
-            _create_html_table(row)
+            _create_html_table(row, kind)
 
 
 def generate_inflections_in_table_list():
