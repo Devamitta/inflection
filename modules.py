@@ -47,9 +47,11 @@ def create_inflection_table_index() -> DataFrame:
     print(f"{timeis()} ----------------------------------------")
     print(f"{timeis()} [green]creating inflection table index")
 
-    inflection_table_index_df = pandas.read_excel(settings.DECLENSIONS_AND_CONJUGATIONS_FILE, sheet_name="index", dtype=str)
-
-    inflection_table_index_df.fillna("", inplace=True)
+    inflection_table_index_df = pandas.read_excel(
+        settings.DECLENSIONS_AND_CONJUGATIONS_FILE,
+        sheet_name="index",
+        dtype=str,
+        na_filter=False)
 
     return inflection_table_index_df
 
@@ -120,7 +122,6 @@ def test_inflection_pattern_changed(inflection_table_index: DataFrame, inflectio
 
         try:
             old = pandas.read_csv(f"output/patterns/{inflection_name}.csv", sep="\t", index_col=0, na_filter=False)
-            old.fillna("", inplace=True)
             old = old.rename(columns=lambda x: re.sub('Unnamed.*', '', x))
         except FileNotFoundError:
             print(f"{timeis()} [red]{inflection_name} - doesn't exist - added")
@@ -146,8 +147,11 @@ def create_dps_df() -> pandas.DataFrame:
     print("~" * 40)
     print("create dps_df")
 
-    dps_df = pandas.read_csv(settings.DPS_DIR / "spreadsheets" / "dps-full.csv", sep="\t", dtype=str)
-    dps_df.fillna("", inplace=True)  # FIXME Use read_csv option
+    dps_df = pandas.read_csv(
+        settings.DPS_DIR / "spreadsheets" / "dps-full.csv",
+        sep="\t",
+        dtype=str,
+        na_filter=False)
 
     global headwords_list
     headwords_list = dps_df["Pāli1"].tolist()
@@ -160,8 +164,7 @@ def create_sbs_df(class_file_name: str) -> pandas.DataFrame:
     print("create sbs_df")
 
     path = settings.DPS_DIR / "word-frequency" / "csv-for-examples" / f"{class_file_name}-class.csv"
-    dps_df = pandas.read_csv(path, sep="\t", dtype=str)
-    dps_df.fillna("", inplace=True)  # FIXME Use read_csv option
+    dps_df = pandas.read_csv(path, sep="\t", dtype=str, na_filter=False)
 
     global headwords_list
     headwords_list = dps_df["Pāli1"].tolist()
@@ -372,8 +375,7 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
                 inflections_string+= headword_clean + " "
 
                 try:
-                    df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", header=None)
-                    df.fillna("", inplace=True)
+                    df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", header=None, na_filter=False)
                     df_rows = df.shape[0]
                     df_columns = df.shape[1]
 
@@ -482,8 +484,7 @@ class InflectionTableGenerator:
             html = f"<p>click on <b>{pattern}</b> for inflection table</p>"
 
         else:
-            df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
-            df.fillna("", inplace=True, axis=0)
+            df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0, na_filter=False)
             df.rename_axis(None, inplace=True)  # delete pattern name
 
             df_rows = df.shape[0]
@@ -566,8 +567,7 @@ def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
                     print(f"{timeis()} {row}/{dps_df_length}\t{headword}")
 
                 try:
-                    df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
-                    df.fillna("", inplace=True, axis=0)
+                    df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0, na_filter=False)
                     df.rename_axis(None, inplace=True) #delete pattern name
                     df_rows = df.shape[0]
                     df_columns = df.shape[1]
