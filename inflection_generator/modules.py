@@ -9,10 +9,10 @@ from pandas_ods_reader import read_ods
 from rich import print
 import pandas
 
-from abbreviation_translator import AbbreviationTranslator
-from helpers import Kind, create_directories, data_frame_from_inflections_csv, excel_index, timeis
-from sorter import sort_key
-import settings
+from inflection_generator import settings
+from inflection_generator.abbreviation_translator import AbbreviationTranslator
+from inflection_generator.helpers import Kind, create_directories, data_frame_from_inflections_csv, excel_index, timeis
+from inflection_generator.sorter import sort_key
 
 # TODO Try to avoid global keyword in the module
 # TODO Better to use paths without spaces (see also create_directories())

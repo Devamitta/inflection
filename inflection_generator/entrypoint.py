@@ -2,19 +2,18 @@ import argparse
 
 from rich import print  # pylint: disable=redefined-builtin
 
-import modules
-
-from helpers import Kind, timeis
+from inflection_generator import modules
+from inflection_generator.helpers import Kind, timeis
 
 
 def get_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--kind", choices=[i.name for i in Kind])
+    parser.add_argument("--kind", required=True, choices=[i.name for i in Kind])
     parser.add_argument("--class-file-name", type=str, default='1')
     return parser
 
 
-def main(args: argparse.Namespace):
+def generate(args: argparse.Namespace) -> None:
     print(f"{timeis()} ----------------------------------------")
 
     inflection_table_index = modules.create_inflection_table_index()
@@ -52,3 +51,8 @@ def main(args: argparse.Namespace):
     modules.delete_unused_inflections_translit()
 
     print(f"{timeis()} ----------------------------------------")
+
+
+def main() -> None:
+    ARGS = get_argparser().parse_args()
+    generate(ARGS)

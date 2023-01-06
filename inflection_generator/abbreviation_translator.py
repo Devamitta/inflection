@@ -1,9 +1,6 @@
 import pandas
 
-from helpers import Kind
-import settings
-
-# FIXME File must not be read for every word
+from inflection_generator import settings
 
 
 class AbbreviationTranslator:

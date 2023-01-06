@@ -7,6 +7,5 @@ from inflection_generator import main, _get_argparser
 
 
 if __name__ == "__main__":
-    args = _get_argparser().parse_args('')
-    args.kind = 'SBS'
+    args = _get_argparser().parse_args(['--kind', 'SBS'])
     main(args)

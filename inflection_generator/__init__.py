@@ -1,1 +1,1 @@
-from entrypoint import *
+from inflection_generator.entrypoint import *

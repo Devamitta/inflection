@@ -8,7 +8,7 @@ import pandas
 
 from pandas.errors import EmptyDataError
 
-import settings
+from inflection_generator import settings
 
 
 class Kind(enum.Enum):

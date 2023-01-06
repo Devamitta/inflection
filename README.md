@@ -8,7 +8,7 @@ Generate all inflections from scratch and write to CSV, HTML and text.
 
 > Run following commands from the root directory of the repo
 
-Create and activate an env:
+Create and activate a Python environment:
 
 ```shell
 python3 -m venv env
@@ -17,11 +17,16 @@ source env/bin/activate
 
 `source` command should be run for every new shell.
 
-Install dependencies:
+> Creating an environment is optional but recommended.
+
+Install the package:
 
 ```shell
-pip3 install -r requirements.txt
+pip3 install -e .
 ```
+
+> `-e` flag makes installations editable, i.e. package may be edited in place
+> without reinstallation.
 
 Directory with the dictionary sources may be set with `DPS_DIR` environment
 variable:
@@ -36,7 +41,7 @@ files.
 Run generator with command:
 
 ```shell
-python3 inflection_generator --kind DPS
+inflection-generator --kind DPS
 ```
 
 Or in an old style:
@@ -44,10 +49,9 @@ Or in an old style:
 python3 'inflection generator.py'
 ```
 
-At first time utility should be ran mulitple times until output will not
+At first time utility should be ran multiple times until output will not
 changes.
 
 ## TODO
 
 - Fix func args in `test*.py`
-- Move majority of moudules to a subdir

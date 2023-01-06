@@ -1,5 +1,4 @@
-from entrypoint import main, get_argparser
+from inflection_generator.entrypoint import main
 
 if __name__ == "__main__":
-    ARGS = get_argparser().parse_args()
-    main(ARGS)
+    main()
