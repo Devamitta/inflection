@@ -8,7 +8,6 @@ from pandas import DataFrame
 from pandas_ods_reader import read_ods
 from rich import print
 import pandas
-import pandas as pd
 
 from abbreviation_translator import AbbreviationTranslator
 from helpers import Kind, create_directories, data_frame_from_inflections_csv, excel_index, timeis
@@ -48,7 +47,7 @@ def create_inflection_table_index() -> DataFrame:
     print(f"{timeis()} ----------------------------------------")
     print(f"{timeis()} [green]creating inflection table index")
 
-    inflection_table_index_df = pd.read_excel(settings.DECLENSIONS_AND_CONJUGATIONS_FILE, sheet_name="index", dtype=str)
+    inflection_table_index_df = pandas.read_excel(settings.DECLENSIONS_AND_CONJUGATIONS_FILE, sheet_name="index", dtype=str)
 
     inflection_table_index_df.fillna("", inplace=True)
 
@@ -58,7 +57,7 @@ def create_inflection_table_index() -> DataFrame:
 def create_inflection_table_df() -> pandas.DataFrame:
     print(f"{timeis()} [green]creating inflection table dataframe")
 
-    inflection_table_df = pd.read_excel(
+    inflection_table_df = pandas.read_excel(
         settings.DECLENSIONS_AND_CONJUGATIONS_FILE,
         sheet_name="declensions",
         dtype=str,
@@ -120,7 +119,7 @@ def test_inflection_pattern_changed(inflection_table_index: DataFrame, inflectio
         old = ''
 
         try:
-            old = pd.read_csv(f"output/patterns/{inflection_name}.csv", sep="\t", index_col=0, na_filter=False)
+            old = pandas.read_csv(f"output/patterns/{inflection_name}.csv", sep="\t", index_col=0, na_filter=False)
             old.fillna("", inplace=True)
             old = old.rename(columns=lambda x: re.sub('Unnamed.*', '', x))
         except FileNotFoundError:
@@ -147,7 +146,7 @@ def create_dps_df() -> pandas.DataFrame:
     print("~" * 40)
     print("create dps_df")
 
-    dps_df = pd.read_csv(settings.DPS_DIR / "spreadsheets" / "dps-full.csv", sep="\t", dtype=str)
+    dps_df = pandas.read_csv(settings.DPS_DIR / "spreadsheets" / "dps-full.csv", sep="\t", dtype=str)
     dps_df.fillna("", inplace=True)  # FIXME Use read_csv option
 
     global headwords_list
@@ -161,7 +160,7 @@ def create_sbs_df(class_file_name: str) -> pandas.DataFrame:
     print("create sbs_df")
 
     path = settings.DPS_DIR / "word-frequency" / "csv-for-examples" / f"{class_file_name}-class.csv"
-    dps_df = pd.read_csv(path, sep="\t", dtype=str)
+    dps_df = pandas.read_csv(path, sep="\t", dtype=str)
     dps_df.fillna("", inplace=True)  # FIXME Use read_csv option
 
     global headwords_list
@@ -373,7 +372,7 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
                 inflections_string+= headword_clean + " "
 
                 try:
-                    df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", header=None)
+                    df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", header=None)
                     df.fillna("", inplace=True)
                     df_rows = df.shape[0]
                     df_columns = df.shape[1]
@@ -396,7 +395,7 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
             new_inflections_dict.update(this_word_inflections)
 
     if new_inflections_dict != {}:
-        new_inflections_df = pd.DataFrame.from_dict(new_inflections_dict, orient='index')
+        new_inflections_df = pandas.DataFrame.from_dict(new_inflections_dict, orient='index')
         new_inflections_df.to_csv("output/new inflections.csv", sep="\t", header=False)
 
     else:
@@ -483,7 +482,7 @@ class InflectionTableGenerator:
             html = f"<p>click on <b>{pattern}</b> for inflection table</p>"
 
         else:
-            df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
+            df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
             df.fillna("", inplace=True, axis=0)
             df.rename_axis(None, inplace=True)  # delete pattern name
 
@@ -567,7 +566,7 @@ def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
                     print(f"{timeis()} {row}/{dps_df_length}\t{headword}")
 
                 try:
-                    df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
+                    df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
                     df.fillna("", inplace=True, axis=0)
                     df.rename_axis(None, inplace=True) #delete pattern name
                     df_rows = df.shape[0]
@@ -634,14 +633,14 @@ def combine_old_and_new_translit_dataframes():
     print("combing old and new dataframes:")
 
     global diff
-    diff = pd.DataFrame()
+    diff = pandas.DataFrame()
 
     if new_inflections_dict != {}:
         all_inflections_translit = data_frame_from_inflections_csv(settings.ALL_INFLECTIONS_TRANSLIT_FILE)
 
-        new_inflections_translit = pd.read_csv("output/new inflections translit.csv", header=None, sep="\t")
+        new_inflections_translit = pandas.read_csv("output/new inflections translit.csv", header=None, sep="\t")
 
-        diff = pd.merge(all_inflections_translit, new_inflections_translit, on=[0], how='outer', indicator='exists')
+        diff = pandas.merge(all_inflections_translit, new_inflections_translit, on=[0], how='outer', indicator='exists')
         # diff.to_csv("output/diff translit.csv", sep="\t", index=None)
 
         # copy changes
@@ -712,14 +711,14 @@ def combine_old_and_new_dataframes():
     create_directories()
 
     global diff
-    diff = pd.DataFrame()
+    diff = pandas.DataFrame()
 
     if new_inflections_dict != {}:
         all_inflections_df = data_frame_from_inflections_csv(settings.ALL_INFLECTIONS_FILE)
 
-        new_inflections_df = pd.read_csv("output/new inflections.csv", header=None, sep="\t")
+        new_inflections_df = pandas.read_csv("output/new inflections.csv", header=None, sep="\t")
 
-        diff = pd.merge(all_inflections_df, new_inflections_df, on=[0], how='outer', indicator='exists')
+        diff = pandas.merge(all_inflections_df, new_inflections_df, on=[0], how='outer', indicator='exists')
         # diff.to_csv("output/diff.csv", sep="\t", index=None, header=False)
 
         # copy changes
@@ -784,7 +783,7 @@ def make_list_of_all_inflections():
     print("creating all inflections df")
 
     global all_inflections_df
-    all_inflections_df = pd.read_csv(settings.ALL_INFLECTIONS_FILE, header=None, sep="\t")
+    all_inflections_df = pandas.read_csv(settings.ALL_INFLECTIONS_FILE, header=None, sep="\t")
 
     print("~" * 40)
     print("making master list of all inflections")
@@ -1090,7 +1089,7 @@ def read_and_clean_sutta_text():
     global output_path
     output_path = "output/html suttas/"
 
-    sutta_dict = pd.read_csv('sutta corespondence tables/sutta correspondence tables.csv', sep="\t", index_col=0, squeeze=True).to_dict(orient='index',)
+    sutta_dict = pandas.read_csv('sutta corespondence tables/sutta correspondence tables.csv', sep="\t", index_col=0, squeeze=True).to_dict(orient='index',)
 
     while True:
         sutta_number = input ("enter sutta number: ")
@@ -1130,7 +1129,7 @@ def make_comparison_table():
         word_llst=[word for line in text_to_split for word in line.split(" ")]
 
     global sutta_words_df
-    sutta_words_df = pd.DataFrame(word_llst)
+    sutta_words_df = pandas.DataFrame(word_llst)
 
     inflection_test = sutta_words_df[0].isin(all_inflections_set)
     sutta_words_df["Inflection"] = inflection_test
@@ -1161,7 +1160,7 @@ def make_comparison_table():
         word_llst=[word for line in text_to_split for word in line.split(" ")]
 
     global commentary_words_df
-    commentary_words_df = pd.DataFrame(word_llst)
+    commentary_words_df = pandas.DataFrame(word_llst)
 
     inflection_test = commentary_words_df[0].isin(all_inflections_set)
     commentary_words_df["Inflection"] = inflection_test
