@@ -415,6 +415,7 @@ class InflectionTableGenerator:
     def translate_table(self, data: pandas.DataFrame) -> None:
         if self._kind is Kind.DPS:
             data.columns = [self._translator.translate_string(col) for col in data.columns]
+            data.index = [self._translator.translate_string(i) for i in data.index]
 
     def _create_html_table(self, row: int):
         indeclinables = {"abbrev", "abs", "ger", "ind", "inf", "prefix"}
