@@ -15,6 +15,8 @@ python3 -m venv env
 source env/bin/activate
 ```
 
+`source` command should be run for every new shell.
+
 Install dependencies:
 
 ```shell
@@ -34,12 +36,12 @@ files.
 Run generator with command:
 
 ```shell
-python inflection_generator.py --kind DPS
+python3 inflection_generator --kind DPS
 ```
 
 Or in an old style:
 ```shell
-python 'inflection generator.py'
+python3 'inflection generator.py'
 ```
 
 At first time utility should be ran mulitple times until output will not

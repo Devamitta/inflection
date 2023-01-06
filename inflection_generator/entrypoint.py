@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import argparse
 
 from rich import print  # pylint: disable=redefined-builtin
@@ -9,7 +7,7 @@ import modules
 from helpers import Kind, timeis
 
 
-def _get_argparser() -> argparse.ArgumentParser:
+def get_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--kind", choices=[i.name for i in Kind])
     parser.add_argument("--class-file-name", type=str, default='1')
@@ -54,8 +52,3 @@ def main(args: argparse.Namespace):
     modules.delete_unused_inflections_translit()
 
     print(f"{timeis()} ----------------------------------------")
-
-
-if __name__ == "__main__":
-    ARGS = _get_argparser().parse_args()
-    main(ARGS)
