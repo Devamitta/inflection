@@ -407,6 +407,13 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
 
 
 class InflectionTableGenerator:
+    # TODO Split to module
+    indeclinables = {"abbrev", "abs", "ger", "ind", "inf", "prefix"}
+    conjugations = {"aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"}
+    declensions = {
+        "adj", "card", "cs", "fem", "letter", "masc", "nt", "ordin",
+        "pp", "pron", "prp", "ptp", "root", "suffix", "ve"}
+
     def __init__(self, data: pandas.DataFrame, kind: Kind) -> None:
         self._data = data
         self._kind = kind
@@ -417,13 +424,41 @@ class InflectionTableGenerator:
             data.columns = [self._translator.translate_string(col) for col in data.columns]
             data.index = [self._translator.translate_string(i) for i in data.index]
 
-    def _create_html_table(self, row: int):
-        indeclinables = {"abbrev", "abs", "ger", "ind", "inf", "prefix"}
-        conjugations = {"aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"}
-        declensions = {
-            "adj", "card", "cs", "fem", "letter", "masc", "nt", "ordin",
-            "pp", "pron", "prp", "ptp", "root", "suffix", "ve"}
+    def _make_heading(self, pos: str, example: str, headword_clean: str, pattern: str) -> str:
+        if pos in self.declensions:
+            if self._kind is Kind.DPS:
+                derivative_type = "склоняется"
+            else:
+                derivative_type = "declension"
+        elif pos in self.conjugations:
+            if self._kind is Kind.DPS:
+                derivative_type = "спрягается"
+            else:
+                derivative_type = "conjugation"
 
+        if example:
+            if self._kind is Kind.DPS:
+                par_content = (
+                    f"<b>{headword_clean}</b> — это <b>{pattern}</b>,"
+                    f" {derivative_type} как <b>{example}</b>")
+            else:
+                par_content = (
+                    f"<b>{headword_clean}</b> is <b>{pattern}</b>"
+                    f" {derivative_type} like <b>{example}</b>")
+        else:
+            if self._kind is Kind.DPS:
+                par_content = (
+                    f"<b>{headword_clean}</b> — это <b>{pattern}</b>,"
+                    f" неправильно {derivative_type}")
+            else:
+                par_content = (
+                    f"<b>{headword_clean}</b> is <b>{pattern}</b>"
+                    f" irregular {derivative_type}")
+
+        heading = f'<p class="heading">{par_content}</p>\n'
+        return heading
+
+    def _create_html_table(self, row: int):
         headword = self._data.loc[row, "Pāli1"]
         print(f"{row}\t{headword}")
 
@@ -438,75 +473,55 @@ class InflectionTableGenerator:
         pattern = self._data.loc[row, "Pattern"]
         pos = self._data.loc[row, "POS"]
 
-        with open(settings.HTML_TABLES_DIR / f"{headword}.html", "w") as html_table:
-            if stem == "-":
-                html_table.write(f"<p><b>{headword_clean}</b> is indeclinable</p>")
+        html = ''
 
-            elif stem == "!":
-                html_table.write(f"<p>click on <b>{pattern}</b> for inflection table</p>")
+        if stem == "-":
+            html = f"<p><b>{headword_clean}</b> is indeclinable</p>"
 
-            else:
-                df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
-                df.fillna("", inplace=True, axis=0)
-                df.rename_axis(None, inplace=True)  # delete pattern name
+        elif stem == "!":
+            html = f"<p>click on <b>{pattern}</b> for inflection table</p>"
 
-                df_rows = df.shape[0]
-                df_columns = df.shape[1]
+        else:
+            df = pd.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0)
+            df.fillna("", inplace=True, axis=0)
+            df.rename_axis(None, inplace=True)  # delete pattern name
 
-                for rows in range(0, df_rows):
-                    for columns in range(0, df_columns, 2):  # 1 to 0
-                        html_cell = df.iloc[rows, columns]
-                        syn_cell = df.iloc[rows, columns]
+            df_rows = df.shape[0]
+            df_columns = df.shape[1]
 
-                        html_cell = re.sub(r"(.+)", "<b>\\1</b>", html_cell)  # add bold
-                        html_cell = re.sub(r"(.+)", f"{stem}\\1", html_cell)  # add stem
-                        html_cell = re.sub(r"\n", "<br>", html_cell)  # add line breaks
-                        df.iloc[rows, columns] = html_cell
+            for rows in range(0, df_rows):
+                for columns in range(0, df_columns, 2):  # 1 to 0
+                    html_cell = df.iloc[rows, columns]
+                    syn_cell = df.iloc[rows, columns]
 
-                        syn_cell = re.sub(r"(.+)", f"{stem}\\1", syn_cell)
-                        # FIXME following seems unused
-                        #search_string = re.compile("\n", re.M)
-                        #replace_string = " "
-                        #matches = re.sub(search_string, replace_string, syn_cell)
+                    html_cell = re.sub(r"(.+)", "<b>\\1</b>", html_cell)  # add bold
+                    html_cell = re.sub(r"(.+)", f"{stem}\\1", html_cell)  # add stem
+                    html_cell = re.sub(r"\n", "<br>", html_cell)  # add line breaks
+                    df.iloc[rows, columns] = html_cell
 
-                column_list = []
-                for i in range(1, df_columns, 2):
-                    column_list.append(i)
+                    syn_cell = re.sub(r"(.+)", f"{stem}\\1", syn_cell)
+                    # FIXME following seems unused
+                    # search_string = re.compile("\n", re.M)
+                    # replace_string = " "
+                    # matches = re.sub(search_string, replace_string, syn_cell)
 
-                df.drop(df.columns[column_list], axis=1, inplace=True)
-                self.translate_table(df)
-                table = df.to_html(escape=False)
-                table = re.sub("Unnamed.+", "", table)
-                table = re.sub("NaN", "", table)
+            column_list = []
+            for i in range(1, df_columns, 2):
+                column_list.append(i)
 
-                if inflection_table_index_dict[pattern]:
-                    if pos in declensions:
-                        heading = (
-                            '<p class ="heading">'
-                            f'<b>{headword_clean}</b> is <b>{pattern}</b> declension'
-                            f' like <b>{inflection_table_index_dict[pattern]}</b>'
-                            '</p>')
-                    elif pos in conjugations:
-                        heading = (
-                            '<p class ="heading">'
-                            f'<b>{headword_clean}</b> is <b>{pattern}</b> conjugation'
-                            f' like <b>{inflection_table_index_dict[pattern]}</b>'
-                            '</p>')
+            df.drop(df.columns[column_list], axis=1, inplace=True)
+            self.translate_table(df)
+            table = df.to_html(escape=False)
+            table = re.sub("Unnamed.+", "", table)
+            table = re.sub("NaN", "", table)
 
-                else:
-                    if pos in declensions:
-                        heading = (
-                            '<p class ="heading">'
-                            f'<b>{headword_clean}</b> is <b>{pattern}</b> irregular declension'
-                            '</p>')
-                    if pos in conjugations:
-                        heading = (
-                            '<p class ="heading">'
-                            f'<b>{headword_clean}</b> is <b>{pattern}</b> irregular conjugation'
-                            '</p>')
+            example = inflection_table_index_dict[pattern]
+            heading = self._make_heading(pos, example, headword_clean, pattern)
 
-                html = heading + '\n' + table
-                html_table.write(html)
+            html = heading + table
+
+        with open(settings.HTML_TABLES_DIR / f"{headword}.html", "w") as html_file:
+            html_file.write(html)
 
     def generate_html(self) -> None:
         create_directories()

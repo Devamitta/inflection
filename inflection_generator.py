@@ -26,9 +26,9 @@ def main(args: argparse.Namespace):
 
     kind = Kind[args.kind]
 
-    if kind == Kind.DPS:
+    if kind is Kind.DPS:
         data = modules.create_dps_df()
-    elif kind == Kind.SBS:
+    elif kind is Kind.SBS:
         data = modules.create_sbs_df(args.class_file_name)
 
     modules.test_for_missing_stem_and_pattern(data)
