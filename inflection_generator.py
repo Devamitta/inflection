@@ -39,7 +39,7 @@ def main(args: argparse.Namespace):
     modules.generate_changed_inflected_forms(data)
     modules.combine_old_and_new_dataframes()
 
-    table_generator = modules.InflectionTableGenerator(data, kind)
+    table_generator = modules.InflectionTableGenerator(data, inflection_table_index, kind)
     table_generator.generate_html()
 
     modules.generate_inflections_in_table_list(data)

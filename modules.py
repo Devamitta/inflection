@@ -21,7 +21,6 @@ import settings
 
 # Globals
 headwords_list = None
-inflection_table_index_dict = None
 
 
 def convert_dpd_ods_to_csv():
@@ -53,12 +52,6 @@ def create_inflection_table_index() -> DataFrame:
 
     inflection_table_index_df.fillna("", inplace=True)
 
-    global inflection_table_index_length
-    inflection_table_index_length = len(inflection_table_index_df)
-
-    global inflection_table_index_dict
-    inflection_table_index_dict = dict(zip(inflection_table_index_df.iloc[:, 0], inflection_table_index_df.iloc[:, 2]))
-
     return inflection_table_index_df
 
 
@@ -85,19 +78,19 @@ def test_inflection_pattern_changed(inflection_table_index: DataFrame, inflectio
     global pattern_changed
     pattern_changed = []
 
-    for row in range(inflection_table_index_length):
-        inflection_name = inflection_table_index.iloc[row,0]
-        cell_range = inflection_table_index.iloc[row,1]
-        like = inflection_table_index.iloc[row,2]
-        irreg = inflection_table_index.iloc[row,3]
+    for row in range(len(inflection_table_index)):
+        inflection_name = inflection_table_index.iloc[row, 0]
+        cell_range = inflection_table_index.iloc[row, 1]
+        like = inflection_table_index.iloc[row, 2]
+        irreg = inflection_table_index.iloc[row, 3]
 
-        col_range_1 = re.sub("(.+?)\d*\:.+", "\\1", cell_range)
-        col_range_2 = re.sub(".+\:(.[A-Z]*)\d*", "\\1", cell_range)
-        row_range_1 = int(re.sub(".+?(\d{1,3}):.+", "\\1", cell_range))
-        row_range_2 = int(re.sub(".+:.+?(\d{1,3})", "\\1", cell_range))
+        col_range_1 = re.sub(r"(.+?)\d*\:.+", "\\1", cell_range)
+        col_range_2 = re.sub(r".+\:(.[A-Z]*)\d*", "\\1", cell_range)
+        row_range_1 = int(re.sub(r".+?(\d{1,3}):.+", "\\1", cell_range))
+        row_range_2 = int(re.sub(r".+:.+?(\d{1,3})", "\\1", cell_range))
 
         inflection_table_df_filtered = inflection_table.loc[row_range_1:row_range_2, col_range_1:col_range_2]
-        inflection_table_df_filtered.Name =  f"{inflection_name}"
+        inflection_table_df_filtered.Name = inflection_name
 
         inflection_table_df_filtered.reset_index(drop=True, inplace=True)
 
@@ -105,18 +98,22 @@ def test_inflection_pattern_changed(inflection_table_index: DataFrame, inflectio
 
         # replace header
 
-        new_header = inflection_table_df_filtered.iloc[0] #grab the first row for the header
-        inflection_table_df_filtered = inflection_table_df_filtered[1:] #take the data less the header row
-        inflection_table_df_filtered.columns = new_header #set the header row as the df header
+        # Grab the first row for the header
+        new_header = inflection_table_df_filtered.iloc[0]
+        # Take the data less the header row
+        inflection_table_df_filtered = inflection_table_df_filtered[1:]
+        # Set the header row as the df header
+        inflection_table_df_filtered.columns = new_header
 
         # replace index
 
-        inflection_table_df_filtered.index = inflection_table_df_filtered.iloc[0:,0]
+        inflection_table_df_filtered.index = inflection_table_df_filtered.iloc[0:, 0]
         inflection_table_df_filtered = inflection_table_df_filtered.iloc[:, 1:]
 
         # remove unnamed column headers
 
-        inflection_table_df_filtered = inflection_table_df_filtered.rename(columns=lambda x: re.sub('Unnamed.*','',x))
+        inflection_table_df_filtered = inflection_table_df_filtered.rename(
+            columns=lambda x: re.sub('Unnamed.*', '', x))
 
         # test
 
@@ -414,8 +411,12 @@ class InflectionTableGenerator:
         "adj", "card", "cs", "fem", "letter", "masc", "nt", "ordin",
         "pp", "pron", "prp", "ptp", "root", "suffix", "ve"}
 
-    def __init__(self, data: pandas.DataFrame, kind: Kind) -> None:
+    def __init__(self, data: pandas.DataFrame, inflection_table_index: pandas.DataFrame, kind: Kind) -> None:
         self._data = data
+        self._inflection_table_index_dict = dict(
+            zip(
+                inflection_table_index.iloc[:, 0],
+                inflection_table_index.iloc[:, 2]))
         self._kind = kind
         self._translator = AbbreviationTranslator(script='cyrl')
 
@@ -515,7 +516,7 @@ class InflectionTableGenerator:
             table = re.sub("Unnamed.+", "", table)
             table = re.sub("NaN", "", table)
 
-            example = inflection_table_index_dict[pattern]
+            example = self._inflection_table_index_dict[pattern]
             heading = self._make_heading(pos, example, headword_clean, pattern)
 
             html = heading + table
