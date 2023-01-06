@@ -1,4 +1,5 @@
 from pathlib import Path
+import importlib
 import os
 import pickle
 import re
@@ -657,7 +658,7 @@ def combine_old_and_new_translit_dataframes():
         filter = test1 & test2
         diff.loc[filter, "1_x"] = diff.loc[filter, "1_y"]
 
-        # fixme !!! how to delete non existent
+        # FIXME !!! How to delete non existent?
 
         # drop columns and write to csv
 
@@ -677,14 +678,12 @@ def export_translit_to_pickle():
 
     all_inflections = diff
 
-    length = len(all_inflections)
-
-    for row in range(length):
+    for row in range(len(all_inflections)):
 
         headword = all_inflections.iloc[row, 0]
         inflections = all_inflections.iloc[row, 1]
 
-        # fixme !!! how to delete headword when no longer exists    ???
+        # FIXME !!! How to delete headword when no longer exists???
 
         if headword in new_inflections_dict.keys():
             print(headword)
@@ -1238,101 +1237,7 @@ def html_find_and_replace():
 def write_html():
     create_directories()
 
-    # TODO To file
-    html1 = """
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-#content, html, body {
-    height: 98%;
-    font-size: 1.5em;
-    }
-
-#left {
-    float: left;
-    width: 50%;
-    height: 100%;
-    overflow: scroll;}
-
-#right {
-    float: left;
-    width: 50%;
-    height: 100%;
-    overflow: scroll;
-    }
-
-body {
-    color: #a1998a;
-    background-color: #0d0c0b;
-    font-size: 16px;}
-
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-    }
-
-::-webkit-scrollbar-button {
-    width: 0px;
-    height: 0px;
-    }
-
-::-webkit-scrollbar-thumb {
-    background: #5d6726;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    }
-
-::-webkit-scrollbar-thumb:hover {
-    background: #9b794b;
-    }
-
-::-webkit-scrollbar-track:hover {
-    background: transparent;
-    }
-
-::-webkit-scrollbar-thumb:active {
-    background: #9b794b;
-    }
-
-::-webkit-scrollbar-track:active {
-    background: #433730;
-    }
-
-::-webkit-scrollbar-track {
-    background: transparent;
-    border: 0px none transparent;
-    border-radius: 0px;
-    }
-
-::-webkit-scrollbar-corner {
-    background: transparent;
-    border-radius: 10px;
-    }
-
-.highlight {
-    color:#f4ae4d;
-    }
-
-.red{
-    border-radius: 5px;
-    color: #de6767;
-    }
-
-.green{
-    border-radius: 5px;
-    color: #83e783;
-    }
-
-.blue{
-    border-radius: 5px;
-    color: #8983fe;
-    }
-
-</style>
-</head>
-<body>
-<div id="content">"""
+    html1 = importlib.resources.read_text(__package__, 'part1.html')
 
     # html2 = """</div><div id="right">"""
 
