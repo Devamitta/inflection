@@ -309,30 +309,29 @@ def test_if_inflections_exist_suttas(dps_df: pandas.DataFrame) -> None:
         print("inflection file doesn't exist for:")
         print("|".join(inflections_not_exist))
         print("~"*40)
-
-    if inflections_not_exist == []:
+    else:
         print("no missing inflection files")
 
 
 def test_if_inflections_exist_dps(dps_df: pandas.DataFrame):
     global inflections_not_exist
     inflections_not_exist = []
-    inflections_not_exists_string = ""
 
     print("~"*40)
     print("test if inflections exists")
 
     for row in range(dps_df.shape[0]):
         headword = dps_df.loc[row, "Pāli1"]
+        path = settings.INFLECTIONS_TRANSLIT_DIR / headword
 
-        if not Path(f"output/inflections translit/{headword}").is_file():
-            inflections_not_exists_string += headword + "|"
+        if not path.is_file():
             inflections_not_exist.append(headword)
 
-    if inflections_not_exists_string != "":
+    if inflections_not_exist:
         print("~"*40)
-        print(f"inflection file doesn't exist for:\n{inflections_not_exists_string}")
-    if inflections_not_exist == []:
+        print("inflection file doesn't exist for:")
+        print("|".join(inflections_not_exist))
+    else:
         print("no missing inflection files")
 
 
@@ -695,7 +694,7 @@ def export_translit_to_pickle():
 
             inflections_list = list(dict.fromkeys(inflections_list))
 
-            with open(f"output/inflections translit/{headword}", "wb") as text_file:
+            with open(settings.INFLECTIONS_TRANSLIT_DIR / headword, "wb") as text_file:
                 pickle.dump(inflections_list, text_file)
 
 
@@ -1323,11 +1322,11 @@ def delete_unused_inflections():
 def delete_unused_inflections_translit():
     print(f"{timeis()} [green]deleting unused inflections translit")
 
-    for root, dirs, files in os.walk("output/inflections translit", topdown=True):
+    for root, dirs, files in os.walk(settings.INFLECTIONS_TRANSLIT_DIR, topdown=True):
         for file in files:
             if file not in headwords_list:
                 try:
-                    os.remove(f"output/inflections translit/{file}")
+                    os.remove(settings.INFLECTIONS_TRANSLIT_DIR / file)
                 except FileNotFoundError:
                     print(f"{timeis()} [red]{file} not found")
                 else:
