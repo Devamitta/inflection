@@ -5,7 +5,6 @@ import pickle
 import re
 
 from aksharamukha import transliterate
-from pandas import DataFrame
 from pandas_ods_reader import read_ods
 from rich import print
 import pandas
@@ -17,9 +16,6 @@ from inflection_generator.sorter import sort_key
 
 # TODO Try to avoid global keyword in the module
 # FIXME Too long, split on modules
-
-# Globals
-headwords_list = None
 
 
 def convert_dpd_ods_to_csv():
@@ -42,7 +38,7 @@ def convert_dpd_ods_to_csv():
     df.to_csv(settings.DPS_DIR / "csvs" / "dpd.csv", index=False, sep="\t", encoding="utf-8")
 
 
-def create_inflection_table_index() -> DataFrame:
+def create_inflection_table_index() -> pandas.DataFrame:
     print(f"{timeis()} [yellow]inflection generator")
     print(f"{timeis()} ----------------------------------------")
     print(f"{timeis()} [green]creating inflection table index")
@@ -72,7 +68,7 @@ def create_inflection_table_df() -> pandas.DataFrame:
     return inflection_table_df
 
 
-def test_inflection_pattern_changed(inflection_table_index: DataFrame, inflection_table: DataFrame) -> None:
+def test_inflection_pattern_changed(inflection_table_index: pandas.DataFrame, inflection_table: pandas.DataFrame) -> None:
     print(f"{timeis()} [green]test if inflection patterns have changed")
 
     create_directories()
@@ -289,7 +285,7 @@ def test_for_differences_in_stem_and_pattern(dps_df: pandas.DataFrame) -> None:
         print("no headwords stems or patterns changed")
 
 
-def test_if_inflections_exist_suttas(dps_df: DataFrame) -> None:
+def test_if_inflections_exist_suttas(dps_df: pandas.DataFrame) -> None:
     global inflections_not_exist
     inflections_not_exist = []
     inflections_not_exists_string = ""
