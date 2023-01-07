@@ -34,22 +34,25 @@ def generate_inflections(args: argparse.Namespace) -> None:
     modules.test_if_inflections_exist_dps(data)
     modules.test_if_inflections_exist_suttas(data)  # nu
     modules.generate_changed_inflected_forms(data)
-    modules.combine_old_and_new_dataframes()
+    diff = modules.combine_old_and_new_dataframes()
 
     table_generator = modules.InflectionTableGenerator(data, inflection_table_index, kind)
     table_generator.generate_html()
 
     modules.generate_inflections_in_table_list(data)
     modules.transcribe_new_inflections()
-    modules.combine_old_and_new_translit_dataframes()
-    modules.export_translit_to_pickle()
-    modules.export_inflections_to_pickle()
+    diff_translit = modules.combine_old_and_new_translit_dataframes()
+    modules.export_translit_to_pickle(diff_translit)
+    modules.export_inflections_to_pickle(diff)
     modules.delete_unused_inflection_patterns(inflection_table_index)
     modules.delete_old_pickle_files()
     modules.delete_unused_html_tables()
     modules.delete_unused_inflections()
     modules.delete_unused_inflections_translit()
 
+    # FIXME Delete prints
+    print(diff)
+    print(diff_translit)
     print(f"{timeis()} ----------------------------------------")
 
 

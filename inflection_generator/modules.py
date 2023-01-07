@@ -21,7 +21,6 @@ from inflection_generator.sorter import sort_key
 # Globals
 inflections_not_exist: List[str]
 changed: List[str]
-diff: pandas.DataFrame
 new_inflections_dict: Dict = {}
 
 
@@ -382,7 +381,7 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
 
     if new_inflections_dict != {}:
         new_inflections_df = pandas.DataFrame.from_dict(new_inflections_dict, orient='index')
-        new_inflections_df.to_csv("output/new inflections.csv", sep="\t", header=False)
+        new_inflections_df.to_csv(settings.NEW_INFLECTIONS_FILE, sep="\t", header=False)
 
     else:
         print("no new inflections")
@@ -520,7 +519,7 @@ class InflectionTableGenerator:
             pattern = self._data.loc[row, "Pattern"]
 
             if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
-                #print(f'{headword} in {changed} or {pattern} in {pattern_changed} or {headword} in {inflections_not_exist}')  # FIXME Delete
+                #print(f'=== {headword} in {inflections_not_exist}')  # FIXME Delete
                 self._create_html_table(row)
 
 
@@ -588,11 +587,11 @@ def transcribe_new_inflections():
     if new_inflections_dict != {}:
         print("~" * 40)
 
-        new_inflections = open("output/new inflections.csv", "r")
+        new_inflections = open(settings.NEW_INFLECTIONS_FILE, "r")
         new_inflections_read = new_inflections.read()
         new_inflections.close()
 
-        new_inflections_translit = open("output/new inflections translit.csv", "w")
+        new_inflections_translit = open(settings.NEW_INFLECTIONS_TRANSLIT_FILE, "w")
 
         print("converting synonyms to RussianCyrillic")
         cyrillic = transliterate.process("IAST","RussianCyrillic", new_inflections_read, post_options =['CyrillicPali'])
@@ -613,13 +612,12 @@ def transcribe_new_inflections():
         print("no new inflections to transcribe")
 
 
-def _combine_old_and_new_dataframes(all_inflections_file: Path, new_inflections_file: Path, diff_file: Path) -> None:
+def _combine_old_and_new_dataframes(all_inflections_file: Path, new_inflections_file: Path, diff_file: Path) -> pandas.DataFrame:
     print("~" * 40)
     print("combing old and new dataframes:")
 
     create_directories()
 
-    global diff
     diff = pandas.DataFrame()
 
     if new_inflections_dict != {}:
@@ -627,6 +625,8 @@ def _combine_old_and_new_dataframes(all_inflections_file: Path, new_inflections_
 
         new_inflections = pandas.read_csv(new_inflections_file, header=None, sep="\t")
 
+        print(f'=== ALLINF {all_inflections}')
+        print(f'=== NEWINF {new_inflections}')  # FIXME DEL
         diff = pandas.merge(all_inflections, new_inflections, on=[0], how='outer', indicator='exists')
         # diff.to_csv(diff_file, sep="\t", index=None, header=False)
 
@@ -655,8 +655,10 @@ def _combine_old_and_new_dataframes(all_inflections_file: Path, new_inflections_
     else:
         print(f"{all_inflections_file} unchanged")
 
+    return diff
 
-def _export_to_pickle(output_dir: Path, alt_anusvara=False):
+
+def _export_to_pickle(output_dir: Path, diff: pandas.DataFrame, alt_anusvara=False):
     print("~" * 40)
     print(f"exporting pickles to {output_dir}")
 
@@ -664,6 +666,7 @@ def _export_to_pickle(output_dir: Path, alt_anusvara=False):
 
     all_inflections = diff
 
+    print(f'=== {output_dir} {all_inflections}')  # FIXME DELETE
     for row in range(len(all_inflections)):
         headword = all_inflections.iloc[row, 0]
         inflections = all_inflections.iloc[row, 1]
@@ -686,26 +689,26 @@ def _export_to_pickle(output_dir: Path, alt_anusvara=False):
                 pickle.dump(inflections_list, text_file)
 
 
-def combine_old_and_new_translit_dataframes():
-    _combine_old_and_new_dataframes(
+def combine_old_and_new_translit_dataframes() -> pandas.DataFrame:
+    return _combine_old_and_new_dataframes(
         all_inflections_file=settings.ALL_INFLECTIONS_TRANSLIT_FILE,
-        new_inflections_file="output/new inflections translit.csv",
+        new_inflections_file=settings.NEW_INFLECTIONS_TRANSLIT_FILE,
         diff_file="output/diff translit.csv")
 
 
-def export_translit_to_pickle():
-    _export_to_pickle(settings.INFLECTIONS_TRANSLIT_DIR, alt_anusvara=True)
+def export_translit_to_pickle(diff: pandas.DataFrame):
+    _export_to_pickle(settings.INFLECTIONS_TRANSLIT_DIR, diff, alt_anusvara=True)
 
 
-def combine_old_and_new_dataframes():
-    _combine_old_and_new_dataframes(
+def combine_old_and_new_dataframes() -> pandas.DataFrame:
+    return _combine_old_and_new_dataframes(
         all_inflections_file=settings.ALL_INFLECTIONS_FILE,
-        new_inflections_file="output/new inflections.csv",
+        new_inflections_file=settings.NEW_INFLECTIONS_FILE,
         diff_file="output/diff.csv")
 
 
-def export_inflections_to_pickle():
-    _export_to_pickle(settings.INFLECTIONS_DIR)
+def export_inflections_to_pickle(diff: pandas.DataFrame):
+    _export_to_pickle(settings.INFLECTIONS_DIR, diff)
 
 
 def make_list_of_all_inflections():

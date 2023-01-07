@@ -13,9 +13,11 @@ CSCD_DIR = Path(os.getenv(
 
 # Output paths
 OUTPUT_DIR = Path("output")
-ALL_INFLECTIONS_FILE = OUTPUT_DIR / "all inflections.csv"
-ALL_INFLECTIONS_TRANSLIT_FILE = OUTPUT_DIR / "all inflections translit.csv"
-INFLECTIONS_DIR = OUTPUT_DIR / "inflections"
+ALL_INFLECTIONS_FILE = OUTPUT_DIR/"all inflections.csv"
+NEW_INFLECTIONS_FILE = OUTPUT_DIR/"new inflections.csv"
+ALL_INFLECTIONS_TRANSLIT_FILE = OUTPUT_DIR/"all inflections translit.csv"
+NEW_INFLECTIONS_TRANSLIT_FILE = OUTPUT_DIR/"new inflections translit.csv"
+INFLECTIONS_DIR = OUTPUT_DIR/"inflections"
 INFLECTIONS_TRANSLIT_DIR = OUTPUT_DIR / "inflections translit"
-HTML_TABLES_DIR = OUTPUT_DIR / "html tables"
-HTML_SUTTAS_DIR = OUTPUT_DIR / "html suttas"
+HTML_TABLES_DIR = OUTPUT_DIR/"html tables"
+HTML_SUTTAS_DIR = OUTPUT_DIR/"html suttas"
