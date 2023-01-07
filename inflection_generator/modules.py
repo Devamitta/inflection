@@ -19,7 +19,9 @@ from inflection_generator.sorter import sort_key
 # FIXME Too long, split on modules
 
 # Globals
-inflections_not_exist: List[str] = []
+inflections_not_exist: List[str]
+changed: List[str]
+diff: pandas.DataFrame
 
 
 def convert_dpd_ods_to_csv():
@@ -289,7 +291,7 @@ def test_for_differences_in_stem_and_pattern(dps_df: pandas.DataFrame) -> None:
         print("no headwords stems or patterns changed")
 
 
-def test_if_inflections_exist_suttas(dps_df: pandas.DataFrame) -> None:
+def _test_if_inflections_exist(dps_df: pandas.DataFrame, output_dir: Path) -> None:
     global inflections_not_exist
     inflections_not_exist = []
 
@@ -300,7 +302,7 @@ def test_if_inflections_exist_suttas(dps_df: pandas.DataFrame) -> None:
 
     for row in range(dps_df.shape[0]):
         headword = dps_df.loc[row, "Pāli1"]
-        path = settings.INFLECTIONS_DIR / headword
+        path = output_dir / headword
         if not path.is_file():
             inflections_not_exist.append(headword)
 
@@ -313,26 +315,12 @@ def test_if_inflections_exist_suttas(dps_df: pandas.DataFrame) -> None:
         print("no missing inflection files")
 
 
-def test_if_inflections_exist_dps(dps_df: pandas.DataFrame):
-    global inflections_not_exist
-    inflections_not_exist = []
+def test_if_inflections_exist_suttas(dps_df: pandas.DataFrame) -> None:
+    _test_if_inflections_exist(dps_df, settings.INFLECTIONS_DIR)
 
-    print("~"*40)
-    print("test if inflections exists")
 
-    for row in range(dps_df.shape[0]):
-        headword = dps_df.loc[row, "Pāli1"]
-        path = settings.INFLECTIONS_TRANSLIT_DIR / headword
-
-        if not path.is_file():
-            inflections_not_exist.append(headword)
-
-    if inflections_not_exist:
-        print("~"*40)
-        print("inflection file doesn't exist for:")
-        print("|".join(inflections_not_exist))
-    else:
-        print("no missing inflection files")
+def test_if_inflections_exist_dps(dps_df: pandas.DataFrame) -> None:
+    _test_if_inflections_exist(dps_df, settings.INFLECTIONS_TRANSLIT_DIR)
 
 
 def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
@@ -1143,7 +1131,7 @@ def make_comparison_table():
     eg3_test = sutta_words_df[0].isin(no_eg3_list)
     sutta_words_df["Eg3"] = ~eg3_test
 
-    sutta_words_df.rename(columns={0 :"Pali"}, inplace=True)
+    sutta_words_df.rename(columns={0: "Pali"}, inplace=True)
 
     sutta_words_df.drop_duplicates(subset=["Pali"], keep="first", inplace=True)
 
@@ -1154,7 +1142,7 @@ def make_comparison_table():
     print("making commentary comparison table")
 
     with open(output_path / commentary_file) as text_to_split:
-        word_llst=[word for line in text_to_split for word in line.split(" ")]
+        word_llst = [word for line in text_to_split for word in line.split(" ")]
 
     global commentary_words_df
     commentary_words_df = pandas.DataFrame(word_llst)
@@ -1165,7 +1153,7 @@ def make_comparison_table():
     no_meaning_test = commentary_words_df[0].isin(no_meaning_list)
     commentary_words_df["Meaning"] = no_meaning_test
 
-    commentary_words_df.rename(columns={0 :"Pali"}, inplace=True)
+    commentary_words_df.rename(columns={0: "Pali"}, inplace=True)
 
     commentary_words_df.drop_duplicates(subset=["Pali"], keep="first", inplace=True)
 
@@ -1192,7 +1180,7 @@ def html_find_and_replace():
         sutta_text = input_file.read()
 
     max_row = sutta_words_df.shape[0]
-    row=0
+    row = 0
 
     for word in range(row, max_row):
         pali_word = str(sutta_words_df.iloc[row, 0])
@@ -1308,7 +1296,7 @@ def delete_unused_html_tables():
 def delete_unused_inflections():
     print(f"{timeis()} [green]deleting unused inflections")
 
-    for root, dirs, files in os.walk("output/inflections", topdown=True):
+    for root, dirs, files in os.walk(settings.INFLECTIONS_DIR, topdown=True):
         for file in files:
             if file not in headwords_list:
                 try:
