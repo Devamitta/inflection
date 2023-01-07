@@ -1024,31 +1024,31 @@ def make_list_of_all_inflections_potential(dps_df: pandas.DataFrame, class_file_
 
 def clean_machine(text):
     text = text.lower()
-    text = re.sub("\d", "", text)
-    text = re.sub("\.", "", text)
+    text = re.sub(r"\d", "", text)
+    text = re.sub(r"\.", "", text)
     text = re.sub("/", "", text)
-    text = re.sub("\:", "", text)
-    text = re.sub("\;", "", text)
+    text = re.sub(r"\:", "", text)
+    text = re.sub(r"\;", "", text)
     text = re.sub(",", " ", text)
     text = re.sub("‘", "", text)
     text = re.sub("'", "", text)
     text = re.sub(";", "", text)
     text = re.sub("’", "", text)
     text = re.sub(" ̓ ", " ", text)
-    text = re.sub("\’", "", text)
+    text = re.sub(r"\’", "", text)
     text = re.sub("\"", "", text)
     text = re.sub("!", "", text)
-    text = re.sub("\?", "", text)
-    text = re.sub("\+", "", text)
+    text = re.sub(r"\?", "", text)
+    text = re.sub(r"\+", "", text)
     text = re.sub("=", "", text)
     text = re.sub("﻿", "", text)
     text = re.sub("⇒", "", text)
     text = re.sub("§", " ", text)
-    text = re.sub("\(", "", text)
-    text = re.sub("\)", "", text)
+    text = re.sub(r"\(", "", text)
+    text = re.sub(r"\)", "", text)
     text = re.sub("-", "", text)
     text = re.sub("–", "", text)
-    text = re.sub("\—", " ", text)
+    text = re.sub(r"\—", " ", text)
     text = re.sub("\t", " ", text)
     text = re.sub("…", " ", text)
     text = re.sub("–", "", text)
@@ -1057,12 +1057,12 @@ def clean_machine(text):
     text = re.sub("^ ", "", text)
     text = re.sub("^ ", "", text)
     text = re.sub("^ ", "", text)
-    text = re.sub("\[", "", text)
-    text = re.sub("\]", "", text)
+    text = re.sub(r"\[", "", text)
+    text = re.sub(r"\]", "", text)
     text = re.sub("ṁ", "ṃ", text)
     text = re.sub("〈", "", text)
     text = re.sub("〉", "", text)
-    text = re.sub("\*", "", text)
+    text = re.sub(r"\*", "", text)
     text = re.sub("☸", "", text)
     # text = re.sub("\n", "  ", text)
     text = re.sub("suttaṃ", "suttaṃ\n", text)
@@ -1083,37 +1083,41 @@ def read_and_clean_sutta_text():
     global sub_commentary_file
 
     input_path = settings.CSCD_DIR
-    output_path = settings.HTML_TABLES_DIR
+    output_path = settings.HTML_SUTTAS_DIR
 
-    sutta_dict = pandas.read_csv('sutta corespondence tables/sutta correspondence tables.csv', sep="\t", index_col=0, squeeze=True).to_dict(orient='index',)
+    sutta_dict = pandas.read_csv(
+        'sutta corespondence tables/sutta correspondence tables.csv',
+        sep="\t",
+        index_col=0,
+        squeeze=True).to_dict(orient='index',)
 
     while True:
-        sutta_number = input ("enter sutta number: ")
+        sutta_number = input("enter sutta number: ")
         if sutta_number in sutta_dict.keys():
-            sutta_file = sutta_dict.get(sutta_number).get("mūla")
-            commentary_file = sutta_dict.get(sutta_number).get("aṭṭhakathā")
-            sub_commentary_file = sutta_dict.get(sutta_number).get("ṭīkā")
             break
-        elif sutta_number not in sutta_dict.keys():
+        else:
             print("sutta number not recognised, please try again")
-            continue
 
-    with open(f"{input_path}{sutta_file}", 'r') as input_file :
+    sutta_file = sutta_dict.get(sutta_number).get("mūla")
+    commentary_file = sutta_dict.get(sutta_number).get("aṭṭhakathā")
+    sub_commentary_file = sutta_dict.get(sutta_number).get("ṭīkā")
+
+    with open(input_path / sutta_file, 'r') as input_file:
         sutta_text = input_file.read()
 
     sutta_text = clean_machine(sutta_text)
 
-    with open(f"{output_path}{sutta_file}", "w") as output_file:
+    with open(output_path / sutta_file, "w") as output_file:
         output_file.write(sutta_text)
 
-    # commentary
+    # Commentaries
 
-    with open(f"{input_path}{commentary_file}", 'r') as input_file :
+    with open(input_path / commentary_file, 'r') as input_file:
         commentary_text = input_file.read()
 
     commentary_text = clean_machine(commentary_text)
 
-    with open(f"{output_path}{commentary_file}", "w") as output_file:
+    with open(output_path / commentary_file, "w") as output_file:
         output_file.write(commentary_text)
 
 
@@ -1121,10 +1125,10 @@ def make_comparison_table():
     print("~" * 40)
     print("making sutta comparison table")
 
-    output_path = settings.HTML_TABLES_DIR
+    output_path = settings.HTML_SUTTAS_DIR
 
-    with open(f"{output_path}{sutta_file}") as text_to_split:
-        word_llst=[word for line in text_to_split for word in line.split(" ")]
+    with open(output_path / sutta_file) as text_to_split:
+        word_llst = [word for line in text_to_split for word in line.split(" ")]
 
     global sutta_words_df
     sutta_words_df = pandas.DataFrame(word_llst)
@@ -1148,13 +1152,13 @@ def make_comparison_table():
 
     sutta_words_df.drop_duplicates(subset=["Pali"], keep="first", inplace=True)
 
-    with open(f"{output_path}{sutta_file}.csv", 'w') as txt_file:
+    with open(output_path / f"{sutta_file}.csv", 'w') as txt_file:
         sutta_words_df.to_csv(txt_file, header=True, index=True, sep="\t")
 
     print("~" * 40)
     print("making commentary comparison table")
 
-    with open(f"{output_path}{commentary_file}") as text_to_split:
+    with open(output_path / commentary_file) as text_to_split:
         word_llst=[word for line in text_to_split for word in line.split(" ")]
 
     global commentary_words_df
@@ -1170,7 +1174,7 @@ def make_comparison_table():
 
     commentary_words_df.drop_duplicates(subset=["Pali"], keep="first", inplace=True)
 
-    with open(f"{output_path}{commentary_file}.csv", 'w') as txt_file:
+    with open(output_path / f"{commentary_file}.csv", 'w') as txt_file:
         commentary_words_df.to_csv(txt_file, header=True, index=True, sep="\t")
 
 
@@ -1179,7 +1183,7 @@ def html_find_and_replace():
     print("finding and replacing sutta html")
     print("~" * 40)
 
-    output_path = settings.HTML_TABLES_DIR
+    output_path = settings.HTML_SUTTAS_DIR
 
     global sutta_text
     global commentary_text
@@ -1189,7 +1193,7 @@ def html_find_and_replace():
     no_eg2_string = ""
     no_eg3_string = ""
 
-    with open(f"{output_path}{sutta_file}", 'r') as input_file:
+    with open(output_path / sutta_file, 'r') as input_file:
         sutta_text = input_file.read()
 
     max_row = sutta_words_df.shape[0]
@@ -1240,15 +1244,15 @@ def html_find_and_replace():
 def write_html():
     create_directories()
 
-    output_path = settings.HTML_TABLES_DIR
+    output_path = settings.HTML_SUTTAS_DIR
     html1 = importlib.resources.read_text(__package__, 'part1.html')
 
     # html2 = """</div><div id="right">"""
 
     html3 = """</div></div>"""
 
-    html_file = open(f"{output_path}{sutta_file}.html", "w")
-    html_file = open(f"{output_path}{sutta_file}.html", "a")
+    html_file = open(output_path / f"{sutta_file}.html", "w")
+    html_file = open(output_path / f"{sutta_file}.html", "a")
     html_file.write(html1)
     html_file.write(sutta_text)
     # html_file.write(html2)

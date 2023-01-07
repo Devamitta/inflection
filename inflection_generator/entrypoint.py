@@ -53,6 +53,11 @@ def generate(args: argparse.Namespace) -> None:
     print(f"{timeis()} ----------------------------------------")
 
 
+def suttas() -> None:
+    modules.read_and_clean_sutta_text()
+    #make_comparison_table()
+
+
 def main() -> None:
     ARGS = get_argparser().parse_args()
     generate(ARGS)

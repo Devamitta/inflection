@@ -20,7 +20,7 @@ def create_directories() -> None:
     dirs = [
         settings.OUTPUT_DIR,
         settings.HTML_TABLES_DIR,
-        "output/html suttas/",
+        settings.HTML_SUTTAS_DIR,
         "output/inflections in table/",
         "output/inflections translit/",
         "output/inflections/",
