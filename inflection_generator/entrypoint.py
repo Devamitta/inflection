@@ -50,9 +50,6 @@ def generate_inflections(args: argparse.Namespace) -> None:
     modules.delete_unused_inflections()
     modules.delete_unused_inflections_translit()
 
-    # FIXME Delete prints
-    print(diff)
-    print(diff_translit)
     print(f"{timeis()} ----------------------------------------")
 
 

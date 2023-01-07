@@ -519,7 +519,6 @@ class InflectionTableGenerator:
             pattern = self._data.loc[row, "Pattern"]
 
             if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
-                #print(f'=== {headword} in {inflections_not_exist}')  # FIXME Delete
                 self._create_html_table(row)
 
 
@@ -625,20 +624,15 @@ def _combine_old_and_new_dataframes(all_inflections_file: Path, new_inflections_
 
         new_inflections = pandas.read_csv(new_inflections_file, header=None, sep="\t")
 
-        print(f'=== ALLINF {all_inflections}')
-        print(f'=== NEWINF {new_inflections}')  # FIXME DEL
         diff = pandas.merge(all_inflections, new_inflections, on=[0], how='outer', indicator='exists')
-        # diff.to_csv(diff_file, sep="\t", index=None, header=False)
 
-        # copy changes
-
+        # Copy changed items
         test1 = diff["exists"] == "both"
         test2 = diff["1_y"] != ""
         filter = test1 & test2
         diff.loc[filter, "1_x"] = diff.loc[filter, "1_y"]
 
-        # add new
-
+        # Add new items
         test1 = diff["exists"] == "right_only"
         test2 = diff["1_y"] != ""
         filter = test1 & test2
@@ -646,9 +640,9 @@ def _combine_old_and_new_dataframes(all_inflections_file: Path, new_inflections_
 
         # FIXME !!! How to delete non existent?
 
-        # drop columns and write to csv
+        # Order columns
+        diff = diff[[0, "1_x"]]
 
-        diff.drop(columns=["1_y", "exists"], inplace=True)
         diff.to_csv(all_inflections_file, sep="\t", index=None, header=False)
         print(f"{all_inflections_file} updated")
 
@@ -666,7 +660,6 @@ def _export_to_pickle(output_dir: Path, diff: pandas.DataFrame, alt_anusvara=Fal
 
     all_inflections = diff
 
-    print(f'=== {output_dir} {all_inflections}')  # FIXME DELETE
     for row in range(len(all_inflections)):
         headword = all_inflections.iloc[row, 0]
         inflections = all_inflections.iloc[row, 1]
@@ -725,12 +718,12 @@ def make_list_of_all_inflections():
     # global all_inflections_list
     all_inflections_string = ""
     all_inflections_length = all_inflections_df.shape[0]
-    for row in range (all_inflections_length):
+    for row in range(all_inflections_length):
         headword = all_inflections_df.iloc[row, 0]
         inflections = all_inflections_df.iloc[row, 1]
         all_inflections_string += inflections
 
-        if row %5000 == 0:
+        if row % 5000 == 0:
             print(f"{row} {headword}")
 
     all_inflections_list = all_inflections_string.split()
