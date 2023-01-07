@@ -18,14 +18,14 @@ class Kind(enum.Enum):
 
 def create_directories() -> None:
     dirs = [
-        settings.OUTPUT_DIR,
-        settings.HTML_TABLES_DIR,
-        settings.HTML_SUTTAS_DIR,
         "output/inflections in table/",
         "output/inflections translit/",
-        "output/inflections/",
         "output/patterns/",
         "output/pickle test/",
+        settings.HTML_SUTTAS_DIR,
+        settings.HTML_TABLES_DIR,
+        settings.INFLECTIONS_DIR,
+        settings.OUTPUT_DIR,
     ]
 
     for d in dirs:

@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 import importlib
 import os
 import pickle
@@ -16,6 +17,9 @@ from inflection_generator.sorter import sort_key
 
 # TODO Try to avoid global keyword in the module
 # FIXME Too long, split on modules
+
+# Globals
+inflections_not_exist: List[str] = []
 
 
 def convert_dpd_ods_to_csv():
@@ -288,26 +292,22 @@ def test_for_differences_in_stem_and_pattern(dps_df: pandas.DataFrame) -> None:
 def test_if_inflections_exist_suttas(dps_df: pandas.DataFrame) -> None:
     global inflections_not_exist
     inflections_not_exist = []
-    inflections_not_exists_string = ""
 
-    print("~"*40)
+    print("~" * 40)
     print("test if inflections exists")
+
+    create_directories()
 
     for row in range(dps_df.shape[0]):
         headword = dps_df.loc[row, "Pāli1"]
-
-        try:
-            with open(f"output/inflections/{headword}", "rb") as syn_file:
-                pass
-            with open(f"output/inflections/{headword}", "rb") as syn_file:
-                pass
-        except FileNotFoundError:
-            inflections_not_exists_string += headword + "|"
+        path = settings.INFLECTIONS_DIR / headword
+        if not path.is_file():
             inflections_not_exist.append(headword)
 
-    if inflections_not_exists_string != "":
+    if inflections_not_exist:
         print("~"*40)
-        print(f"inflection file doesn't exist for:\n{inflections_not_exists_string}")
+        print("inflection file doesn't exist for:")
+        print("|".join(inflections_not_exist))
         print("~"*40)
 
     if inflections_not_exist == []:
@@ -769,7 +769,7 @@ def export_inflections_to_pickle():
 
             inflections_list = list(dict.fromkeys(inflections_list))
 
-            with open(f"output/inflections/{headword}", "wb") as text_file:
+            with open(settings.INFLECTIONS_DIR / headword, "wb") as text_file:
                 pickle.dump(inflections_list, text_file)
 
 
@@ -1313,7 +1313,7 @@ def delete_unused_inflections():
         for file in files:
             if file not in headwords_list:
                 try:
-                    os.remove(f"output/inflections/{file}")
+                    os.remove(settings.INFLECTIONS_DIR / file)
                 except FileNotFoundError:
                     print(f"{timeis()} [red]{file} not found")
                 else:
