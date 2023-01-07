@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 import importlib
 import os
 import pickle
@@ -22,6 +22,7 @@ from inflection_generator.sorter import sort_key
 inflections_not_exist: List[str]
 changed: List[str]
 diff: pandas.DataFrame
+new_inflections_dict: Dict = {}
 
 
 def convert_dpd_ods_to_csv():
@@ -519,7 +520,7 @@ class InflectionTableGenerator:
             pattern = self._data.loc[row, "Pattern"]
 
             if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
-                print(f'{headword} in {changed} or {pattern} in {pattern_changed} or {headword} in {inflections_not_exist}')  # FIXME Delete
+                #print(f'{headword} in {changed} or {pattern} in {pattern_changed} or {headword} in {inflections_not_exist}')  # FIXME Delete
                 self._create_html_table(row)
 
 
@@ -653,16 +654,15 @@ def combine_old_and_new_translit_dataframes():
         print(f"{settings.ALL_INFLECTIONS_TRANSLIT_FILE} unchanged")
 
 
-def export_translit_to_pickle():
+def _export_to_pickle(output_dir: Path, alt_anusvara=False):
     print("~" * 40)
-    print("exporting inflections translit to pickle")
+    print(f"exporting pickles to {output_dir}")
 
     create_directories()
 
     all_inflections = diff
 
     for row in range(len(all_inflections)):
-
         headword = all_inflections.iloc[row, 0]
         inflections = all_inflections.iloc[row, 1]
 
@@ -674,16 +674,18 @@ def export_translit_to_pickle():
             inflections_list = inflections.split()
 
             # add ṁ version
-
-            for word in inflections_list:
-                if 'ṃ' in word:
-                    wordṁ = re.sub("ṃ", "ṁ", word)
-                    inflections_list.append(wordṁ)
+            if alt_anusvara:
+                alt_list = [word.replace("ṃ", "ṁ") for word in inflections_list if 'ṃ' in word]
+                inflections_list.extend(alt_list)
 
             inflections_list = list(dict.fromkeys(inflections_list))
 
-            with open(settings.INFLECTIONS_TRANSLIT_DIR / headword, "wb") as text_file:
+            with open(output_dir / headword, "wb") as text_file:
                 pickle.dump(inflections_list, text_file)
+
+
+def export_translit_to_pickle():
+    _export_to_pickle(settings.INFLECTIONS_TRANSLIT_DIR, alt_anusvara=True)
 
 
 def combine_old_and_new_dataframes():
@@ -732,32 +734,7 @@ def combine_old_and_new_dataframes():
 
 
 def export_inflections_to_pickle():
-
-    print("~" * 40)
-    print("exporting inflections to pickle")
-
-    all_inflections = diff
-
-    length = len(all_inflections)
-
-    for row in range(length):
-
-        headword = all_inflections.iloc[row, 0]
-        inflections = all_inflections.iloc[row, 1]
-
-        # !!! how to delete headword when no longer exists  ???
-
-        if headword in new_inflections_dict.keys():
-            print(headword)
-
-            inflections_list = inflections.split()
-
-            # add ṁ version
-
-            inflections_list = list(dict.fromkeys(inflections_list))
-
-            with open(settings.INFLECTIONS_DIR / headword, "wb") as text_file:
-                pickle.dump(inflections_list, text_file)
+    _export_to_pickle(settings.INFLECTIONS_DIR)
 
 
 def make_list_of_all_inflections():
