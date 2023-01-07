@@ -13,7 +13,7 @@ def get_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def generate(args: argparse.Namespace) -> None:
+def generate_inflections(args: argparse.Namespace) -> None:
     print(f"{timeis()} ----------------------------------------")
 
     inflection_table_index = modules.create_inflection_table_index()
@@ -53,11 +53,6 @@ def generate(args: argparse.Namespace) -> None:
     print(f"{timeis()} ----------------------------------------")
 
 
-def suttas() -> None:
-    modules.read_and_clean_sutta_text()
-    #make_comparison_table()
-
-
 def main() -> None:
     ARGS = get_argparser().parse_args()
-    generate(ARGS)
+    generate_inflections(ARGS)
