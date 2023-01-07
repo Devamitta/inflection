@@ -613,20 +613,22 @@ def transcribe_new_inflections():
         print("no new inflections to transcribe")
 
 
-def combine_old_and_new_translit_dataframes():
+def _combine_old_and_new_dataframes(all_inflections_file: Path, new_inflections_file: Path, diff_file: Path) -> None:
     print("~" * 40)
     print("combing old and new dataframes:")
+
+    create_directories()
 
     global diff
     diff = pandas.DataFrame()
 
     if new_inflections_dict != {}:
-        all_inflections_translit = data_frame_from_inflections_csv(settings.ALL_INFLECTIONS_TRANSLIT_FILE)
+        all_inflections = data_frame_from_inflections_csv(all_inflections_file)
 
-        new_inflections_translit = pandas.read_csv("output/new inflections translit.csv", header=None, sep="\t")
+        new_inflections = pandas.read_csv(new_inflections_file, header=None, sep="\t")
 
-        diff = pandas.merge(all_inflections_translit, new_inflections_translit, on=[0], how='outer', indicator='exists')
-        # diff.to_csv("output/diff translit.csv", sep="\t", index=None)
+        diff = pandas.merge(all_inflections, new_inflections, on=[0], how='outer', indicator='exists')
+        # diff.to_csv(diff_file, sep="\t", index=None, header=False)
 
         # copy changes
 
@@ -647,11 +649,11 @@ def combine_old_and_new_translit_dataframes():
         # drop columns and write to csv
 
         diff.drop(columns=["1_y", "exists"], inplace=True)
-        diff.to_csv(settings.ALL_INFLECTIONS_TRANSLIT_FILE, sep="\t", index=None, header=False)
-        print(f"{settings.ALL_INFLECTIONS_TRANSLIT_FILE} updated")
+        diff.to_csv(all_inflections_file, sep="\t", index=None, header=False)
+        print(f"{all_inflections_file} updated")
 
     else:
-        print(f"{settings.ALL_INFLECTIONS_TRANSLIT_FILE} unchanged")
+        print(f"{all_inflections_file} unchanged")
 
 
 def _export_to_pickle(output_dir: Path, alt_anusvara=False):
@@ -684,53 +686,22 @@ def _export_to_pickle(output_dir: Path, alt_anusvara=False):
                 pickle.dump(inflections_list, text_file)
 
 
+def combine_old_and_new_translit_dataframes():
+    _combine_old_and_new_dataframes(
+        all_inflections_file=settings.ALL_INFLECTIONS_TRANSLIT_FILE,
+        new_inflections_file="output/new inflections translit.csv",
+        diff_file="output/diff translit.csv")
+
+
 def export_translit_to_pickle():
     _export_to_pickle(settings.INFLECTIONS_TRANSLIT_DIR, alt_anusvara=True)
 
 
 def combine_old_and_new_dataframes():
-    print("~" * 40)
-    print("combinging old and new dataframes:")
-
-    create_directories()
-
-    global diff
-    diff = pandas.DataFrame()
-
-    if new_inflections_dict != {}:
-        all_inflections_df = data_frame_from_inflections_csv(settings.ALL_INFLECTIONS_FILE)
-
-        new_inflections_df = pandas.read_csv("output/new inflections.csv", header=None, sep="\t")
-
-        diff = pandas.merge(all_inflections_df, new_inflections_df, on=[0], how='outer', indicator='exists')
-        # diff.to_csv("output/diff.csv", sep="\t", index=None, header=False)
-
-        # copy changes
-
-        test1 = diff["exists"] == "both"
-        test2 = diff["1_y"] != ""
-        filter = test1 & test2
-        diff.loc[filter, "1_x"] = diff.loc[filter, "1_y"]
-
-        # add new
-
-        test1 = diff["exists"] == "right_only"
-        test2 = diff["1_y"] != ""
-        filter = test1 & test2
-        diff.loc[filter, "1_x"] = diff.loc[filter, "1_y"]
-
-        # !!! how to delete non existent
-
-        # drop columns and write to csv
-
-        diff.drop(columns=["1_y", "exists"], inplace=True)
-
-        diff.to_csv(settings.ALL_INFLECTIONS_FILE, sep="\t", index=None, header=False)
-
-        print("all inflections.csv updated")
-
-    else:
-        print("all inflections.csv unchanged")
+    _combine_old_and_new_dataframes(
+        all_inflections_file=settings.ALL_INFLECTIONS_FILE,
+        new_inflections_file="output/new inflections.csv",
+        diff_file="output/diff.csv")
 
 
 def export_inflections_to_pickle():
