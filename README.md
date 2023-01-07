@@ -55,3 +55,4 @@ changes.
 ## TODO
 
 - Fix func args in `test*.py`
+- All output should be generated on first run

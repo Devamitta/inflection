@@ -16,7 +16,6 @@ from inflection_generator.helpers import Kind, create_directories, data_frame_fr
 from inflection_generator.sorter import sort_key
 
 # TODO Try to avoid global keyword in the module
-# TODO Better to use paths without spaces (see also create_directories())
 # FIXME Too long, split on modules
 
 # Globals
@@ -537,6 +536,7 @@ class InflectionTableGenerator:
             pattern = self._data.loc[row, "Pattern"]
 
             if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
+                print(f'{headword} in {changed} or {pattern} in {pattern_changed} or {headword} in {inflections_not_exist}')  # FIXME Delete
                 self._create_html_table(row)
 
 
@@ -1082,11 +1082,8 @@ def read_and_clean_sutta_text():
     global commentary_file
     global sub_commentary_file
 
-    global input_path
-    input_path = "/home/deva/Documents/dpd-br/pure-machine-readable-corpus/cscd/"
-
-    global output_path
-    output_path = "output/html suttas/"
+    input_path = settings.CSCD_DIR
+    output_path = settings.HTML_TABLES_DIR
 
     sutta_dict = pandas.read_csv('sutta corespondence tables/sutta correspondence tables.csv', sep="\t", index_col=0, squeeze=True).to_dict(orient='index',)
 
@@ -1123,6 +1120,8 @@ def read_and_clean_sutta_text():
 def make_comparison_table():
     print("~" * 40)
     print("making sutta comparison table")
+
+    output_path = settings.HTML_TABLES_DIR
 
     with open(f"{output_path}{sutta_file}") as text_to_split:
         word_llst=[word for line in text_to_split for word in line.split(" ")]
@@ -1180,6 +1179,8 @@ def html_find_and_replace():
     print("finding and replacing sutta html")
     print("~" * 40)
 
+    output_path = settings.HTML_TABLES_DIR
+
     global sutta_text
     global commentary_text
 
@@ -1209,6 +1210,7 @@ def html_find_and_replace():
 
         if meaning_exists == "False":
 
+            # TODO Shorten literals
             sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "highlight">\\2</span>\\3""", sutta_text)
             no_meaning_string += pali_word + " "
 
@@ -1227,6 +1229,7 @@ def html_find_and_replace():
             sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "blue">\\2</span>\\3""", sutta_text)
             no_eg3_string += pali_word + " "
 
+    # TODO Shorten literals with f-strings
     sutta_text = re.sub("\n", "<br><br>", sutta_text)
     sutta_text += "<br><br>" + 'no meanings: <span class = "highlight">' + no_meaning_string + "</span>"
     sutta_text += "<br><br>" + 'no eg1: <span class = "red">' + no_eg1_string + "</span>"
@@ -1237,6 +1240,7 @@ def html_find_and_replace():
 def write_html():
     create_directories()
 
+    output_path = settings.HTML_TABLES_DIR
     html1 = importlib.resources.read_text(__package__, 'part1.html')
 
     # html2 = """</div><div id="right">"""
