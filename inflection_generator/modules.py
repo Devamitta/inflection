@@ -1115,10 +1115,10 @@ def html_find_and_replace():
     global sutta_text
     global commentary_text
 
-    no_meaning_string = ""
-    no_eg1_string = ""
-    no_eg2_string = ""
-    no_eg3_string = ""
+    no_meaning = []
+    no_eg1 = []
+    no_eg2 = []
+    no_eg3 = []
 
     with open(output_path / sutta_file, 'r') as input_file:
         sutta_text = input_file.read()
@@ -1137,35 +1137,29 @@ def html_find_and_replace():
         if row % 250 == 0:
             print(f"{row}/{max_row}\t{pali_word}")
 
-        row +=1
+        row += 1
 
         if meaning_exists == "False":
-
-            # TODO Shorten literals
-            sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "highlight">\\2</span>\\3""", sutta_text)
-            no_meaning_string += pali_word + " "
+            sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", r'\\1<span class="highlight">\\2</span>\\3', sutta_text)
+            no_meaning.append(pali_word)
 
         elif eg1_exists == "False":
-
-            sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "red">\\2</span>\\3""", sutta_text)
-            no_eg1_string += pali_word + " "
+            sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", r'\\1<span class="red">\\2</span>\\3', sutta_text)
+            no_eg1.append(pali_word)
 
         elif eg2_exists == "False":
-
-            sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "green">\\2</span>\\3""", sutta_text)
-            no_eg2_string += pali_word + " "
+            sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", r'\\1<span class="green">\\2</span>\\3', sutta_text)
+            no_eg2.append(pali_word)
 
         elif eg3_exists == "False":
+            sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", r'\\1<span class="blue">\\2</span>\\3', sutta_text)
+            no_eg3.append(pali_word)
 
-            sutta_text = re.sub(fr"(^|\s)({pali_word})(\s|\n|$)", f"""\\1<span class = "blue">\\2</span>\\3""", sutta_text)
-            no_eg3_string += pali_word + " "
-
-    # TODO Shorten literals with f-strings
     sutta_text = re.sub("\n", "<br><br>", sutta_text)
-    sutta_text += "<br><br>" + 'no meanings: <span class = "highlight">' + no_meaning_string + "</span>"
-    sutta_text += "<br><br>" + 'no eg1: <span class = "red">' + no_eg1_string + "</span>"
-    sutta_text += "<br><br>" + 'no eg2: <span class = "green">' + no_eg2_string + "</span>"
-    sutta_text += "<br><br>" + 'no eg3: <span class = "blue">' + no_eg3_string + "</span>"
+    sutta_text += f'<br><br>no meanings: <span class="highlight">{" ".join(no_meaning)}</span>'
+    sutta_text += f'<br><br>no eg1: <span class="red">{" ".join(no_eg1)}</span>'
+    sutta_text += f'<br><br>no eg2: <span class="green">{" ".join(no_eg2)}</span>'
+    sutta_text += f'<br><br>no eg3: <span class="blue">{" ".joint(no_eg3)}</span>'
 
 
 def write_html():

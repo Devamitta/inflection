@@ -49,10 +49,6 @@ Or in an old style:
 python3 'inflection generator.py'
 ```
 
-At first time utility should be ran multiple times until output will not
-changes.
-
 ## TODO
 
-- Fix func args in `test*.py`
-- All output should be generated on first run
+- Fix executables `*.py`
