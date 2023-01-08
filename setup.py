@@ -19,7 +19,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'inflection-generator=inflection_generator.entrypoint:main',
+            'inflection-generator=inflection_generator.cli:main',
         ]
     },
     classifiers=[

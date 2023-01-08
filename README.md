@@ -48,7 +48,3 @@ Or in an old style:
 ```shell
 python3 'inflection generator.py'
 ```
-
-## TODO
-
-- Fix executables `*.py`

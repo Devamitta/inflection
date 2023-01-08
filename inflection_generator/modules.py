@@ -22,6 +22,9 @@ from inflection_generator.sorter import sort_key
 inflections_not_exist: List[str]
 changed: List[str]
 new_inflections_dict: Dict = {}
+no_eg1_list: List[str]
+no_eg2_list: List[str]
+no_eg3_list: List[str]
 
 
 def convert_dpd_ods_to_csv():
@@ -689,7 +692,7 @@ def combine_old_and_new_translit_dataframes() -> pandas.DataFrame:
         diff_file="output/diff translit.csv")
 
 
-def export_translit_to_pickle(diff: pandas.DataFrame):
+def export_translit_to_pickle(diff: pandas.DataFrame) -> None:
     _export_to_pickle(settings.INFLECTIONS_TRANSLIT_DIR, diff, alt_anusvara=True)
 
 
@@ -700,11 +703,11 @@ def combine_old_and_new_dataframes() -> pandas.DataFrame:
         diff_file="output/diff.csv")
 
 
-def export_inflections_to_pickle(diff: pandas.DataFrame):
+def export_inflections_to_pickle(diff: pandas.DataFrame) -> None:
     _export_to_pickle(settings.INFLECTIONS_DIR, diff)
 
 
-def make_list_of_all_inflections():
+def make_list_of_all_inflections() -> None:
     print("~" * 40)
     print("creating all inflections df")
 
@@ -998,7 +1001,7 @@ def clean_machine(text):
     return text
 
 
-def read_and_clean_sutta_text():
+def read_and_clean_sutta_text() -> None:
     create_directories()
 
     print("~" * 40)
@@ -1048,7 +1051,7 @@ def read_and_clean_sutta_text():
         output_file.write(commentary_text)
 
 
-def make_comparison_table():
+def make_comparison_table() -> None:
     print("~" * 40)
     print("making sutta comparison table")
 
@@ -1105,7 +1108,7 @@ def make_comparison_table():
         commentary_words_df.to_csv(txt_file, header=True, index=True, sep="\t")
 
 
-def html_find_and_replace():
+def html_find_and_replace() -> None:
     print("~" * 40)
     print("finding and replacing sutta html")
     print("~" * 40)
@@ -1162,7 +1165,7 @@ def html_find_and_replace():
     sutta_text += f'<br><br>no eg3: <span class="blue">{" ".joint(no_eg3)}</span>'
 
 
-def write_html():
+def write_html() -> None:
     create_directories()
 
     output_path = settings.HTML_SUTTAS_DIR
