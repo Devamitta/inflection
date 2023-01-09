@@ -8,31 +8,43 @@ Generate all inflections from scratch and write to CSV, HTML and text.
 
 > Run following commands from the root directory of the repo
 
-Create and activate an env:
+Create and activate a Python environment:
 
 ```shell
 python3 -m venv env
 source env/bin/activate
 ```
 
-Install dependencies:
+`source` command should be run for every new shell.
+
+> Creating an environment is optional but recommended.
+
+Install the package:
 
 ```shell
-pip3 install -r requirements.txt
+pip3 install -e .
 ```
 
-Directory with CSV files of dictionary may be set with `DPS_DIR` environment
+> `-e` flag makes installations editable, i.e. package may be edited in place
+> without reinstallation.
+
+Directory with the dictionary sources may be set with `DPS_DIR` environment
 variable:
 
 ```shell
-export DPS_DIR='/PATH/TO/FILES/'
+export DPS_DIR='/PATH/TO/DIR/'
 ```
 
-## TODO
+`DPS_DIR` directory expected to contain `spreadsheets` subdirectory with CSV
+files.
 
-- ~~Untabify~~
-- Remove timeis.py
-- Remove spaces in names of modules
-- Make variables' names ASCII-only
-- Merge generator modules
-- Create necessary dirs
+Run generator with command:
+
+```shell
+inflection-generator --kind DPS
+```
+
+Or in an old style:
+```shell
+python3 'inflection generator.py'
+```

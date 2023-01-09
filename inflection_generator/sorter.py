@@ -1,5 +1,4 @@
 def sort_key(word):
-
     pāli_alphabet = [
         "√", "a", "ā", "i", "ī", "u", "ū", "e", "o", "k", "kh", "g", "gh", "ṅ",
         "c", "ch", "j", "jh", "ñ", "ṭ", "ṭh", "ḍ", "ḍḥ", "ṇ", "t", "th", "d",
@@ -8,7 +7,7 @@ def sort_key(word):
     ]
 
     # comp iteration condition
-    dl = [i for i in pāli_alphabet if len(i) > 1]
+    dl = [i for i in pali_alphabet if len(i) > 1]
 
     for i in dl:
         word = word.replace(i, '/{}'.format(i))
@@ -26,5 +25,5 @@ def sort_key(word):
 
     word = wordVe
 
-    pāli_alphabet_string = '-'.join(pāli_alphabet)
-    return [pāli_alphabet_string.find('-' + x + '-') for x in wordVe]
+    pali_alphabet_string = '-'.join(pali_alphabet)
+    return [pali_alphabet_string.find('-' + x + '-') for x in wordVe]
