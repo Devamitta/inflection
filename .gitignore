@@ -1,4 +1,6 @@
 data/
+env/
+inflection_generator.egg-info/
 data/csv
 data/df
 errors.txt
