@@ -1,4 +1,5 @@
-from typing import List
+from pathlib import Path
+from typing import Dict, List
 
 import pandas
 import rich
@@ -8,15 +9,26 @@ from inflection_generator.helpers import timeis
 
 
 class AbbreviationTranslator:
+    overrides_file = settings.DECLENSIONS_AND_CONJUGATIONS_OVERRIDES_FILE
+
     def __init__(self, script: str, declensions_file=settings.DECLENSIONS_AND_CONJUGATIONS_FILE):
+        abbrev_dict = self._dict_from_file(declensions_file, script)
+        override_dict = self._dict_from_file(self.overrides_file, script)
+        abbrev_dict.update(override_dict)
+
+        self._abbrev_dict = abbrev_dict
+        self._len_sorted_keys = sorted(list(abbrev_dict), key=len, reverse=True)
+
+    @staticmethod
+    def _dict_from_file(file_path: Path, script: str) -> Dict[str, str]:
         abbrev_frame = pandas.read_excel(
-            declensions_file,
+            file_path,
             sheet_name="abbreviations",
             dtype=str,
             keep_default_na=True,)
 
         if script not in abbrev_frame:
-            raise RuntimeError(f"No script variant {script} for abbreviations in {declensions_file}")
+            raise RuntimeError(f"No script variant {script} for abbreviations in {file_path}")
 
         # Filter rows with empty translation cell
         abbrev_frame = abbrev_frame[~abbrev_frame[script].isnull()]
@@ -24,8 +36,7 @@ class AbbreviationTranslator:
         abbreviations = abbrev_frame["name"]
         translates = abbrev_frame[script]
 
-        self._abbrev_dict = dict(zip(abbreviations, translates))
-        self._len_sorted_keys = sorted(abbreviations, key=len, reverse=True)
+        return dict(zip(abbreviations, translates))
 
     def get(self, key: str, default=None) -> str:
         return self._abbrev_dict.get(key, default)
@@ -37,7 +48,7 @@ class AbbreviationTranslator:
         for tok in tokens:
             tok_new = self._abbrev_dict.get(tok)
             if tok_new is None:
-                rich.print(f'{timeis()} [red] no translation for abbreviature "{tok}"')
+                rich.print(f'{timeis()} [red] no translation for abbreviation "{tok}"')
                 tok_new = tok
             tokens_new.append(tok_new)
 

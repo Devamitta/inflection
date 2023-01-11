@@ -6,6 +6,7 @@ from pathlib import Path
 
 # Source paths
 DECLENSIONS_AND_CONJUGATIONS_FILE = Path("declensions & conjugations.xlsx")
+DECLENSIONS_AND_CONJUGATIONS_OVERRIDES_FILE = Path("declensions_n_conjugations_overrides.xlsx")
 DPS_DIR = Path(os.getenv("DPS_DIR", "../"))
 CSCD_DIR = Path(os.getenv(
     "CSCD_DIR",
