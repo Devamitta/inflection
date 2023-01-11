@@ -1,6 +1,6 @@
+from importlib import resources
 from pathlib import Path
 from typing import List, Dict
-import importlib
 import os
 import pickle
 import re
@@ -24,7 +24,7 @@ changed: List[str]
 new_inflections_dict: Dict = {}
 no_eg1_list: List[str]
 no_eg2_list: List[str]
-no_eg3_list: List[str]
+no_eg3_list: List[str] = []
 
 
 def convert_dpd_ods_to_csv():
@@ -1196,14 +1196,14 @@ def html_find_and_replace() -> None:
     sutta_text += f'<br><br>no meanings: <span class="highlight">{" ".join(no_meaning)}</span>'
     sutta_text += f'<br><br>no eg1: <span class="red">{" ".join(no_eg1)}</span>'
     sutta_text += f'<br><br>no eg2: <span class="green">{" ".join(no_eg2)}</span>'
-    sutta_text += f'<br><br>no eg3: <span class="blue">{" ".joint(no_eg3)}</span>'
+    sutta_text += f'<br><br>no eg3: <span class="blue">{" ".join(no_eg3)}</span>'
 
 
 def write_html() -> None:
     create_directories()
 
     output_path = settings.HTML_SUTTAS_DIR
-    html1 = importlib.resources.read_text(__package__, 'part1.html')
+    html1 = resources.read_text(__package__, 'part1.html')
 
     # html2 = """</div><div id="right">"""
 
