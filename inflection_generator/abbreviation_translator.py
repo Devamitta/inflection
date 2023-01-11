@@ -1,6 +1,10 @@
+from typing import List
+
 import pandas
+import rich
 
 from inflection_generator import settings
+from inflection_generator.helpers import timeis
 
 
 class AbbreviationTranslator:
@@ -27,7 +31,14 @@ class AbbreviationTranslator:
         return self._abbrev_dict.get(key, default)
 
     def translate_string(self, string: str) -> str:
-        for key in self._len_sorted_keys:
-            val = self._abbrev_dict[key]
-            string = string.replace(key, val)
-        return string
+        tokens = string.split()
+        tokens_new: List[str] = []
+
+        for tok in tokens:
+            tok_new = self._abbrev_dict.get(tok)
+            if tok_new is None:
+                rich.print(f'{timeis()} [red] no translation for abbreviature "{tok}"')
+                tok_new = tok
+            tokens_new.append(tok_new)
+
+        return " ".join(tokens_new)
