@@ -24,7 +24,7 @@ def main():
     modules.make_list_of_all_inflections_no_meaning(data)
     modules.make_list_of_all_inflections_no_eg1(data)
     modules.make_list_of_all_inflections_no_eg2(data)
-    # modules.make_list_of_all_inflections_no_eg3(data)
+    modules.make_list_of_all_inflections_no_eg3(data)
     modules.read_and_clean_sutta_text()
     modules.make_comparison_table()
     modules.html_find_and_replace()

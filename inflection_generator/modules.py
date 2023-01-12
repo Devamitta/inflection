@@ -918,6 +918,40 @@ def make_list_of_all_inflections_no_eg2(dps_df: pandas.DataFrame) -> None:
     no_eg2_list = list(dict.fromkeys(no_eg2_list))
 
 
+def make_list_of_all_inflections_no_eg3(dps_df: pandas.DataFrame) -> None:
+    print("~" * 40)
+    print("making list of all inflections with sbs")
+    print("~" * 40)
+
+    global no_eg3_list
+
+    test1 = dps_df["POS"] == "prefix"
+    # test2 = dps_df["Chapter 2"] != ""
+    filter = test1
+    no_eg3_df = dps_df[filter]
+
+    no_eg3_headword_list = no_eg3_df["Pāli1"].tolist()
+
+    no_eg3_df = all_inflections_df[all_inflections_df[0].isin(no_eg3_headword_list)]
+
+    no_eg3_string = ""
+    all_inflections_length = all_inflections_df.shape[0]
+    for row in range(all_inflections_length):
+        headword = all_inflections_df.iloc[row, 0]
+        inflections = all_inflections_df.iloc[row, 1]
+
+        if row % 5000 == 0:
+            print(f"{row} {headword}")
+
+        if headword in no_eg3_headword_list:
+            no_eg3_string += inflections
+
+    no_eg3_list = no_eg3_string.split()
+    no_eg3_list = list(dict.fromkeys(no_eg3_list))
+
+
+
+
 def make_list_of_all_inflections_potential(dps_df: pandas.DataFrame, class_file_name: str) -> None:
     print("~" * 40)
     print("making list of all inflections with sbs")
