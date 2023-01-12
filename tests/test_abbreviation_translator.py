@@ -22,3 +22,8 @@ def test_transalte_double(abbrev):
     assert abbrev.translate_string('key key') == 'value value'
     assert abbrev.translate_string('key str key') == 'value str value'
     assert abbrev.translate_string('key ke') == 'value ke'
+
+def test_transalte_no_entry(abbrev):
+    assert abbrev.translate_string('eyke') == 'eyke'
+    assert abbrev.translate_string('value') == 'value'
+    assert abbrev.translate_string('ke ke') == 'ke ke'

@@ -16,6 +16,7 @@ setup(
         'pandas~=1.0',
         'rich~=12.0',
     ),
+    tests_require=['pytest'],
     include_package_data=True,
     entry_points={
         'console_scripts': [

@@ -38,22 +38,36 @@ class AbbreviationTranslator:
         return dict(zip(abbreviations, translates))
 
     def _replace(self, string: str, key: str) -> str:
-        counter = 0
-        key_len = len(key)
+        #if key not in string:
+        #    return string
 
-        start = string.find(key)
+        result = ''
+        buf = ''
+        index = 0
 
-        while start != -1:
-            end = start + key_len
-            if ((start == 0 or string[start - 1] in self.separators)
-                    and (end == len(string) or string[end] in self.separators)):
-                string = string.replace(key, self._abbrev_dict[key], 1)
-            start = string.find(key, start)
-            counter += 1
-            if counter > self.iterations_threshold:
-                raise RuntimeError('Too much cycles, seems like infinite loop')
+        for i, ch in enumerate(string):
+            if ch == key[index]:
+                buf += ch
+                index += 1
+                if index == len(key):
+                    if ((result == '' or result[-1] in self.separators) and
+                            (i == len(string) - 1 or string[i + 1] in self.separators)):
+                        result += self._abbrev_dict[key]
+                    else:
+                        result += buf
+                    buf = ''
+                    index = 0
+            else:
+                if index == 0:
+                    result += ch
+                else:
+                    result += buf + ch
+                    index = 0
+                    buf = ''
 
-        return string
+        result += buf
+
+        return result
 
     def set_dict(self, abbrev_dict: Dict[str, str]) -> None:
         self._abbrev_dict = abbrev_dict
@@ -66,5 +80,4 @@ class AbbreviationTranslator:
         for key in self._len_sorted_keys:
             string = self._replace(string, key)
 
-        print(f'== {string}')
         return string
