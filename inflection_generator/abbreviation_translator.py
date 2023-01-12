@@ -7,9 +7,9 @@ from inflection_generator import settings
 
 
 class AbbreviationTranslator:
+    # TODO Docstring
     overrides_file = settings.DECLENSIONS_AND_CONJUGATIONS_OVERRIDES_FILE
     separators = " "
-    iterations_threshold = 9999
 
     def __init__(self, script: str, declensions_file=settings.DECLENSIONS_AND_CONJUGATIONS_FILE):
         self._script = script
@@ -38,31 +38,32 @@ class AbbreviationTranslator:
         return dict(zip(abbreviations, translates))
 
     def _replace(self, string: str, key: str) -> str:
-        #if key not in string:
-        #    return string
+        if key not in string:
+            return string
 
         result = ''
         buf = ''
-        index = 0
+        key_ind = 0
 
-        for i, ch in enumerate(string):
-            if ch == key[index]:
+        for s_ind, ch in enumerate(string):
+            if ch == key[key_ind]:
                 buf += ch
-                index += 1
-                if index == len(key):
+                key_ind += 1
+                if key_ind == len(key):
+                    # Check if token surrounded with whitespaces or bounds
                     if ((result == '' or result[-1] in self.separators) and
-                            (i == len(string) - 1 or string[i + 1] in self.separators)):
+                            (s_ind == len(string) - 1 or string[s_ind + 1] in self.separators)):
                         result += self._abbrev_dict[key]
                     else:
                         result += buf
                     buf = ''
-                    index = 0
+                    key_ind = 0
             else:
-                if index == 0:
+                if key_ind == 0:
                     result += ch
                 else:
                     result += buf + ch
-                    index = 0
+                    key_ind = 0
                     buf = ''
 
         result += buf
@@ -77,6 +78,8 @@ class AbbreviationTranslator:
         return self._abbrev_dict.get(key, default)
 
     def translate_string(self, string: str) -> str:
+        with open('str.txt', 'a') as f:  # FIXME
+            f.write(string + '\n')
         for key in self._len_sorted_keys:
             string = self._replace(string, key)
 
