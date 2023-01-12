@@ -1,55 +1,70 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import pandas
-import rich
 
 from inflection_generator import settings
-from inflection_generator.helpers import timeis
 
 
 class AbbreviationTranslator:
     overrides_file = settings.DECLENSIONS_AND_CONJUGATIONS_OVERRIDES_FILE
+    separators = " "
+    iterations_threshold = 9999
 
     def __init__(self, script: str, declensions_file=settings.DECLENSIONS_AND_CONJUGATIONS_FILE):
-        abbrev_dict = self._dict_from_file(declensions_file, script)
-        override_dict = self._dict_from_file(self.overrides_file, script)
+        self._script = script
+        abbrev_dict = self._dict_from_file(declensions_file)
+        override_dict = self._dict_from_file(self.overrides_file)
         abbrev_dict.update(override_dict)
 
-        self._abbrev_dict = abbrev_dict
-        self._len_sorted_keys = sorted(list(abbrev_dict), key=len, reverse=True)
+        self.set_dict(abbrev_dict)
 
-    @staticmethod
-    def _dict_from_file(file_path: Path, script: str) -> Dict[str, str]:
+    def _dict_from_file(self, file_path: Path) -> Dict[str, str]:
         abbrev_frame = pandas.read_excel(
             file_path,
             sheet_name="abbreviations",
             dtype=str,
             keep_default_na=True,)
 
-        if script not in abbrev_frame:
-            raise RuntimeError(f"No script variant {script} for abbreviations in {file_path}")
+        if self._script not in abbrev_frame:
+            raise RuntimeError(f"No script variant {self._script} for abbreviations in {file_path}")
 
         # Filter rows with empty translation cell
-        abbrev_frame = abbrev_frame[~abbrev_frame[script].isnull()]
+        abbrev_frame = abbrev_frame[~abbrev_frame[self._script].isnull()]
 
         abbreviations = abbrev_frame["name"]
-        translates = abbrev_frame[script]
+        translates = abbrev_frame[self._script]
 
         return dict(zip(abbreviations, translates))
+
+    def _replace(self, string: str, key: str) -> str:
+        counter = 0
+        key_len = len(key)
+
+        start = string.find(key)
+
+        while start != -1:
+            end = start + key_len
+            if ((start == 0 or string[start - 1] in self.separators)
+                    and (end == len(string) or string[end] in self.separators)):
+                string = string.replace(key, self._abbrev_dict[key], 1)
+            start = string.find(key, start)
+            counter += 1
+            if counter > self.iterations_threshold:
+                raise RuntimeError('Too much cycles, seems like infinite loop')
+
+        return string
+
+    def set_dict(self, abbrev_dict: Dict[str, str]) -> None:
+        self._abbrev_dict = abbrev_dict
+        self._len_sorted_keys = sorted(list(abbrev_dict), key=len, reverse=True)
 
     def get(self, key: str, default=None) -> str:
         return self._abbrev_dict.get(key, default)
 
     def translate_string(self, string: str) -> str:
-        tokens = string.split()
-        tokens_new: List[str] = []
+        for key in self._len_sorted_keys:
+            string = self._replace(string, key)
 
-        for tok in tokens:
-            tok_new = self._abbrev_dict.get(tok)
-            if tok_new is None:
-                rich.print(f'{timeis()} [red] no translation for abbreviation "{tok}"')
-                tok_new = tok
-            tokens_new.append(tok_new)
-
-        return " ".join(tokens_new)
+        print(f'== {string}')
+        return string
