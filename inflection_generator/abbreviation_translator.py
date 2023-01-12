@@ -7,11 +7,22 @@ from inflection_generator import settings
 
 
 class AbbreviationTranslator:
-    # TODO Docstring
+    """ Keep dictionary to translate abbreviations and other lexems from English
+
+    Attributes:
+        overrides_file (Path): Path to table file with abbreviations list which
+            are overrides and extends default declencions file
+        separators (Path): String of chars which mark bounds of tokens
+    """
+
     overrides_file = settings.DECLENSIONS_AND_CONJUGATIONS_OVERRIDES_FILE
     separators = " "
 
     def __init__(self, script: str, declensions_file=settings.DECLENSIONS_AND_CONJUGATIONS_FILE):
+        """
+        :param script: Name of script as in a header of the abbreviations sheet
+            of the declencions file
+        """
         self._script = script
         abbrev_dict = self._dict_from_file(declensions_file)
         override_dict = self._dict_from_file(self.overrides_file)
@@ -50,7 +61,7 @@ class AbbreviationTranslator:
                 buf += ch
                 key_ind += 1
                 if key_ind == len(key):
-                    # Check if token surrounded with whitespaces or bounds
+                    # Check if token is bounded
                     if ((result == '' or result[-1] in self.separators) and
                             (s_ind == len(string) - 1 or string[s_ind + 1] in self.separators)):
                         result += self._abbrev_dict[key]
@@ -71,15 +82,22 @@ class AbbreviationTranslator:
         return result
 
     def set_dict(self, abbrev_dict: Dict[str, str]) -> None:
+        """ Override innder dictionary
+        """
         self._abbrev_dict = abbrev_dict
         self._len_sorted_keys = sorted(list(abbrev_dict), key=len, reverse=True)
 
     def get(self, key: str, default=None) -> str:
+        """ Get translation for token, if exists
+        """
         return self._abbrev_dict.get(key, default)
 
     def translate_string(self, string: str) -> str:
-        with open('str.txt', 'a') as f:  # FIXME
-            f.write(string + '\n')
+        """ Translate known tokens in an arbitrary string
+
+        Methods translates only tokens which are bounded with separtator chars
+        or string bounds.
+        """
         for key in self._len_sorted_keys:
             string = self._replace(string, key)
 
