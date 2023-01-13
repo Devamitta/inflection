@@ -1,6 +1,6 @@
+from importlib import resources
 from pathlib import Path
 from typing import List, Dict
-import importlib
 import os
 import pickle
 import re
@@ -19,12 +19,13 @@ from inflection_generator.sorter import sort_key
 # FIXME Too long, split on modules
 
 # Globals
-inflections_not_exist: List[str]
 changed: List[str]
+headwords_list: List[str]
+inflections_not_exist: List[str]
 new_inflections_dict: Dict = {}
 no_eg1_list: List[str]
 no_eg2_list: List[str]
-no_eg3_list: List[str]
+no_eg3_list: List[str] = []
 
 
 def convert_dpd_ods_to_csv():
@@ -237,9 +238,9 @@ def test_for_wrong_patterns(inflection_table_index: pandas.DataFrame, dps_df: pa
 
     if wrong_patten_string != "":
         print(f"{timeis()} [red]wrong patterns: {wrong_patten_string}")
-    if error == True:
+    if error:
         input(f"{timeis()} [red]wrong patterns - fix 'em!")
-    if error == False:
+    if not error:
         print("no wrong patterns found")
 
 
@@ -335,7 +336,7 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
 
     for row in range(dps_df.shape[0]):
         headword = dps_df.loc[row, "Pāli1"]
-        headword_clean = re.sub(" \d*$", "", headword)
+        headword_clean = re.sub(r" \d*$", "", headword)
         stem = dps_df.loc[row, "Stem"]
         if re.match("!.+", stem) != None: #stem contains "!.+" - must get inflection table but no synonsyms
             stem = "!"
@@ -507,7 +508,12 @@ class InflectionTableGenerator:
 
             html = heading + table
 
-        with open(settings.HTML_TABLES_DIR / f"{headword}.html", "w") as html_file:
+        if self._kind is Kind.DPS:
+            tables_dir = settings.HTML_TABLES_DPS_DIR
+        elif self._kind is Kind.SBS:
+            tables_dir = settings.HTML_TABLES_SBS_DIR
+
+        with open(tables_dir / f"{headword}.html", "w") as html_file:
             html_file.write(html)
 
     def generate_html(self) -> None:
@@ -538,7 +544,7 @@ def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
 
     for row in range(dps_df_length):
         headword = dps_df.loc[row, "Pāli1"]
-        headword_clean = re.sub(" \d*$", "", headword)
+        headword_clean = re.sub(r" \d*$", "", headword)
         stem = dps_df.loc[row, "Stem"]
 
         inflection_string = ""
@@ -1196,14 +1202,14 @@ def html_find_and_replace() -> None:
     sutta_text += f'<br><br>no meanings: <span class="highlight">{" ".join(no_meaning)}</span>'
     sutta_text += f'<br><br>no eg1: <span class="red">{" ".join(no_eg1)}</span>'
     sutta_text += f'<br><br>no eg2: <span class="green">{" ".join(no_eg2)}</span>'
-    sutta_text += f'<br><br>no eg3: <span class="blue">{" ".joint(no_eg3)}</span>'
+    sutta_text += f'<br><br>no eg3: <span class="blue">{" ".join(no_eg3)}</span>'
 
 
 def write_html() -> None:
     create_directories()
 
     output_path = settings.HTML_SUTTAS_DIR
-    html1 = importlib.resources.read_text(__package__, 'part1.html')
+    html1 = resources.read_text(__package__, 'part1.html')
 
     # html2 = """</div><div id="right">"""
 
@@ -1253,19 +1259,23 @@ def delete_unused_inflection_patterns(inflection_table_index):
                     print(f"{timeis()} {file}")
 
 
-def delete_unused_html_tables():
-    print(f"{timeis()} [green]deleting unused html files ")
-
-    for root, dirs, files in os.walk(settings.HTML_TABLES_DIR, topdown=True):
+def _delete_unused_html_tables(path) -> None:
+    for root, dirs, files in os.walk(path, topdown=True):
         for file in files:
-            file_clean = re.sub(".html", "", file)
-            if file_clean not in headwords_list:
+            basename = file.removesuffix(".html")
+            if basename not in headwords_list:
                 try:
-                    os.remove(settings.HTML_TABLES_DIR / file)
+                    os.remove(path / file)
                 except FileNotFoundError:
                     print(f"{timeis()} [red]{file} not found")
                 else:
                     print(f"{timeis()} {file}")
+
+
+def delete_unused_html_tables():
+    print(f"{timeis()} [green]deleting unused html files ")
+    for path in [settings.HTML_TABLES_DPS_DIR, settings.HTML_TABLES_SBS_DIR]:
+        _delete_unused_html_tables(path)
 
 
 def delete_unused_inflections():
