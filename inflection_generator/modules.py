@@ -160,7 +160,7 @@ def create_dps_df() -> pandas.DataFrame:
         na_filter=False)
 
     global headwords_list
-    headwords_list = dps_df["Pāli1"].tolist()
+    headwords_list = dps_df['pali_1'].tolist()
 
     return dps_df
 
@@ -173,7 +173,7 @@ def create_sbs_df(class_file_name: str) -> pandas.DataFrame:
     dps_df = pandas.read_csv(path, sep="\t", dtype=str, na_filter=False)
 
     global headwords_list
-    headwords_list = dps_df["Pāli1"].tolist()
+    headwords_list = dps_df['pali_1'].tolist()
 
     return dps_df
 
@@ -187,9 +187,9 @@ def test_for_missing_stem_and_pattern(dps_df: pandas.DataFrame):
     missing_pattern_string = ""
 
     for row in range(dps_df.shape[0]):
-        headword = dps_df.loc[row, "Pāli1"]
-        stem = dps_df.loc[row, "Stem"]
-        pattern = dps_df.loc[row, "Pattern"]
+        headword = dps_df.loc[row, 'pali_1']
+        stem = dps_df.loc[row, "stem"]
+        pattern = dps_df.loc[row, "pattern"]
 
         if stem == "":
             missing_stem_string += headword + "|"
@@ -220,9 +220,9 @@ def test_for_wrong_patterns(inflection_table_index: pandas.DataFrame, dps_df: pa
     wrong_patten_string = ""
 
     for row in range(dps_df.shape[0]):
-        headword =  dps_df.loc[row, "Pāli1"]
-        stem = dps_df.loc[row, "Stem"]
-        pattern = dps_df.loc[row, "Pattern"]
+        headword =  dps_df.loc[row, 'pali_1']
+        stem = dps_df.loc[row, "stem"]
+        pattern = dps_df.loc[row, "pattern"]
 
         if stem == "-":
             pass
@@ -256,9 +256,9 @@ def test_for_differences_in_stem_and_pattern(dps_df: pandas.DataFrame) -> None:
     changed_string = ""
 
     for row in range(dps_df.shape[0]):
-        headword = dps_df.loc[row, "Pāli1"]
-        stem = dps_df.loc[row, "Stem"]
-        pattern = dps_df.loc[row, "Pattern"]
+        headword = dps_df.loc[row, 'pali_1']
+        stem = dps_df.loc[row, "stem"]
+        pattern = dps_df.loc[row, "pattern"]
         old = ""
         new = f"{headword} {stem} {pattern}"
 
@@ -305,7 +305,7 @@ def _test_if_inflections_exist(dps_df: pandas.DataFrame, output_dir: Path) -> No
     create_directories()
 
     for row in range(dps_df.shape[0]):
-        headword = dps_df.loc[row, "Pāli1"]
+        headword = dps_df.loc[row, 'pali_1']
         path = output_dir / headword
         if not path.is_file():
             inflections_not_exist.append(headword)
@@ -335,18 +335,18 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
     new_inflections_dict = {}
 
     for row in range(dps_df.shape[0]):
-        headword = dps_df.loc[row, "Pāli1"]
+        headword = dps_df.loc[row, 'pali_1']
         headword_clean = re.sub(r" \d*$", "", headword)
-        stem = dps_df.loc[row, "Stem"]
+        stem = dps_df.loc[row, "stem"]
         if re.match("!.+", stem) != None: #stem contains "!.+" - must get inflection table but no synonsyms
             stem = "!"
         if stem == "*":
             stem = ""
-        pattern = dps_df.loc[row, "Pattern"]
-        pos = dps_df.loc[row, "POS"]
+        pattern = dps_df.loc[row, "pattern"]
+        pos = dps_df.loc[row, 'pos']
         # metadata = dps_df.loc[row, "Metadata"]
-        meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
-        variant = dps_df.loc[row, "Variant"]
+        meaning = dps_df.loc[row, "meaning_1"]
+        variant = dps_df.loc[row, "variant"]
 
         inflections_string= ""
 
@@ -448,19 +448,19 @@ class InflectionTableGenerator:
         return heading
 
     def _create_html_table(self, row: int):
-        headword = self._data.loc[row, "Pāli1"]
+        headword = self._data.loc[row, 'pali_1']
         print(f"{row}\t{headword}")
 
         headword_clean = re.sub(r" \d*$", "", headword)
 
-        stem = self._data.loc[row, "Stem"]
+        stem = self._data.loc[row, "stem"]
         if re.match("!.+", stem) is not None:  # stem contains "!.+" - must get inflection table but no synonsyms
             stem = re.sub("!", "", stem)
         if stem == "*":
             stem = ""
 
-        pattern = self._data.loc[row, "Pattern"]
-        pos = self._data.loc[row, "POS"]
+        pattern = self._data.loc[row, "pattern"]
+        pos = self._data.loc[row, 'pos']
 
         html = ''
 
@@ -524,8 +524,8 @@ class InflectionTableGenerator:
         print("~" * 40)
 
         for row in range(self._data.shape[0]):
-            headword = self._data.loc[row, "Pāli1"]
-            pattern = self._data.loc[row, "Pattern"]
+            headword = self._data.loc[row, 'pali_1']
+            pattern = self._data.loc[row, "pattern"]
 
             if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
                 self._create_html_table(row)
@@ -543,15 +543,15 @@ def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
     dps_df_length = dps_df.shape[0]
 
     for row in range(dps_df_length):
-        headword = dps_df.loc[row, "Pāli1"]
+        headword = dps_df.loc[row, 'pali_1']
         headword_clean = re.sub(r" \d*$", "", headword)
-        stem = dps_df.loc[row, "Stem"]
+        stem = dps_df.loc[row, "stem"]
 
         inflection_string = ""
 
-        pattern = dps_df.loc[row, "Pattern"]
-        pos = dps_df.loc[row, "POS"]
-        meaning = dps_df.loc[row, "Meaning IN CONTEXT"]
+        pattern = dps_df.loc[row, "pattern"]
+        pos = dps_df.loc[row, 'pos']
+        meaning = dps_df.loc[row, "meaning_1"]
 
         if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
             if pos not in indeclinables and pos != "idiom" and pos != "sandhi":
@@ -750,18 +750,18 @@ def make_list_of_all_inflections_no_meaning(dps_df: pandas.DataFrame) -> None:
 
     global no_meaning_list
 
-    test1 = dps_df["Meaning IN CONTEXT"] != ""
-    test2 = dps_df["POS"] != "prefix"
-    test3 = dps_df["POS"] != "suffix"
-    test4 = dps_df["POS"] != "cs"
-    test5 = dps_df["POS"] != "ve"
-    test6 = dps_df["POS"] != "idiom"
+    test1 = dps_df["meaning_1"] != ""
+    test2 = dps_df['pos'] != "prefix"
+    test3 = dps_df['pos'] != "suffix"
+    test4 = dps_df['pos'] != "cs"
+    test5 = dps_df['pos'] != "ve"
+    test6 = dps_df['pos'] != "idiom"
     # test7 = dps_df["Metadata"] != "yes"
     filter = test1 & test2 & test3 & test4 & test5 & test6
 
     no_meaning_df = dps_df[filter]
 
-    no_meaning_headword_list = no_meaning_df["Pāli1"].tolist()
+    no_meaning_headword_list = no_meaning_df['pali_1'].tolist()
 
     no_meaning_df = all_inflections_df[all_inflections_df[0].isin(no_meaning_headword_list)]
 
@@ -789,14 +789,14 @@ def make_list_of_all_inflections_no_eg1(dps_df: pandas.DataFrame) -> None:
 
     global no_eg1_list
 
-    test1 = dps_df["Sutta1"] == ""
-    test2 = dps_df["Chapter 2"] != ""
-    test3 = dps_df["Sutta2"] == ""
-    test4 = dps_df["POS"] != "prefix"
+    test1 = dps_df["sutta_1"] == ""
+    test2 = dps_df["sbs_chapter_2"] != ""
+    test3 = dps_df["sutta_2"] == ""
+    test4 = dps_df['pos'] != "prefix"
     filter = test1 & test2 & test3 & test4
     no_eg1_df = dps_df[filter]
 
-    no_eg1_headword_list = no_eg1_df["Pāli1"].tolist()
+    no_eg1_headword_list = no_eg1_df['pali_1'].tolist()
 
     no_eg1_df = all_inflections_df[all_inflections_df[0].isin(no_eg1_headword_list)]
 
@@ -823,14 +823,14 @@ def make_list_of_all_inflections_only_in_class(dps_df: pandas.DataFrame) -> None
 
     global no_eg1_list
 
-    test1 = dps_df["ex"] == "-"
-    # test2 = dps_df["Meaning in native language"] != ""
-    # test3 = dps_df["Sutta2"] == ""
-    # test4 = dps_df["POS"] != "prefix"
+    test1 = dps_df['sbs_class_anki'] == "-"
+    # test2 = dps_df["ru_meaning"] != ""
+    # test3 = dps_df["sutta_2"] == ""
+    # test4 = dps_df['pos'] != "prefix"
     filter = test1
     no_eg1_df = dps_df[filter]
 
-    no_eg1_headword_list = no_eg1_df["Pāli1"].tolist()
+    no_eg1_headword_list = no_eg1_df['pali_1'].tolist()
 
     no_eg1_df = all_inflections_df[all_inflections_df[0].isin(no_eg1_headword_list)]
 
@@ -866,15 +866,15 @@ def make_list_of_all_inflections_already_in(dps_df: pandas.DataFrame) -> None:
     # if class_file_name == '4':
     #   cl_active = "1|2|3|4"
 
-    test1 = dps_df["ex"] != "-"
-    test2 = dps_df["ex"] != ""
-    # test2 = dps_df["Meaning in native language"] != ""
-    # test3 = dps_df["Sutta2"] == ""
-    # test4 = dps_df["POS"] != "prefix"
+    test1 = dps_df['sbs_class_anki'] != "-"
+    test2 = dps_df['sbs_class_anki'] != ""
+    # test2 = dps_df["ru_meaning"] != ""
+    # test3 = dps_df["sutta_2"] == ""
+    # test4 = dps_df['pos'] != "prefix"
     filter = test1 & test2
     no_eg2_df = dps_df[filter]
 
-    no_eg2_headword_list = no_eg2_df["Pāli1"].tolist()
+    no_eg2_headword_list = no_eg2_df['pali_1'].tolist()
 
     no_eg2_df = all_inflections_df[all_inflections_df[0].isin(no_eg2_headword_list)]
 
@@ -904,7 +904,7 @@ def make_list_of_all_inflections_no_eg2(dps_df: pandas.DataFrame) -> None:
     test = ~dps_df["Fin"].str.contains("s")
     no_eg2_df = dps_df[test]
 
-    no_eg2_headword_list = no_eg2_df["Pāli1"].tolist()
+    no_eg2_headword_list = no_eg2_df['pali_1'].tolist()
 
     no_eg2_df = all_inflections_df[all_inflections_df[0].isin(no_eg2_headword_list)]
 
@@ -931,12 +931,12 @@ def make_list_of_all_inflections_no_eg3(dps_df: pandas.DataFrame) -> None:
 
     global no_eg3_list
 
-    test1 = dps_df["POS"] == "prefix"
-    # test2 = dps_df["Chapter 2"] != ""
+    test1 = dps_df['pos'] == "prefix"
+    # test2 = dps_df["sbs_chapter_2"] != ""
     filter = test1
     no_eg3_df = dps_df[filter]
 
-    no_eg3_headword_list = no_eg3_df["Pāli1"].tolist()
+    no_eg3_headword_list = no_eg3_df['pali_1'].tolist()
 
     no_eg3_df = all_inflections_df[all_inflections_df[0].isin(no_eg3_headword_list)]
 
@@ -965,14 +965,14 @@ def make_list_of_all_inflections_potential(dps_df: pandas.DataFrame, class_file_
 
     global no_eg3_list
 
-    test1 = dps_df["Meaning IN CONTEXT"] != ""
-    test2 = dps_df["ex"] == ""
+    test1 = dps_df["meaning_1"] != ""
+    test2 = dps_df['sbs_class_anki'] == ""
     test3 = dps_df["class"] == f"{class_file_name}"
-    # test2 = dps_df["Chapter 2"] != ""
+    # test2 = dps_df["sbs_chapter_2"] != ""
     filter = test1 & test2 & test3
     no_eg3_df = dps_df[filter]
 
-    no_eg3_headword_list = no_eg3_df["Pāli1"].tolist()
+    no_eg3_headword_list = no_eg3_df['pali_1'].tolist()
 
     no_eg3_df = all_inflections_df[all_inflections_df[0].isin(no_eg3_headword_list)]
 
