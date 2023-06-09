@@ -1,6 +1,6 @@
 from importlib import resources
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import os
 import pickle
 import re
@@ -1042,16 +1042,12 @@ def clean_machine(text):
     return text
 
 
-def read_and_clean_sutta_text() -> None:
+def read_and_clean_sutta_text() -> Tuple[str, str]:
     create_directories()
 
     print("~" * 40)
     print("reading and cleaning sutta file")
     print("~" * 40)
-
-    global sutta_file
-    global commentary_file
-    global sub_commentary_file
 
     input_path = settings.CSCD_DIR
     output_path = settings.HTML_SUTTAS_DIR
@@ -1091,8 +1087,10 @@ def read_and_clean_sutta_text() -> None:
     with open(output_path / commentary_file, "w") as output_file:
         output_file.write(commentary_text)
 
+    return sutta_file, commentary_file
 
-def make_comparison_table() -> None:
+
+def make_comparison_table(sutta_file: str, commentary_file: str) -> None:
     print("~" * 40)
     print("making sutta comparison table")
 
@@ -1149,7 +1147,7 @@ def make_comparison_table() -> None:
         commentary_words_df.to_csv(txt_file, header=True, index=True, sep="\t")
 
 
-def html_find_and_replace() -> None:
+def html_find_and_replace(sutta_file: str) -> None:
     print("~" * 40)
     print("finding and replacing sutta html")
     print("~" * 40)
@@ -1206,7 +1204,7 @@ def html_find_and_replace() -> None:
     sutta_text += f'<br><br>no eg3: <span class="blue">{" ".join(no_eg3)}</span>'
 
 
-def write_html() -> None:
+def write_html(sutta_file: str) -> None:
     create_directories()
 
     output_path = settings.HTML_SUTTAS_DIR

@@ -32,11 +32,11 @@ def main():
     # green
     modules.make_list_of_all_inflections_potential(dps_df=data, class_file_name=class_file_name)
     # blue
-    modules.read_and_clean_sutta_text()
-    modules.make_comparison_table()
-    modules.html_find_and_replace()
-    modules.write_html()
-    # modules.open_in_browser()
+    sutta_file, commentary_file = modules.read_and_clean_sutta_text()
+    modules.make_comparison_table(sutta_file, commentary_file)
+    modules.html_find_and_replace(sutta_file)
+    modules.write_html(sutta_file)
+    modules.open_in_browser(sutta_file)
 
 
 main()
