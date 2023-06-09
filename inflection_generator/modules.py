@@ -4,6 +4,7 @@ from typing import List, Dict
 import os
 import pickle
 import re
+import webbrowser
 
 from aksharamukha import transliterate
 from pandas_ods_reader import read_ods
@@ -1225,9 +1226,8 @@ def write_html() -> None:
     html_file.close
 
 
-def open_in_browser():
-    os.popen('cd "output/html suttas"')
-    os.popen(f"{sutta_file}.html")
+def open_in_browser(sutta_file: str) -> None:
+    webbrowser.open(f'output/html suttas/{sutta_file}.html')
 
 
 def delete_old_pickle_files():
