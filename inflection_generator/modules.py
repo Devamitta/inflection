@@ -8,7 +8,7 @@ import webbrowser
 
 from aksharamukha import transliterate
 from pandas_ods_reader import read_ods
-from rich import print
+from rich import print  # pylint: disable=redefined-builtin
 import pandas
 
 from inflection_generator import settings
@@ -21,7 +21,6 @@ from inflection_generator.sorter import sort_key
 
 # Globals
 changed: List[str]
-headwords_list: List[str]
 inflections_not_exist: List[str]
 new_inflections_dict: Dict = {}
 no_eg1_list: List[str]
@@ -79,7 +78,9 @@ def create_inflection_table_df() -> pandas.DataFrame:
     return inflection_table_df
 
 
-def test_inflection_pattern_changed(inflection_table_index: pandas.DataFrame, inflection_table: pandas.DataFrame) -> None:
+def test_inflection_pattern_changed(
+        inflection_table_index: pandas.DataFrame,
+        inflection_table: pandas.DataFrame) -> None:
     print(f"{timeis()} [green]test if inflection patterns have changed")
 
     create_directories()
@@ -102,7 +103,7 @@ def test_inflection_pattern_changed(inflection_table_index: pandas.DataFrame, in
 
         inflection_table_df_filtered.reset_index(drop=True, inplace=True)
 
-        inflection_table_df_filtered.iloc[0,0] = ""
+        inflection_table_df_filtered.iloc[0, 0] = ""
 
         # replace header
 
@@ -150,7 +151,7 @@ def test_inflection_pattern_changed(inflection_table_index: pandas.DataFrame, in
         print(f"the following patterns have changes and will be generated\n{pattern_changed}")
 
 
-def create_dps_df() -> pandas.DataFrame:
+def create_dps_df() -> Tuple[pandas.DataFrame, List[str]]:
     print("~" * 40)
     print("create dps_df")
 
@@ -160,23 +161,23 @@ def create_dps_df() -> pandas.DataFrame:
         dtype=str,
         na_filter=False)
 
-    global headwords_list
     headwords_list = dps_df['pali_1'].tolist()
+    print(f'==>> {len(headwords_list)}') # FIXME
 
-    return dps_df
+    return dps_df, headwords_list
 
 
-def create_sbs_df(class_file_name: str) -> pandas.DataFrame:
+def create_sbs_df(class_file_name: str) -> Tuple[pandas.DataFrame, List[str]]:
     print("~" * 40)
     print("create sbs_df")
 
     path = settings.DPS_DIR / "word-frequency" / "csv-for-examples" / f"{class_file_name}-class.csv"
     dps_df = pandas.read_csv(path, sep="\t", dtype=str, na_filter=False)
 
-    global headwords_list
     headwords_list = dps_df['pali_1'].tolist()
+    print(f'==>> {len(headwords_list)}') # FIXME
 
-    return dps_df
+    return dps_df, headwords_list
 
 
 def test_for_missing_stem_and_pattern(dps_df: pandas.DataFrame):
@@ -1221,20 +1222,20 @@ def write_html(sutta_file: str) -> None:
     # html_file.write(html2)
     # html_file.write(commentary_text)
     html_file.write(html3)
-    html_file.close
+    html_file.close()
 
 
 def open_in_browser(sutta_file: str) -> None:
     webbrowser.open(f'output/html suttas/{sutta_file}.html')
 
 
-def delete_old_pickle_files():
+def delete_old_pickle_files(headwords: List[str]):
     print(f"{timeis()} [green]deleting old pickle files ")
 
-    for root, dirs, files in os.walk("output/pickle test", topdown=True):
+    for _root, _dirs, files in os.walk("output/pickle test", topdown=True):
         for file in files:
             try:
-                if file not in headwords_list:
+                if file not in headwords:
                     os.remove(f"output/pickle test/{file}")
                     print(f"{timeis()} {file}")
             except FileNotFoundError:
@@ -1245,7 +1246,7 @@ def delete_unused_inflection_patterns(inflection_table_index):
     print(f"{timeis()} [green]deleting unused inflection patterns")
 
     inflection_patterns_list = inflection_table_index["inflection name"].tolist()
-    for root, dirs, files in os.walk("output/patterns", topdown=True):
+    for _root, _dirs, files in os.walk("output/patterns", topdown=True):
         for file in files:
             file_clean = re.sub(".csv", "", file)
             if file_clean not in inflection_patterns_list:
@@ -1257,11 +1258,11 @@ def delete_unused_inflection_patterns(inflection_table_index):
                     print(f"{timeis()} {file}")
 
 
-def _delete_unused_html_tables(path) -> None:
-    for root, dirs, files in os.walk(path, topdown=True):
+def _delete_unused_html_tables(path, headwords: List[str]) -> None:
+    for _root, _dirs, files in os.walk(path, topdown=True):
         for file in files:
             basename = file.removesuffix(".html")
-            if basename not in headwords_list:
+            if basename not in headwords:
                 try:
                     os.remove(path / file)
                 except FileNotFoundError:
@@ -1270,18 +1271,18 @@ def _delete_unused_html_tables(path) -> None:
                     print(f"{timeis()} {file}")
 
 
-def delete_unused_html_tables():
+def delete_unused_html_tables(headwords):
     print(f"{timeis()} [green]deleting unused html files ")
     for path in [settings.HTML_TABLES_DPS_DIR, settings.HTML_TABLES_SBS_DIR]:
-        _delete_unused_html_tables(path)
+        _delete_unused_html_tables(path, headwords)
 
 
-def delete_unused_inflections():
+def delete_unused_inflections(headwords: List[str]):
     print(f"{timeis()} [green]deleting unused inflections")
 
-    for root, dirs, files in os.walk(settings.INFLECTIONS_DIR, topdown=True):
+    for _root, _dirs, files in os.walk(settings.INFLECTIONS_DIR, topdown=True):
         for file in files:
-            if file not in headwords_list:
+            if file not in headwords:
                 try:
                     os.remove(settings.INFLECTIONS_DIR / file)
                 except FileNotFoundError:
@@ -1290,12 +1291,12 @@ def delete_unused_inflections():
                     print(f"{timeis()} {file}")
 
 
-def delete_unused_inflections_translit():
+def delete_unused_inflections_translit(headwords: List[str]):
     print(f"{timeis()} [green]deleting unused inflections translit")
 
-    for root, dirs, files in os.walk(settings.INFLECTIONS_TRANSLIT_DIR, topdown=True):
+    for _root, _dirs, files in os.walk(settings.INFLECTIONS_TRANSLIT_DIR, topdown=True):
         for file in files:
-            if file not in headwords_list:
+            if file not in headwords:
                 try:
                     os.remove(settings.INFLECTIONS_TRANSLIT_DIR / file)
                 except FileNotFoundError:
