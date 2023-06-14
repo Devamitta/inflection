@@ -1,6 +1,6 @@
 from importlib import resources
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 import os
 import pickle
 import re
@@ -26,6 +26,9 @@ new_inflections_dict: Dict = {}
 no_eg1_list: List[str]
 no_eg2_list: List[str]
 no_eg3_list: List[str] = []
+
+
+PathType = Union[Path, str]
 
 
 def convert_dpd_ods_to_csv():
@@ -151,31 +154,14 @@ def test_inflection_pattern_changed(
         print(f"the following patterns have changes and will be generated\n{pattern_changed}")
 
 
-def create_dps_df() -> Tuple[pandas.DataFrame, List[str]]:
+def create_data_frame(path: PathType) -> Tuple[pandas.DataFrame, List[str]]:
     print("~" * 40)
-    print("create dps_df")
+    print(f"create dataframe from {path}")
 
-    dps_df = pandas.read_csv(
-        settings.DPS_DIR / "spreadsheets" / "dps-full.csv",
-        sep="\t",
-        dtype=str,
-        na_filter=False)
-
-    headwords_list = dps_df['pali_1'].tolist()
-    print(f'==>> {len(headwords_list)}') # FIXME
-
-    return dps_df, headwords_list
-
-
-def create_sbs_df(class_file_name: str) -> Tuple[pandas.DataFrame, List[str]]:
-    print("~" * 40)
-    print("create sbs_df")
-
-    path = settings.DPS_DIR / "word-frequency" / "csv-for-examples" / f"{class_file_name}-class.csv"
     dps_df = pandas.read_csv(path, sep="\t", dtype=str, na_filter=False)
-
     headwords_list = dps_df['pali_1'].tolist()
-    print(f'==>> {len(headwords_list)}') # FIXME
+
+    print(f"{len(headwords_list)} headwords loaded")
 
     return dps_df, headwords_list
 
@@ -956,8 +942,6 @@ def make_list_of_all_inflections_no_eg3(dps_df: pandas.DataFrame) -> None:
 
     no_eg3_list = no_eg3_string.split()
     no_eg3_list = list(dict.fromkeys(no_eg3_list))
-
-
 
 
 def make_list_of_all_inflections_potential(dps_df: pandas.DataFrame, class_file_name: str) -> None:

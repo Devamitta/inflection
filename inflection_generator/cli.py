@@ -2,7 +2,7 @@ import argparse
 
 from rich import print  # pylint: disable=redefined-builtin
 
-from inflection_generator import modules
+from inflection_generator import modules, settings
 from inflection_generator.helpers import Kind, timeis
 
 
@@ -24,9 +24,10 @@ def generate_inflections(args: argparse.Namespace) -> None:
     kind = Kind[args.kind]
 
     if kind is Kind.DPS:
-        data, headwords = modules.create_dps_df()
+        csv_file = settings.DPS_DIR/"spreadsheets"/"dps-full.csv"
     elif kind is Kind.SBS:
-        data, headwords = modules.create_sbs_df(args.class_file_name)
+        csv_file = settings.DPS_DIR/"word-frequency"/"csv-for-examples"/f"{args.class_file_name}-class.csv"
+    data, headwords = modules.create_data_frame(csv_file)
 
     modules.test_for_missing_stem_and_pattern(data)
     modules.test_for_wrong_patterns(inflection_table_index, data)

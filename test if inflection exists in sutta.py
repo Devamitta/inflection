@@ -2,7 +2,7 @@
 
 import warnings
 
-from inflection_generator import modules
+from inflection_generator import modules, settings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -12,7 +12,10 @@ def main():
     inflection_table_index = modules.create_inflection_table_index()
     inflection_table = modules.create_inflection_table_df()
     modules.test_inflection_pattern_changed(inflection_table_index, inflection_table)
-    data, _ = modules.create_dps_df()
+
+    csv_file = settings.DPS_DIR/"spreadsheets"/"dps-full.csv"
+    data, _ = modules.create_data_frame(csv_file)
+
     modules.test_for_missing_stem_and_pattern(data)
     modules.test_for_wrong_patterns(inflection_table_index, data)
     modules.test_for_differences_in_stem_and_pattern(data)
