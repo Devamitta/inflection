@@ -1,13 +1,14 @@
 from importlib import resources
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Tuple, Union
 import os
 import pickle
 import re
+import webbrowser
 
 from aksharamukha import transliterate
 from pandas_ods_reader import read_ods
-from rich import print
+from rich import print  # pylint: disable=redefined-builtin
 import pandas
 
 from inflection_generator import settings
@@ -20,12 +21,14 @@ from inflection_generator.sorter import sort_key
 
 # Globals
 changed: List[str]
-headwords_list: List[str]
 inflections_not_exist: List[str]
 new_inflections_dict: Dict = {}
 no_eg1_list: List[str]
 no_eg2_list: List[str]
 no_eg3_list: List[str] = []
+
+
+PathType = Union[Path, str]
 
 
 def convert_dpd_ods_to_csv():
@@ -78,7 +81,9 @@ def create_inflection_table_df() -> pandas.DataFrame:
     return inflection_table_df
 
 
-def test_inflection_pattern_changed(inflection_table_index: pandas.DataFrame, inflection_table: pandas.DataFrame) -> None:
+def test_inflection_pattern_changed(
+        inflection_table_index: pandas.DataFrame,
+        inflection_table: pandas.DataFrame) -> None:
     print(f"{timeis()} [green]test if inflection patterns have changed")
 
     create_directories()
@@ -101,7 +106,7 @@ def test_inflection_pattern_changed(inflection_table_index: pandas.DataFrame, in
 
         inflection_table_df_filtered.reset_index(drop=True, inplace=True)
 
-        inflection_table_df_filtered.iloc[0,0] = ""
+        inflection_table_df_filtered.iloc[0, 0] = ""
 
         # replace header
 
@@ -149,33 +154,16 @@ def test_inflection_pattern_changed(inflection_table_index: pandas.DataFrame, in
         print(f"the following patterns have changes and will be generated\n{pattern_changed}")
 
 
-def create_dps_df() -> pandas.DataFrame:
+def create_data_frame(path: PathType) -> Tuple[pandas.DataFrame, List[str]]:
     print("~" * 40)
-    print("create dps_df")
+    print(f"create dataframe from {path}")
 
-    dps_df = pandas.read_csv(
-        settings.DPS_DIR / "spreadsheets" / "dps-full.csv",
-        sep="\t",
-        dtype=str,
-        na_filter=False)
-
-    global headwords_list
-    headwords_list = dps_df['pali_1'].tolist()
-
-    return dps_df
-
-
-def create_sbs_df(class_file_name: str) -> pandas.DataFrame:
-    print("~" * 40)
-    print("create sbs_df")
-
-    path = settings.DPS_DIR / "word-frequency" / "csv-for-examples" / f"{class_file_name}-class.csv"
     dps_df = pandas.read_csv(path, sep="\t", dtype=str, na_filter=False)
-
-    global headwords_list
     headwords_list = dps_df['pali_1'].tolist()
 
-    return dps_df
+    print(f"{len(headwords_list)} headwords loaded")
+
+    return dps_df, headwords_list
 
 
 def test_for_missing_stem_and_pattern(dps_df: pandas.DataFrame):
@@ -202,7 +190,7 @@ def test_for_missing_stem_and_pattern(dps_df: pandas.DataFrame):
         print(f"{timeis()} [red]words with missing stems: {missing_stem_string}")
     if missing_pattern_string != "":
         print(f"{timeis()} [red]words with missing patterns: {missing_pattern_string}")
-    if error == True:
+    if error:
         input(f"{timeis()} [red]there are stem & pattern errors, please fix them before continuing")
     else:
         print("no stem & pattern errors found")
@@ -220,7 +208,7 @@ def test_for_wrong_patterns(inflection_table_index: pandas.DataFrame, dps_df: pa
     wrong_patten_string = ""
 
     for row in range(dps_df.shape[0]):
-        headword =  dps_df.loc[row, 'pali_1']
+        headword = dps_df.loc[row, 'pali_1']
         stem = dps_df.loc[row, "stem"]
         pattern = dps_df.loc[row, "pattern"]
 
@@ -263,25 +251,23 @@ def test_for_differences_in_stem_and_pattern(dps_df: pandas.DataFrame) -> None:
         new = f"{headword} {stem} {pattern}"
 
         try:
-            with open(f"output/pickle test/{headword}","rb") as pickle_file:
+            with open(f"output/pickle test/{headword}", "rb") as pickle_file:
                 old = pickle.load(pickle_file)
         except FileNotFoundError:
             added_string += headword + "|"
             changed.append(headword)
-            with open(f"output/pickle test/{headword}","wb") as pickle_file:
+            with open(f"output/pickle test/{headword}", "wb") as pickle_file:
                 pickle.dump(new,pickle_file)
             continue
 
-        if old == new:
+        if old == new or old in changed:
             continue
-        elif old in changed:
-            continue
-        elif old != new:
-            changed_string += headword + "|"
-            changed.append(headword)
-            pickle_file = open(f"output/pickle test/{headword}","wb")
-            pickle.dump(new,pickle_file)
-            pickle_file.close()
+
+        changed_string += headword + "|"
+        changed.append(headword)
+        pickle_file = open(f"output/pickle test/{headword}", "wb")
+        pickle.dump(new, pickle_file)
+        pickle_file.close()
 
     if added_string != "":
         print("headword / stem / pattern doesnt exist and will be added:")
@@ -338,7 +324,7 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
         headword = dps_df.loc[row, 'pali_1']
         headword_clean = re.sub(r" \d*$", "", headword)
         stem = dps_df.loc[row, "stem"]
-        if re.match("!.+", stem) != None: #stem contains "!.+" - must get inflection table but no synonsyms
+        if re.match("!.+", stem) is not None:  # stem contains "!.+" - must get inflection table but no synonsyms
             stem = "!"
         if stem == "*":
             stem = ""
@@ -348,7 +334,7 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
         meaning = dps_df.loc[row, "meaning_1"]
         variant = dps_df.loc[row, "variant"]
 
-        inflections_string= ""
+        inflections_string = ""
 
         if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
 
@@ -359,7 +345,7 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
                 inflections_string += headword_clean + " "
 
             else:
-                inflections_string+= headword_clean + " "
+                inflections_string += headword_clean + " "
 
                 try:
                     df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", header=None, na_filter=False)
@@ -374,16 +360,15 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
                             replace_string = " "
                             matches = re.sub(search_string, replace_string, line)
                             inflections_string += matches + " "
-
                 except:
                     with open("inflection generator errorlog.txt", "a") as error_log:
                         error_log.write(f"error on: {headword}\n")
                         print(f"error on: {headword}\n")
 
-            this_word_inflections = {headword : inflections_string}
+            this_word_inflections = {headword: inflections_string}
             new_inflections_dict.update(this_word_inflections)
 
-    if new_inflections_dict != {}:
+    if new_inflections_dict:
         new_inflections_df = pandas.DataFrame.from_dict(new_inflections_dict, orient='index')
         new_inflections_df.to_csv(settings.NEW_INFLECTIONS_FILE, sep="\t", header=False)
 
@@ -555,21 +540,20 @@ def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
 
         if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
             if pos not in indeclinables and pos != "idiom" and pos != "sandhi":
-                if row %1000 == 0:
+                if row % 1000 == 0:
                     print(f"{timeis()} {row}/{dps_df_length}\t{headword}")
 
                 try:
                     df = pandas.read_csv(f"output/patterns/{pattern}.csv", sep="\t", index_col=0, na_filter=False)
-                    df.rename_axis(None, inplace=True) #delete pattern name
+                    df.rename_axis(None, inplace=True)  # delete pattern name
                     df_rows = df.shape[0]
                     df_columns = df.shape[1]
-
                 except:
                     print(f"{timeis()} [red]pattern '{pattern}' not found for headword '{headword}'")
                     continue
 
                 for rows in range(0, df_rows):
-                    for columns in range(0, df_columns, 2): #1 to 0
+                    for columns in range(0, df_columns, 2):  # 1 to 0
                         cell = df.iloc[rows, columns]
                         if cell == "":
                             continue
@@ -579,8 +563,8 @@ def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
                         cell = re.sub(search_string, replace_string, cell)
                         inflection_string += cell + " "
 
-                inflection_string = re.sub ("!", "", inflection_string)
-                inflection_string = re.sub (r"\*", "", inflection_string)
+                inflection_string = re.sub("!", "", inflection_string)
+                inflection_string = re.sub(r"\*", "", inflection_string)
 
                 inflections_list = list(set(inflection_string.split(" ")))
                 with open(f"output/inflections in table/{headword}", "wb") as file:
@@ -592,7 +576,7 @@ def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
 
 def transcribe_new_inflections():
     create_directories()
-    if new_inflections_dict != {}:
+    if new_inflections_dict:
         print("~" * 40)
 
         new_inflections = open(settings.NEW_INFLECTIONS_FILE, "r")
@@ -602,10 +586,11 @@ def transcribe_new_inflections():
         new_inflections_translit = open(settings.NEW_INFLECTIONS_TRANSLIT_FILE, "w")
 
         print("converting synonyms to RussianCyrillic")
-        cyrillic = transliterate.process("IAST","RussianCyrillic", new_inflections_read, post_options =['CyrillicPali'])
+        cyrillic = transliterate.process("IAST", "RussianCyrillic", new_inflections_read, post_options=['CyrillicPali'])
 
         print("converting inflections to devanagari")
-        devanagari = transliterate.process("IAST","Devanagari",new_inflections_read, post_options = ['DevanagariAnusvara'])
+        devanagari = transliterate.process(
+            "IAST", "Devanagari", new_inflections_read, post_options=['DevanagariAnusvara'])
 
         roman = new_inflections_read.split("\n")[:-1]
         cyrillic = cyrillic.split("\n")
@@ -620,7 +605,9 @@ def transcribe_new_inflections():
         print("no new inflections to transcribe")
 
 
-def _combine_old_and_new_dataframes(all_inflections_file: Path, new_inflections_file: Path, diff_file: Path) -> pandas.DataFrame:
+def _combine_old_and_new_dataframes(
+        all_inflections_file: Path,
+        new_inflections_file: Path, diff_file: Path) -> pandas.DataFrame:
     print("~" * 40)
     print("combing old and new dataframes:")
 
@@ -628,7 +615,7 @@ def _combine_old_and_new_dataframes(all_inflections_file: Path, new_inflections_
 
     diff = pandas.DataFrame()
 
-    if new_inflections_dict != {}:
+    if new_inflections_dict:
         all_inflections = data_frame_from_inflections_csv(all_inflections_file)
 
         new_inflections = pandas.read_csv(new_inflections_file, header=None, sep="\t")
@@ -767,12 +754,12 @@ def make_list_of_all_inflections_no_meaning(dps_df: pandas.DataFrame) -> None:
 
     no_meaning_string = ""
     all_inflections_length = all_inflections_df.shape[0]
-    for row in range (all_inflections_length):
+    for row in range(all_inflections_length):
         headword = all_inflections_df.iloc[row, 0]
         inflections = all_inflections_df.iloc[row, 1]
 
 
-        if row %5000 == 0:
+        if row % 5000 == 0:
             print(f"{row} {headword}")
 
         if headword in no_meaning_headword_list:
@@ -802,11 +789,11 @@ def make_list_of_all_inflections_no_eg1(dps_df: pandas.DataFrame) -> None:
 
     no_eg1_string = ""
     all_inflections_length = all_inflections_df.shape[0]
-    for row in range (all_inflections_length):
+    for row in range(all_inflections_length):
         headword = all_inflections_df.iloc[row, 0]
         inflections = all_inflections_df.iloc[row, 1]
 
-        if row %5000 == 0:
+        if row % 5000 == 0:
             print(f"{row} {headword}")
 
         if headword in no_eg1_headword_list:
@@ -836,11 +823,11 @@ def make_list_of_all_inflections_only_in_class(dps_df: pandas.DataFrame) -> None
 
     no_eg1_string = ""
     all_inflections_length = all_inflections_df.shape[0]
-    for row in range (all_inflections_length):
+    for row in range(all_inflections_length):
         headword = all_inflections_df.iloc[row, 0]
         inflections = all_inflections_df.iloc[row, 1]
 
-        if row %5000 == 0:
+        if row % 5000 == 0:
             print(f"{row} {headword}")
 
         if headword in no_eg1_headword_list:
@@ -880,11 +867,11 @@ def make_list_of_all_inflections_already_in(dps_df: pandas.DataFrame) -> None:
 
     no_eg2_string = ""
     all_inflections_length = all_inflections_df.shape[0]
-    for row in range (all_inflections_length):
+    for row in range(all_inflections_length):
         headword = all_inflections_df.iloc[row, 0]
         inflections = all_inflections_df.iloc[row, 1]
 
-        if row %5000 == 0:
+        if row % 5000 == 0:
             print(f"{row} {headword}")
 
         if headword in no_eg2_headword_list:
@@ -910,11 +897,11 @@ def make_list_of_all_inflections_no_eg2(dps_df: pandas.DataFrame) -> None:
 
     no_eg2_string = ""
     all_inflections_length = all_inflections_df.shape[0]
-    for row in range (all_inflections_length):
+    for row in range(all_inflections_length):
         headword = all_inflections_df.iloc[row, 0]
         inflections = all_inflections_df.iloc[row, 1]
 
-        if row %5000 == 0:
+        if row % 5000 == 0:
             print(f"{row} {headword}")
 
         if headword in no_eg2_headword_list:
@@ -954,8 +941,6 @@ def make_list_of_all_inflections_no_eg3(dps_df: pandas.DataFrame) -> None:
 
     no_eg3_list = no_eg3_string.split()
     no_eg3_list = list(dict.fromkeys(no_eg3_list))
-
-
 
 
 def make_list_of_all_inflections_potential(dps_df: pandas.DataFrame, class_file_name: str) -> None:
@@ -1041,16 +1026,12 @@ def clean_machine(text):
     return text
 
 
-def read_and_clean_sutta_text() -> None:
+def read_and_clean_sutta_text() -> Tuple[str, str]:
     create_directories()
 
     print("~" * 40)
     print("reading and cleaning sutta file")
     print("~" * 40)
-
-    global sutta_file
-    global commentary_file
-    global sub_commentary_file
 
     input_path = settings.CSCD_DIR
     output_path = settings.HTML_SUTTAS_DIR
@@ -1090,8 +1071,10 @@ def read_and_clean_sutta_text() -> None:
     with open(output_path / commentary_file, "w") as output_file:
         output_file.write(commentary_text)
 
+    return sutta_file, commentary_file
 
-def make_comparison_table() -> None:
+
+def make_comparison_table(sutta_file: str, commentary_file: str) -> None:
     print("~" * 40)
     print("making sutta comparison table")
 
@@ -1148,7 +1131,7 @@ def make_comparison_table() -> None:
         commentary_words_df.to_csv(txt_file, header=True, index=True, sep="\t")
 
 
-def html_find_and_replace() -> None:
+def html_find_and_replace(sutta_file: str) -> None:
     print("~" * 40)
     print("finding and replacing sutta html")
     print("~" * 40)
@@ -1205,7 +1188,7 @@ def html_find_and_replace() -> None:
     sutta_text += f'<br><br>no eg3: <span class="blue">{" ".join(no_eg3)}</span>'
 
 
-def write_html() -> None:
+def write_html(sutta_file: str) -> None:
     create_directories()
 
     output_path = settings.HTML_SUTTAS_DIR
@@ -1222,21 +1205,20 @@ def write_html() -> None:
     # html_file.write(html2)
     # html_file.write(commentary_text)
     html_file.write(html3)
-    html_file.close
+    html_file.close()
 
 
-def open_in_browser():
-    os.popen('cd "output/html suttas"')
-    os.popen(f"{sutta_file}.html")
+def open_in_browser(sutta_file: str) -> None:
+    webbrowser.open(f'output/html suttas/{sutta_file}.html')
 
 
-def delete_old_pickle_files():
+def delete_old_pickle_files(headwords: List[str]):
     print(f"{timeis()} [green]deleting old pickle files ")
 
-    for root, dirs, files in os.walk("output/pickle test", topdown=True):
+    for _root, _dirs, files in os.walk("output/pickle test", topdown=True):
         for file in files:
             try:
-                if file not in headwords_list:
+                if file not in headwords:
                     os.remove(f"output/pickle test/{file}")
                     print(f"{timeis()} {file}")
             except FileNotFoundError:
@@ -1247,7 +1229,7 @@ def delete_unused_inflection_patterns(inflection_table_index):
     print(f"{timeis()} [green]deleting unused inflection patterns")
 
     inflection_patterns_list = inflection_table_index["inflection name"].tolist()
-    for root, dirs, files in os.walk("output/patterns", topdown=True):
+    for _root, _dirs, files in os.walk("output/patterns", topdown=True):
         for file in files:
             file_clean = re.sub(".csv", "", file)
             if file_clean not in inflection_patterns_list:
@@ -1259,11 +1241,11 @@ def delete_unused_inflection_patterns(inflection_table_index):
                     print(f"{timeis()} {file}")
 
 
-def _delete_unused_html_tables(path) -> None:
-    for root, dirs, files in os.walk(path, topdown=True):
+def _delete_unused_html_tables(path, headwords: List[str]) -> None:
+    for _root, _dirs, files in os.walk(path, topdown=True):
         for file in files:
             basename = file.removesuffix(".html")
-            if basename not in headwords_list:
+            if basename not in headwords:
                 try:
                     os.remove(path / file)
                 except FileNotFoundError:
@@ -1272,18 +1254,18 @@ def _delete_unused_html_tables(path) -> None:
                     print(f"{timeis()} {file}")
 
 
-def delete_unused_html_tables():
+def delete_unused_html_tables(headwords):
     print(f"{timeis()} [green]deleting unused html files ")
     for path in [settings.HTML_TABLES_DPS_DIR, settings.HTML_TABLES_SBS_DIR]:
-        _delete_unused_html_tables(path)
+        _delete_unused_html_tables(path, headwords)
 
 
-def delete_unused_inflections():
+def delete_unused_inflections(headwords: List[str]):
     print(f"{timeis()} [green]deleting unused inflections")
 
-    for root, dirs, files in os.walk(settings.INFLECTIONS_DIR, topdown=True):
+    for _root, _dirs, files in os.walk(settings.INFLECTIONS_DIR, topdown=True):
         for file in files:
-            if file not in headwords_list:
+            if file not in headwords:
                 try:
                     os.remove(settings.INFLECTIONS_DIR / file)
                 except FileNotFoundError:
@@ -1292,12 +1274,12 @@ def delete_unused_inflections():
                     print(f"{timeis()} {file}")
 
 
-def delete_unused_inflections_translit():
+def delete_unused_inflections_translit(headwords: List[str]):
     print(f"{timeis()} [green]deleting unused inflections translit")
 
-    for root, dirs, files in os.walk(settings.INFLECTIONS_TRANSLIT_DIR, topdown=True):
+    for _root, _dirs, files in os.walk(settings.INFLECTIONS_TRANSLIT_DIR, topdown=True):
         for file in files:
-            if file not in headwords_list:
+            if file not in headwords:
                 try:
                     os.remove(settings.INFLECTIONS_TRANSLIT_DIR / file)
                 except FileNotFoundError:

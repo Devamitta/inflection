@@ -2,7 +2,7 @@ import argparse
 
 from rich import print  # pylint: disable=redefined-builtin
 
-from inflection_generator import modules
+from inflection_generator import modules, settings
 from inflection_generator.helpers import Kind, timeis
 
 
@@ -24,9 +24,10 @@ def generate_inflections(args: argparse.Namespace) -> None:
     kind = Kind[args.kind]
 
     if kind is Kind.DPS:
-        data = modules.create_dps_df()
+        csv_file = settings.DPS_DIR/"spreadsheets"/"dps-full.csv"
     elif kind is Kind.SBS:
-        data = modules.create_sbs_df(args.class_file_name)
+        csv_file = settings.DPS_DIR/"word-frequency"/"csv-for-examples"/f"{args.class_file_name}-class.csv"
+    data, headwords = modules.create_data_frame(csv_file)
 
     modules.test_for_missing_stem_and_pattern(data)
     modules.test_for_wrong_patterns(inflection_table_index, data)
@@ -45,10 +46,10 @@ def generate_inflections(args: argparse.Namespace) -> None:
     modules.export_translit_to_pickle(diff_translit)
     modules.export_inflections_to_pickle(diff)
     modules.delete_unused_inflection_patterns(inflection_table_index)
-    modules.delete_old_pickle_files()
-    modules.delete_unused_html_tables()
-    modules.delete_unused_inflections()
-    modules.delete_unused_inflections_translit()
+    modules.delete_old_pickle_files(headwords)
+    modules.delete_unused_html_tables(headwords)
+    modules.delete_unused_inflections(headwords)
+    modules.delete_unused_inflections_translit(headwords)
 
     print(f"{timeis()} ----------------------------------------")
 

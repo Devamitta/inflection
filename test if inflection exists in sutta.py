@@ -2,7 +2,7 @@
 
 import warnings
 
-from inflection_generator import modules
+from inflection_generator import modules, settings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -12,7 +12,10 @@ def main():
     inflection_table_index = modules.create_inflection_table_index()
     inflection_table = modules.create_inflection_table_df()
     modules.test_inflection_pattern_changed(inflection_table_index, inflection_table)
-    data = modules.create_dps_df()
+
+    csv_file = settings.DPS_DIR/"spreadsheets"/"dps-full.csv"
+    data, _ = modules.create_data_frame(csv_file)
+
     modules.test_for_missing_stem_and_pattern(data)
     modules.test_for_wrong_patterns(inflection_table_index, data)
     modules.test_for_differences_in_stem_and_pattern(data)
@@ -25,11 +28,11 @@ def main():
     modules.make_list_of_all_inflections_no_eg1(data)
     modules.make_list_of_all_inflections_no_eg2(data)
     modules.make_list_of_all_inflections_no_eg3(data)
-    modules.read_and_clean_sutta_text()
-    modules.make_comparison_table()
-    modules.html_find_and_replace()
-    modules.write_html()
-    # moudles.open_in_browser()
+    sutta_file, commentary_file = modules.read_and_clean_sutta_text()
+    modules.make_comparison_table(sutta_file, commentary_file)
+    modules.html_find_and_replace(sutta_file)
+    modules.write_html(sutta_file)
+    moudles.open_in_browser(sutta_file)
 
 
 main()
