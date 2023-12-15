@@ -14,7 +14,6 @@ import pandas
 from inflection_generator import settings
 from inflection_generator.abbreviation_translator import AbbreviationTranslator
 from inflection_generator.helpers import Kind, create_directories, data_frame_from_inflections_csv, excel_index, timeis
-from inflection_generator.sorter import sort_key
 
 # TODO Try to avoid global keyword in the module
 # FIXME Too long, split on modules
@@ -93,8 +92,6 @@ def test_inflection_pattern_changed(
     for row in range(len(inflection_table_index)):
         inflection_name = inflection_table_index.iloc[row, 0]
         cell_range = inflection_table_index.iloc[row, 1]
-        like = inflection_table_index.iloc[row, 2]
-        irreg = inflection_table_index.iloc[row, 3]
 
         col_range_1 = re.sub(r"(.+?)\d*\:.+", "\\1", cell_range)
         col_range_2 = re.sub(r".+\:(.[A-Z]*)\d*", "\\1", cell_range)
@@ -329,10 +326,6 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
         if stem == "*":
             stem = ""
         pattern = dps_df.loc[row, "pattern"]
-        pos = dps_df.loc[row, 'pos']
-        # metadata = dps_df.loc[row, "Metadata"]
-        meaning = dps_df.loc[row, "meaning_1"]
-        variant = dps_df.loc[row, "variant"]
 
         inflections_string = ""
 
@@ -360,7 +353,7 @@ def generate_changed_inflected_forms(dps_df: pandas.DataFrame) -> None:
                             replace_string = " "
                             matches = re.sub(search_string, replace_string, line)
                             inflections_string += matches + " "
-                except:
+                except FileNotFoundError:
                     with open("inflection generator errorlog.txt", "a") as error_log:
                         error_log.write(f"error on: {headword}\n")
                         print(f"error on: {headword}\n")
@@ -495,8 +488,8 @@ class InflectionTableGenerator:
 
         if self._kind is Kind.DPS:
             tables_dir = settings.HTML_TABLES_DPS_DIR
-        elif self._kind is Kind.SBS:
-            tables_dir = settings.HTML_TABLES_SBS_DIR
+        # elif self._kind is Kind.SBS:
+        #     tables_dir = settings.HTML_TABLES_SBS_DIR
 
         with open(tables_dir / f"{headword}.html", "w") as html_file:
             html_file.write(html)
@@ -522,21 +515,17 @@ def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
     create_directories()
 
     indeclinables = ["abbrev", "abs", "ger", "ind", "inf", "prefix", "suffix", "cs", "letter"]
-    conjugations = ["aor", "cond", "fut", "imp", "imperf", "opt", "perf", "pr"]
-    declensions = ["adj", "card", "fem", "letter", "masc", "nt", "ordin", "pp", "pron", "prp", "ptp", "root", "suffix", "ve"]
 
     dps_df_length = dps_df.shape[0]
 
     for row in range(dps_df_length):
         headword = dps_df.loc[row, 'pali_1']
-        headword_clean = re.sub(r" \d*$", "", headword)
         stem = dps_df.loc[row, "stem"]
 
         inflection_string = ""
 
         pattern = dps_df.loc[row, "pattern"]
         pos = dps_df.loc[row, 'pos']
-        meaning = dps_df.loc[row, "meaning_1"]
 
         if headword in changed or pattern in pattern_changed or headword in inflections_not_exist:
             if pos not in indeclinables and pos != "idiom" and pos != "sandhi":
@@ -548,7 +537,7 @@ def generate_inflections_in_table_list(dps_df: pandas.DataFrame) -> None:
                     df.rename_axis(None, inplace=True)  # delete pattern name
                     df_rows = df.shape[0]
                     df_columns = df.shape[1]
-                except:
+                except FileNotFoundError:
                     print(f"{timeis()} [red]pattern '{pattern}' not found for headword '{headword}'")
                     continue
 
@@ -1051,7 +1040,6 @@ def read_and_clean_sutta_text() -> Tuple[str, str]:
 
     sutta_file = sutta_dict.get(sutta_number).get("mūla")
     commentary_file = sutta_dict.get(sutta_number).get("aṭṭhakathā")
-    sub_commentary_file = sutta_dict.get(sutta_number).get("ṭīkā")
 
     with open(input_path / sutta_file, 'r') as input_file:
         sutta_text = input_file.read()
@@ -1154,7 +1142,6 @@ def html_find_and_replace(sutta_file: str) -> None:
 
     for word in range(row, max_row):
         pali_word = str(sutta_words_df.iloc[row, 0])
-        inflection_exists = str(sutta_words_df.iloc[row, 1])
         meaning_exists = str(sutta_words_df.iloc[row, 2])
         eg1_exists = str(sutta_words_df.iloc[row, 3])
         eg2_exists = str(sutta_words_df.iloc[row, 4])
@@ -1256,7 +1243,7 @@ def _delete_unused_html_tables(path, headwords: List[str]) -> None:
 
 def delete_unused_html_tables(headwords):
     print(f"{timeis()} [green]deleting unused html files ")
-    for path in [settings.HTML_TABLES_DPS_DIR, settings.HTML_TABLES_SBS_DIR]:
+    for path in [settings.HTML_TABLES_DPS_DIR]:
         _delete_unused_html_tables(path, headwords)
 
 

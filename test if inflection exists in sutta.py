@@ -13,7 +13,9 @@ def main():
     inflection_table = modules.create_inflection_table_df()
     modules.test_inflection_pattern_changed(inflection_table_index, inflection_table)
 
-    csv_file = settings.DPS_DIR/"spreadsheets"/"dps-full.csv"
+    # csv_file = settings.DPS_DIR/"spreadsheets"/"dps_full.csv"
+    csv_file = settings.DPS_DIR/"spreadsheets"/"dpd_dps_full.csv"
+    
     data, _ = modules.create_data_frame(csv_file)
 
     modules.test_for_missing_stem_and_pattern(data)
@@ -32,7 +34,7 @@ def main():
     modules.make_comparison_table(sutta_file, commentary_file)
     modules.html_find_and_replace(sutta_file)
     modules.write_html(sutta_file)
-    moudles.open_in_browser(sutta_file)
+    # moudles.open_in_browser(sutta_file)
 
 
 main()

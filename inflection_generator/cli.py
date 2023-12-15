@@ -24,10 +24,11 @@ def generate_inflections(args: argparse.Namespace) -> None:
     kind = Kind[args.kind]
 
     if kind is Kind.DPS:
-        csv_file = settings.DPS_DIR/"spreadsheets"/"dps-full.csv"
-    elif kind is Kind.SBS:
-        # csv_file = settings.DPS_DIR/"word-frequency"/"csv-for-examples"/f"{args.class_file_name}-class.csv"
-        csv_file = settings.DPS_DIR/"spreadsheets"/"dps-full.csv"
+        # csv_file = settings.DPS_DIR/"spreadsheets"/"dps_full.csv"
+        csv_file = settings.DPS_DIR/"spreadsheets"/"dpd_dps_full.csv"
+    # elif kind is Kind.SBS:
+    #     # csv_file = settings.DPS_DIR/"word-frequency"/"csv-for-examples"/f"{args.class_file_name}-class.csv"
+    #     csv_file = settings.DPS_DIR/"spreadsheets"/"dps_full.csv"
     data, headwords = modules.create_data_frame(csv_file)
 
     modules.test_for_missing_stem_and_pattern(data)
