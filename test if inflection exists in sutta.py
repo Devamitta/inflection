@@ -14,7 +14,7 @@ def main():
     modules.test_inflection_pattern_changed(inflection_table_index, inflection_table)
 
     # csv_file = settings.DPS_DIR/"spreadsheets"/"dps_full.csv"
-    csv_file = settings.DPS_DIR/"spreadsheets"/"dpd_dps_full.csv"
+    csv_file = settings.DPS_DIR/"spreadsheets"/"dps_full.csv"
     
     data, _ = modules.create_data_frame(csv_file)
 

@@ -25,7 +25,7 @@ def generate_inflections(args: argparse.Namespace) -> None:
 
     if kind is Kind.DPS:
         # csv_file = settings.DPS_DIR/"spreadsheets"/"dps_full.csv"
-        csv_file = settings.DPS_DIR/"spreadsheets"/"dpd_dps_full.csv"
+        csv_file = settings.DPS_DIR/"spreadsheets"/"dps_full.csv"
     # elif kind is Kind.SBS:
     #     # csv_file = settings.DPS_DIR/"word-frequency"/"csv-for-examples"/f"{args.class_file_name}-class.csv"
     #     csv_file = settings.DPS_DIR/"spreadsheets"/"dps_full.csv"
