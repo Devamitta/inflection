@@ -1,5 +1,9 @@
 # Inflection list generator
 
+This is an old version; the new version has been integrated into the DPD exporter:
+
+https://github.com/digitalpalidictionary/dpd-db/
+
 ## Description
 
 Generate all inflections from scratch and write to CSV, HTML and text.
